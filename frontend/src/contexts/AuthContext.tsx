@@ -1,19 +1,26 @@
 import { createContext, useContext, useState } from 'react';
-import axios from '../axios';
+import axios from 'axios';
 
-const AuthContent = createContext({
+const AuthContent = createContext<{
+	user: null | any;
+	setUser: (user: any) => void;
+	csrfToken: () => Promise<boolean>;
+  }>({
 	user: null,
 	setUser: () => {},
-	csrfToken: () => {},
+	csrfToken: async () => false,
 });
 
-export const AuthProvider = ({ children }) => {
-	const [user, _setUser] = useState(
-		JSON.parse(localStorage.getItem('user')) || null
-	);
+export const AuthProvider = ({ children }: any) => {
+	const [user, _setUser] = useState<string | null>(
+		() => {
+		  const storedUser = localStorage.getItem('user');
+		  return storedUser ? JSON.parse(storedUser) : null;
+		}
+	  );
 
 	// set user to local storage
-	const setUser = (user) => {
+	const setUser = (user: any) => {
 		if (user) {
 			localStorage.setItem('user', JSON.stringify(user));
 		} else {

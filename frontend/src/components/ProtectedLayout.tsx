@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
-import axios from '../axios';
+import axios, { AxiosError } from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function DefaultLayout() {
@@ -15,8 +15,8 @@ export default function DefaultLayout() {
 				if (resp.status === 200) {
 					setUser(resp.data.data);
 				}
-			} catch (error) {
-				if (error.response.status === 401) {
+			} catch (error: unknown) {
+				if (error instanceof AxiosError && error.response && error.response.status === 401) {
 					localStorage.removeItem('user');
 					window.location.href = '/';
 				}
