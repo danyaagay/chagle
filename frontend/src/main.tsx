@@ -12,15 +12,9 @@ import {
   } from '@mantine/core';
   
   const myCache = createEmotionCache({
-	key: 'mantine',
+	key: 'ryerlaf',
 	prepend: false
   });
-
-//Запрет перетаскивания страницы на мобильных устройствах
-function preventBehavior(e: any) {
-	e.preventDefault(); 
-};
-document.addEventListener("touchmove", preventBehavior, {passive: false});
 
 let root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 

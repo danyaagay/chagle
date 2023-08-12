@@ -10,12 +10,12 @@ import {
 	Text,
 	Paper,
 	Button,
-	Anchor,
 	Stack,
-	Container,
 	createStyles,
 	rem,
+	MediaQuery,
 } from '@mantine/core';
+import { useId } from '@mantine/hooks';
 
 const useStyles = createStyles((theme, { floating, focused, error }: { floating: boolean, focused: boolean, error: any }) => ({
 	root: {
@@ -59,11 +59,10 @@ function FloatingLabelInput({
 	label: string,
 	field: string
 }) {
+	const uuid = useId(field);
 	const form = useFormContext();
 	const [focused, setFocused] = useState(false);
 	const { classes } = useStyles({ floating: form.values[field as keyof typeof form.values].trim().length !== 0 || focused, focused: focused, error: form.errors[field] });
-
-	console.log(focused);
 
 	return (
 	  <InputType
@@ -74,6 +73,7 @@ function FloatingLabelInput({
 		size='lg'
 		radius="md"
 		fz="md"
+		id={uuid}
 		error={form.errors[field]}
 		value={form.values[field as keyof typeof form.values]}
 		onChange={(event) => form.setFieldValue(field, event.currentTarget.value)}
@@ -81,7 +81,6 @@ function FloatingLabelInput({
 	  />
 	);
 }
-
 
 export default function Login() {
 	const { setUser, csrfToken } = useAuth();
@@ -92,13 +91,18 @@ export default function Login() {
 
 	useEffect(() => {
 		document.title = defaultType === 'register'
-		? "Регистрация"
+		? 'Регистрация'
 		: 'Вход';
 	}, []);
 
+	const adsdsa = () => {
+		console.log('1');
+	}
+
 	const handleSubmit = async () => {
 		setIsLoading(true);
-		await csrfToken();
+		//await csrfToken();
+		console.log('1');
 		try {
 			const resp = await axios.post(location.pathname, form.values);
 			if (resp.status === 200) {
@@ -109,6 +113,7 @@ export default function Login() {
 		} catch (error: unknown) {
 			setIsLoading(false);
 			if (error instanceof AxiosError && error.response) {
+				console.log(error.response);
 				if (error.response.status === 422) {
 					if (error.response.data.errors.name) {
 						form.setFieldError('name', error.response.data.errors.name[0]);
@@ -141,6 +146,7 @@ export default function Login() {
 	const [type, setType] = useState(defaultType);
 	const toggleType = () => {
 		const newType = type === 'login' ? 'register' : 'login';
+		form.reset();
 		setType(newType);
 		navigate(`/${newType}`);
 	};
@@ -154,31 +160,64 @@ export default function Login() {
 		},
 	
 		validate: {
-			name: (value) => (value.length < 2 ? 'Имя должно состоять как минимум из 2 букв' : null),
-			email: (val) => (/^\S+@\S+$/.test(val) ? null : 'Неверный адрес электронной почты.'),
-			password: (val) => (val.length <= 6 ? 'Пароль должен содержать минимум 6 символов.' : null),
-			password_confirmation: (value, values) =>
-				value !== values.password ? 'Пароли не совпадают' : null,
+			name: (value) => (type === 'register' && value.length < 2 ? 'Имя должно состоять как минимум из 2 букв' : null),
+			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Неверный адрес электронной почты.'),
+			password: (value) => (value.length <= 6 ? 'Пароль должен содержать минимум 6 символов.' : null),
+			password_confirmation: (value, values) => (type === 'register' && value !== values.password ? 'Пароли не совпадают' : null),
 		},
 	});
 
 	return (
-		<Container size={420} style={{
-			position: 'absolute', left: '50%', top: '50%',
-			transform: 'translate(-50%, -50%)',
-			minWidth: '400px',
+		<Paper style={{
+			width: 'auto',
+			height: '100%',
+			display: 'flex',
+    		flexDirection: 'column',
+    		justifyContent: 'space-between',
+    		minHeight: '100%',
 		}}>
-		<Paper p="xl">
-			<Text    
-				variant="gradient"
-	  			gradient={{ from: 'indigo', to: '', deg: 45 }}
-	  			ta="center"
-	  			fw={700}
-				size="1.5rem">Луми</Text>
-
-		  <Text ta="center" size="1.5rem" weight={500}>
-			Добро пожаловать
-		  </Text>
+		<MediaQuery
+      		query="(min-width:600px)"
+     		styles={{ 
+				padding: '100px !important',
+			}}
+    	>
+		<Paper style={{ 
+			width: 'auto',
+			display: 'flex',
+   			justifyContent: 'center',
+    		justifyItems: 'center',
+			padding: '60px 20px',
+		}}>
+		<div style={{ 
+			width: '350px',
+		}}>
+		<Text    
+			variant="gradient"
+	  		gradient={{ from: 'indigo', to: '', deg: 45 }}
+	  		ta="center"
+	  		fw={700}
+			size="1.5rem" 
+			style={{
+			flex: '0 0 auto',
+		}}>
+			-+-
+		</Text>
+		  <MediaQuery
+		  		query="(min-width:600px)"
+				styles={{ 
+					fontSize: '1.7rem !important',
+				}}
+		  >
+			<Text ta="center" weight={500} style={{
+				fontSize: '1.5rem',
+				padding: '15px 0 0 0'
+			}}>
+				{type === 'register'
+				? 'Регистрация'
+				: 'Вход'} в Луми
+			</Text>
+		  </MediaQuery>
 		  <FormProvider form={form}>
 		  <form onSubmit={form.onSubmit(handleSubmit)}>
 			<Stack mt="2rem">
@@ -213,20 +252,20 @@ export default function Login() {
 
 			<Button loading={isLoading} type="submit" fullWidth mt="xl" size="lg" radius="md" style={{ fontWeight: 'normal !important' }}>
 				{type === 'register'
-						? "Зарегистрироваться"
-						: 'Войти'}
+					? 'Далее'
+					: 'Войти'}
 			</Button>
 
-			<Text ta="center" mt="md" size="lg">
-				<Anchor<'a'> onClick={() => toggleType()} weight='normal'>
+			<Button variant="subtle" onClick={() => toggleType()} fullWidth radius="md" ta="center" mt="md" size="lg">
 				{type === 'register'
-						? 'Вход'
-						: "Регистрация"}
-				</Anchor>
-			</Text>
+					? 'Вход'
+					: 'Регистрация'}
+			</Button>
 		  </form>
 		  </FormProvider>
+		</div>
 		</Paper>
-		</Container>
+		</MediaQuery>
+		</Paper>
 	  );
 }
