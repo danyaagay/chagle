@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {  Navigate, useLocation, useNavigate } from 'react-router-dom';
 import axios from '../axios';
 import { AxiosError } from 'axios';
@@ -14,6 +14,9 @@ import {
 	createStyles,
 	rem,
 	MediaQuery,
+	Stepper,
+	TextInputProps,
+	PasswordInputProps,
 } from '@mantine/core';
 import { useId } from '@mantine/hooks';
 
@@ -49,16 +52,17 @@ interface FormValues {
 
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 
-function FloatingLabelInput({
+function FloatingLabelInput<T>({
 	InputType,
 	label,
 	field,
-	...rest 
+	...props
 }: {
 	InputType: typeof TextInput | typeof PasswordInput,
 	label: string,
-	field: string
-}) {
+	field: string,
+	props?: any,
+} & TextInputProps & PasswordInputProps & React.InputHTMLAttributes<T>) {
 	const uuid = useId(field);
 	const form = useFormContext();
 	const [focused, setFocused] = useState(false);
@@ -77,7 +81,7 @@ function FloatingLabelInput({
 		error={form.errors[field]}
 		value={form.values[field as keyof typeof form.values]}
 		onChange={(event) => form.setFieldValue(field, event.currentTarget.value)}
-		{...rest}
+		{...props}
 	  />
 	);
 }
@@ -95,14 +99,9 @@ export default function Login() {
 		: 'Вход';
 	}, []);
 
-	const adsdsa = () => {
-		console.log('1');
-	}
-
 	const handleSubmit = async () => {
 		setIsLoading(true);
 		//await csrfToken();
-		console.log('1');
 		try {
 			const resp = await axios.post(location.pathname, form.values);
 			if (resp.status === 200) {
@@ -113,7 +112,6 @@ export default function Login() {
 		} catch (error: unknown) {
 			setIsLoading(false);
 			if (error instanceof AxiosError && error.response) {
-				console.log(error.response);
 				if (error.response.status === 422) {
 					if (error.response.data.errors.name) {
 						form.setFieldError('name', error.response.data.errors.name[0]);
@@ -149,6 +147,7 @@ export default function Login() {
 		form.reset();
 		setType(newType);
 		navigate(`/${newType}`);
+		setActive(0);
 	};
 
 	const form = useForm({
@@ -159,13 +158,37 @@ export default function Login() {
 		 	password_confirmation: '',
 		},
 	
-		validate: {
-			name: (value) => (type === 'register' && value.length < 2 ? 'Имя должно состоять как минимум из 2 букв' : null),
-			email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Неверный адрес электронной почты.'),
-			password: (value) => (value.length <= 6 ? 'Пароль должен содержать минимум 6 символов.' : null),
-			password_confirmation: (value, values) => (type === 'register' && value !== values.password ? 'Пароли не совпадают' : null),
+		validate: (values) => {
+			if (type === 'register') {
+				if (active === 0) {
+					return {
+						name: (values.name.length < 2 ? 'Имя должно состоять как минимум из 2 букв' : null),
+						email: (/^\S+@\S+$/.test(values.email) ? null : 'Неверный адрес электронной почты.'),
+					};
+				} else {
+					return {
+						password: (values.password.length <= 6 ? 'Пароль должен содержать минимум 6 символов.' : null),
+						password_confirmation: (type === 'register' && values.password_confirmation !== values.password ? 'Пароли не совпадают' : null),
+					}
+				}
+			} else {
+				return {
+					email: (/^\S+@\S+$/.test(values.email) ? null : 'Неверный адрес электронной почты.'),
+					password: (values.password.length <= 6 ? 'Пароль должен содержать минимум 6 символов.' : null),	
+				}
+			}
 		},
 	});
+
+	const [active, setActive] = useState(0);
+	const nextStep = () =>
+    setActive((current) => {
+      if (form.validate().hasErrors) {
+        return current;
+      }
+      return current < 2 ? current + 1 : current;
+    });
+	const prevStep = () => setActive((current) => (current > 0 ? current - 1 : current));
 
 	return (
 		<Paper style={{
@@ -220,43 +243,86 @@ export default function Login() {
 		  </MediaQuery>
 		  <FormProvider form={form}>
 		  <form onSubmit={form.onSubmit(handleSubmit)}>
-			<Stack mt="2rem">
 			  {type === 'register' && (
-				<FloatingLabelInput
-					label={'Имя'}
-					field='name'
-					InputType={TextInput}
-				/>
-			  )}
-
-			  <FloatingLabelInput
+    <>
+	<Stepper active={active} styles={{ steps: { display: 'none' }, content: { padding: '0' } }}>
+	  <Stepper.Step>
+	    <Stack mt="2rem">
+	  		<FloatingLabelInput
+				autoComplete='naame'
+				label={'Имя'}
+				field='name'
+				InputType={TextInput}
+			/>
+			<FloatingLabelInput
+				autoComplete='email'
 				label={'Электронная почта'}
 				field='email'
 				InputType={TextInput}
-			  />
-	
-			  <FloatingLabelInput
+				required
+			/>
+		</Stack>
+	  </Stepper.Step>
+
+	  <Stepper.Step>
+	  	<Stack mt="2rem">
+	  		<FloatingLabelInput
 				label={'Пароль'}
 				field='password'
 				InputType={PasswordInput}
-			  />
-
-			{type === 'register' && (
-			  <FloatingLabelInput
+				required
+			/>
+			<FloatingLabelInput
 			    label={'Повторите пароль'}
 			    field='password_confirmation'
 			    InputType={PasswordInput}
-			  />
-			)}
-			</Stack>
+				required
+			/>
+		</Stack>
+	  </Stepper.Step>
+	</Stepper>
 
-			<Button loading={isLoading} type="submit" fullWidth mt="xl" size="lg" radius="md" style={{ fontWeight: 'normal !important' }}>
-				{type === 'register'
-					? 'Далее'
-					: 'Войти'}
+	<Stack>
+	  {active !== 0 && (
+		<Stack spacing="xs">
+			<Button loading={isLoading} type="submit" fullWidth mt="xl" size="lg" radius="md">
+				Зарегистрироваться
 			</Button>
+			<Button variant="light" color="gray" fullWidth size="lg" radius="md" styles={{ root: { fontWeight: 'normal' } }} onClick={prevStep}>
+		  	Назад
+			</Button>
+		</Stack>
+	  )}
+	  {active !== 1 && <Button fullWidth mt="xl" size="lg" radius="md" onClick={nextStep}>Далее</Button>}
+	</Stack>
+  </>
+			  )}
 
-			<Button variant="subtle" onClick={() => toggleType()} fullWidth radius="md" ta="center" mt="md" size="lg">
+{type !== 'register' && (
+    <>
+	    <Stack mt="2rem">
+			<FloatingLabelInput
+				label={'Электронная почта'}
+				field='email'
+				InputType={TextInput}
+				required
+				autoComplete='username'
+			/>
+	  		<FloatingLabelInput
+				label={'Пароль'}
+				field='password'
+				InputType={PasswordInput}
+				required
+			/>
+		</Stack>
+
+		<Button loading={isLoading} type="submit" fullWidth mt="xl" size="lg" radius="md">
+			Войти
+		</Button>
+  </>
+			  )}
+
+			<Button variant="subtle" onClick={() => toggleType()} fullWidth radius="md" ta="center" mt="lg" size="lg" styles={{ root: { fontWeight: 'normal' } }}>
 				{type === 'register'
 					? 'Вход'
 					: 'Регистрация'}
