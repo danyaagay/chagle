@@ -3,13 +3,8 @@ import ReactDOM from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import router from './router';
-
 import './index.css';
-
-import {
-	MantineProvider,
-	createEmotionCache
-  } from '@mantine/core';
+import {MantineProvider, createEmotionCache } from '@mantine/core';
   
   const myCache = createEmotionCache({
 	key: 'ryerlaf',

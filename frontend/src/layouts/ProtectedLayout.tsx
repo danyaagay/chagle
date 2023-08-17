@@ -12,7 +12,7 @@ export default function DefaultLayout() {
 	useEffect(() => {
 		(async () => {
 			try {
-				const resp = await axios.get('/user');
+				const resp = await axios.get('/user', user);
 				if (resp.status === 200) {
 					setUser(resp.data.data);
 				}
@@ -20,6 +20,7 @@ export default function DefaultLayout() {
 				if (error instanceof AxiosError && error.response && error.response.status === 401) {
 					localStorage.removeItem('user');
 					window.location.href = '/';
+					console.log(error);
 				}
 			}
 		})();

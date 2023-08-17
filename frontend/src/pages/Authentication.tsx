@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {  Navigate, useLocation, useNavigate } from 'react-router-dom';
 import axios from '../axios';
 import { AxiosError } from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import { createFormContext } from '@mantine/form';
 import {
 	TextInput,
 	PasswordInput,
@@ -11,99 +10,41 @@ import {
 	Paper,
 	Button,
 	Stack,
-	createStyles,
-	rem,
 	MediaQuery,
 	Stepper,
-	TextInputProps,
-	PasswordInputProps,
+	Anchor,
 } from '@mantine/core';
-import { useId } from '@mantine/hooks';
 
-const useStyles = createStyles((theme, { floating, focused, error }: { floating: boolean, focused: boolean, error: any }) => ({
-	root: {
-	  position: 'relative',
-	},
-  
-	label: {
-	  position: 'absolute',
-	  zIndex: 2,
-	  top: rem(10),
-	  left: theme.spacing.lg,
-	  pointerEvents: 'none',
-	  transformOrigin: 'left center',
-	  color: focused ? error ? '#fa5252' : '#228be6' : error ? '#fa5252' : theme.colors.gray[5],
-	  transition: '.2s transform,.2s color,.2s font-size,.2s padding,font-weight 0s .1s',
-	  transform: floating ? `translate(-.4475rem, calc(50px / -2 + .0625rem)) scale(.75)` : 'none',
-	  fontWeight: floating ? 500 : 400,
-	  backgroundColor: '#ffffff',
-	  padding: floating ? '0 5px' : undefined,
-	},
+import { useForm } from '@mantine/form';
+import FloatingLabelInput from '../components/FloatingLabelInput';
 
-	visibilityToggle: { color: focused ? error ? '#fa5252' : '#228be6' : undefined || error ? '#fa5252' : undefined},
-}));
-
-interface FormValues {
+export interface FormValues {
 	email: string;
 	name: string;
 	password: string;
 	password_confirmation: string;
 }
 
-const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
+//Сам компонент
 
-function FloatingLabelInput<T>({
-	InputType,
-	label,
-	field,
-	...props
-}: {
-	InputType: typeof TextInput | typeof PasswordInput,
-	label: string,
-	field: string,
-	props?: any,
-} & TextInputProps & PasswordInputProps & React.InputHTMLAttributes<T>) {
-	const uuid = useId(field);
-	const form = useFormContext();
-	const [focused, setFocused] = useState(false);
-	const { classes } = useStyles({ floating: form.values[field as keyof typeof form.values].trim().length !== 0 || focused, focused: focused, error: form.errors[field] });
-
-	return (
-	  <InputType
-		label={label}
-		classNames={classes}
-		onFocus={() => setFocused(true)}
-		onBlur={() => setFocused(false)}
-		size='lg'
-		radius="md"
-		fz="md"
-		id={uuid}
-		error={form.errors[field]}
-		value={form.values[field as keyof typeof form.values]}
-		onChange={(event) => form.setFieldValue(field, event.currentTarget.value)}
-		{...props}
-	  />
-	);
-}
-
-export default function Login() {
+export default function () {
 	const { setUser, csrfToken } = useAuth();
 	const [isLoading, setIsLoading] = useState(false);
 	const navigate = useNavigate();
 	const location = useLocation();
-	const defaultType = location.pathname === '/register' ? 'register' : 'login';
+	const defaultType = location.pathname === '/signup' ? 'signup' : 'login';
 
 	useEffect(() => {
-		document.title = defaultType === 'register'
+		document.title = defaultType === 'signup'
 		? 'Регистрация'
 		: 'Вход';
 	}, []);
 
 	const handleSubmit = async () => {
 		setIsLoading(true);
-		//await csrfToken();
+		await csrfToken();
 		try {
-			const resp = await axios.post(location.pathname, form.values);
+			const resp = await axios.post(`/${type}`, form.values);
 			if (resp.status === 200) {
 				setUser(resp.data.user);
 				return <Navigate to="/profile" />;
@@ -143,7 +84,7 @@ export default function Login() {
 
 	const [type, setType] = useState(defaultType);
 	const toggleType = () => {
-		const newType = type === 'login' ? 'register' : 'login';
+		const newType = type === 'login' ? 'signup' : 'login';
 		form.reset();
 		setType(newType);
 		navigate(`/${newType}`);
@@ -159,7 +100,7 @@ export default function Login() {
 		},
 	
 		validate: (values) => {
-			if (type === 'register') {
+			if (type === 'signup') {
 				if (active === 0) {
 					return {
 						name: (values.name.length < 2 ? 'Имя должно состоять как минимум из 2 букв' : null),
@@ -168,7 +109,7 @@ export default function Login() {
 				} else {
 					return {
 						password: (values.password.length <= 6 ? 'Пароль должен содержать минимум 6 символов.' : null),
-						password_confirmation: (type === 'register' && values.password_confirmation !== values.password ? 'Пароли не совпадают' : null),
+						password_confirmation: (type === 'signup' && values.password_confirmation !== values.password ? 'Пароли не совпадают' : null),
 					}
 				}
 			} else {
@@ -179,6 +120,8 @@ export default function Login() {
 			}
 		},
 	});
+
+//Начало Шаги формы регистрации
 
 	const [active, setActive] = useState(0);
 	const nextStep = () =>
@@ -212,9 +155,7 @@ export default function Login() {
     		justifyItems: 'center',
 			padding: '60px 20px',
 		}}>
-		<div style={{ 
-			width: '350px',
-		}}>
+		<div className='w-[350px]'>
 		<Text    
 			variant="gradient"
 	  		gradient={{ from: 'indigo', to: '', deg: 45 }}
@@ -236,23 +177,25 @@ export default function Login() {
 				fontSize: '1.5rem',
 				padding: '15px 0 0 0'
 			}}>
-				{type === 'register'
-				? 'Регистрация'
-				: 'Вход'} в Луми
+				{type === 'signup' ?
+					'Регистрация в Луми' :
+					'Вход в Луми'}
 			</Text>
 		  </MediaQuery>
-		  <FormProvider form={form}>
 		  <form onSubmit={form.onSubmit(handleSubmit)}>
-			  {type === 'register' && (
+			  {type === 'signup' && (
     <>
 	<Stepper active={active} styles={{ steps: { display: 'none' }, content: { padding: '0' } }}>
 	  <Stepper.Step>
 	    <Stack mt="2rem">
 	  		<FloatingLabelInput
-				autoComplete='naame'
+				autoComplete='name'
 				label={'Имя'}
 				field='name'
 				InputType={TextInput}
+				value={form.values.name}
+				onChange={(value) => form.setFieldValue('name', value)}
+				error={form.errors.name}
 			/>
 			<FloatingLabelInput
 				autoComplete='email'
@@ -260,23 +203,33 @@ export default function Login() {
 				field='email'
 				InputType={TextInput}
 				required
+				value={form.values.email}
+				onChange={(value) => form.setFieldValue('email', value)}
+				error={form.errors.email}
 			/>
 		</Stack>
 	  </Stepper.Step>
 
 	  <Stepper.Step>
 	  	<Stack mt="2rem">
-	  		<FloatingLabelInput
+		  	<FloatingLabelInput
 				label={'Пароль'}
 				field='password'
 				InputType={PasswordInput}
+				needStrength
 				required
-			/>
+				value={form.values.password}
+				onChange={(value) => form.setFieldValue('password', value)}
+				error={form.errors.password}
+		  	/>
 			<FloatingLabelInput
 			    label={'Повторите пароль'}
 			    field='password_confirmation'
 			    InputType={PasswordInput}
 				required
+				value={form.values.password_confirmation}
+				onChange={(value) => form.setFieldValue('password_confirmation', value)}
+				error={form.errors.password_confirmation}
 			/>
 		</Stack>
 	  </Stepper.Step>
@@ -298,7 +251,7 @@ export default function Login() {
   </>
 			  )}
 
-{type !== 'register' && (
+{type !== 'signup' && (
     <>
 	    <Stack mt="2rem">
 			<FloatingLabelInput
@@ -307,15 +260,23 @@ export default function Login() {
 				InputType={TextInput}
 				required
 				autoComplete='username'
+				value={form.values.email}
+				onChange={(value) => form.setFieldValue('email', value)}
+				error={form.errors.email}
 			/>
 	  		<FloatingLabelInput
 				label={'Пароль'}
 				field='password'
 				InputType={PasswordInput}
 				required
+				value={form.values.password}
+				onChange={(value) => form.setFieldValue('password', value)}
+				error={form.errors.password}
 			/>
+          <Anchor component="button" size="md" onClick={() => navigate('/reset-password')} ta="left">
+		  Забыли пароль?
+          </Anchor>
 		</Stack>
-
 		<Button loading={isLoading} type="submit" fullWidth mt="xl" size="lg" radius="md">
 			Войти
 		</Button>
@@ -323,12 +284,11 @@ export default function Login() {
 			  )}
 
 			<Button variant="subtle" onClick={() => toggleType()} fullWidth radius="md" ta="center" mt="lg" size="lg" styles={{ root: { fontWeight: 'normal' } }}>
-				{type === 'register'
-					? 'Вход'
-					: 'Регистрация'}
+				{type === 'signup' ?
+					'Вход' :
+					'Регистрация'}
 			</Button>
 		  </form>
-		  </FormProvider>
 		</div>
 		</Paper>
 		</MediaQuery>
