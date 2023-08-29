@@ -3,6 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SettingController;
+use App\Http\Controllers\DialogController;
+use App\Http\Controllers\MessageController;
 
 use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
@@ -25,8 +28,13 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+    Route::get('/dialogs', [DialogController::class, 'index']);
+    Route::delete('/dialogs/{id}', [DialogController::class, 'destroy']);
+    Route::get('/messages/{id}', [MessageController::class, 'index']);
+    Route::post('/messages/{id}', [MessageController::class, 'store']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/settings-update', [SettingController::class, 'update']);
 });
 
 Route::post('/forgot-password', function (Request $request) {

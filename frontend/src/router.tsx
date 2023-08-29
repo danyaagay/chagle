@@ -1,6 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
-import About from './pages/About';
-import Profile from './pages/Profile';
+import Chat from './pages/Chat';
+import Settings from './pages/Settings';
 import Authentication from './pages/Authentication';
 import ResetPassword from './pages/ResetPassword';
 import ProtectedLayout from './layouts/ProtectedLayout';
@@ -34,12 +34,12 @@ const router = createBrowserRouter([
 		element: <ProtectedLayout />,
 		children: [
 			{
-				path: '/about',
-				element: <About />,
+				path: '/chat/:id?',
+				element: <Chat />,
 			},
 			{
-				path: '/profile',
-				element: <Profile />,
+				path: '/settings',
+				element: <Settings />,
 			},
 		],
 	},

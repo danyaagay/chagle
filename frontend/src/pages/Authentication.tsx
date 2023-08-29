@@ -47,7 +47,7 @@ export default function () {
 			const resp = await axios.post(`/${type}`, form.values);
 			if (resp.status === 200) {
 				setUser(resp.data.user);
-				return <Navigate to="/profile" />;
+				return <Navigate to="/profile"/>;
 			}
 			setIsLoading(false);
 		} catch (error: unknown) {
