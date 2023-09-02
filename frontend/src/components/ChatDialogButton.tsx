@@ -1,12 +1,19 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useRef, useState, useContext, useEffect } from 'react';
 import {
 	IconMessageCircle2,
 	IconTrash,
-	IconPencil
+	IconPencil,
+	IconX,
+	IconCheck
 } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
-import { createStyles, getStylesRef, rem, ActionIcon } from '@mantine/core';
-import { useHover } from '@mantine/hooks';
+import { createStyles, getStylesRef, rem, ActionIcon, TextInput } from '@mantine/core';
+import { useNavigate } from 'react-router-dom';
+import { useHover, useDisclosure } from '@mantine/hooks';
+import axios from '../axios';
+import { AxiosError } from 'axios';
+import MobileTitleContext from '../contexts/MobileTitleContext';
+import DialogsContext from '../contexts/DialogsContext';
   
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -32,6 +39,7 @@ const useStyles = createStyles((theme) => ({
 	  borderRadius: theme.radius.md,
 	  cursor: 'pointer',
 	  fontWeight: 400,
+	  height: '48px',
   
 	  '&:hover': {
 		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
@@ -57,33 +65,179 @@ const useStyles = createStyles((theme) => ({
 		  color: theme.colorScheme === 'dark' ? theme.white : theme.black,
 		},
 	},
-  }));
+
+	buttonBox: {
+		display: 'flex',
+		position: 'absolute',
+		right: 0,
+		marginRight: '12px'
+	}
+}));
   
-  interface ChatDialogButtonProps {
+interface ChatDialogButtonProps {
+	dialogId: string,
 	title: string,
 	active: boolean,
-  }
+	onClick(value: string): void,
+}
   
-  export default function ChatDialogButton({ title, active, ...props }: ChatDialogButtonProps & React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>) {
+export default function ChatDialogButton({
+	dialogId,
+	title,
+	active,
+	onClick,
+	...props
+}: ChatDialogButtonProps & React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>) {
+	const dialogTitleRef = useRef<HTMLInputElement>(null);
 	const { classes } = useStyles();
 	const { hovered, ref } = useHover();
+	const [ editable, toggle ]  = useDisclosure(false);
+	const [ dialogTitle, setDialogTitle] = useState(title);
 	const mobileScreen = useMediaQuery('(max-width: 767px)');
+	const navigate = useNavigate();
+	const { setMobileTitle } = useContext(MobileTitleContext);
+	const { dialogs, setDialogs } = useContext(DialogsContext);
+
+	useEffect(() => {
+		// Set mobile title when loading page first time
+		if (active) {
+			setMobileTitle(dialogTitle);
+		}
+	}, [setMobileTitle]);
+
+	// Edit dialog
+	const updateTitle = (newTitle: string): void => {
+		if (dialogs) {
+			const updatedDialogs = dialogs.map(dialog => {
+				if (dialog.id === dialogId) {
+					return { ...dialog, title: newTitle };
+				}
+				return dialog;
+			});
+			setDialogTitle(newTitle);
+			setDialogs(updatedDialogs);
+			if (active) {
+				setMobileTitle(newTitle);
+			}
+		}
+	};
+
+	// Delete dialog
+	const deleteDialog = (): void => {
+		if (dialogs) {
+			setDialogs(dialogs.filter(dialog => dialog.id !== dialogId));
+		}
+	};
+
+	// Handle delete dialog
+	const handleDelete = async () => {
+		try {
+			const resp = await axios.delete('/dialogs/'+dialogId);
+			console.log(resp);
+			if (resp.status === 200) {
+				// Done delete
+			}
+		} catch (error: unknown) {
+			if (error instanceof AxiosError && error.response) {
+				// Delete error
+			}
+		}
+	};
+
+	// Handle edit dialog
+	const handleEdit = async () => {
+		try {
+			if (dialogTitleRef.current) {
+				updateTitle(dialogTitleRef.current.value)
+				const resp = await axios.patch('/dialogs/'+dialogId, { title: dialogTitleRef.current.value });
+				console.log(resp);
+				if (resp.status === 200) {
+					// Done change title
+				}
+			}
+		} catch (error: unknown) {
+			if (error instanceof AxiosError && error.response) {
+				// Change title error
+			}
+		}
+	};
   
 	return (
-		<div ref={ref} {...props}>
+		<div ref={ref} {...props} onClick={(e) => {
+			if (editable) {
+				e.stopPropagation();
+			} else {
+				onClick(e);
+			}
+		}}
+		>
 			<a className={`${classes.link} ${active ? classes.linkActive : ''}`}>
 				<IconMessageCircle2 className={classes.linkIcon} stroke={1.5} />
-				<span>{title}</span>
-				{!mobileScreen && hovered || active ? (
-					<div style={{ display: 'flex', position: 'absolute', right: 0, marginRight: '12px'}}>
-						<ActionIcon variant="transparent" size="lg">
-							<IconPencil className={classes.linkIcon} stroke={1.5} />
-						</ActionIcon>	
-						<ActionIcon variant="transparent" size="lg">
-							<IconTrash className={classes.linkIcon} stroke={1.5} />
-						</ActionIcon>
+				{ editable ? (
+					<TextInput
+      					variant="unstyled"
+						defaultValue={dialogTitle}
+						size='nm'
+						ref={dialogTitleRef}
+    				/>
+				) : (
+					<span>{dialogTitle}</span>
+				) }
+
+				{ !mobileScreen && hovered || active || editable ? (
+					<div className={classes.buttonBox}>
+						{ editable ? (
+							<>
+								<ActionIcon
+									variant="transparent"
+									size="lg"
+									onClick={() => {
+										handleEdit();
+										toggle.toggle();
+									}}
+								>
+									<IconCheck className={classes.linkIcon} stroke={1.5} />
+								</ActionIcon>	
+								<ActionIcon
+									variant="transparent"
+									size="lg"
+									onClick={() => {
+										toggle.toggle();
+									}}
+								>
+									<IconX className={classes.linkIcon} stroke={1.5} />
+								</ActionIcon>
+							</>
+						) : (
+							<>
+								<ActionIcon
+									variant="transparent"
+									size="lg"
+									onClick={(e) => {
+										e.stopPropagation();
+										toggle.toggle();
+									}}
+								>
+									<IconPencil className={classes.linkIcon} stroke={1.5} />
+								</ActionIcon>	
+								<ActionIcon
+									variant="transparent"
+									size="lg"
+									onClick={(e) => {
+										e.stopPropagation();
+										handleDelete();
+										deleteDialog();
+										if (active) {
+											navigate('/chat');
+										}
+									}}
+								>
+									<IconTrash className={classes.linkIcon} stroke={1.5} />
+								</ActionIcon>
+							</>
+						)}
 					</div>
-				) : ''}
+				) : '' }
 			</a>
 		</div>
 	);

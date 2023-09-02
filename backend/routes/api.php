@@ -30,9 +30,10 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::get('/dialogs', [DialogController::class, 'index']);
+    Route::patch('/dialogs/{id}', [DialogController::class, 'update']);
     Route::delete('/dialogs/{id}', [DialogController::class, 'destroy']);
     Route::get('/messages/{id}', [MessageController::class, 'index']);
-    Route::post('/messages/{id}', [MessageController::class, 'store']);
+    Route::post('/messages/{id?}', [MessageController::class, 'store']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/settings-update', [SettingController::class, 'update']);
 });

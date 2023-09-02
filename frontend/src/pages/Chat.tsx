@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
 	IconSend
 } from '@tabler/icons-react';
@@ -8,14 +8,12 @@ import {
 	Group,
 	ActionIcon,
 	Card,
-	LoadingOverlay,
 	Loader,
 } from '@mantine/core';
 import Message from '../components/ChatMessage';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import axios from '../axios';
 import { AxiosError } from 'axios';
-import { useDisclosure } from '@mantine/hooks';
 
 const useStyles = createStyles((theme) => ({
 	container: {
@@ -55,10 +53,12 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export default function Chat() {
-	const { classes } = useStyles();
 	const chatInputRef = useRef<HTMLInputElement>(null);
 	const scrollBoxRef = useRef<HTMLInputElement>(null);
+	const scrollRef = useRef<HTMLInputElement>(null);
+	const messagesEndRef = useRef<HTMLInputElement>(null);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
+	const { classes } = useStyles();
 	const [messages, setMessages] = useState<Array<{
 		id: number;
 		text: string;
@@ -66,40 +66,40 @@ export default function Chat() {
 		time: string;
 		you?: boolean;
 	}> | null>(null);
-	const location = useLocation();
-	const navigate = useNavigate();
-	
-	let chatId = useParams().id ? useParams().id : false;
-
 	const [loading, setLoading] = useState(false);
 
+	const location = useLocation();
+	const navigate = useNavigate();
+
+	const { id } = useParams();
+
 	useEffect(() => {
-		if (!location.pathname.includes('/chat')) {
-			return;
-		}
-
 		// Get all messages in chat
-		if (chatId) {
-			(async () => {
-				try {
-					setLoading(true);
-					const resp = await axios.get('/messages/'+chatId);
-					console.log(resp);
-					if (resp.status === 200) {
+		const controller = new AbortController();
+		
+		const fetchData = async () => {
+			try {
+				setLoading(true);
+				const resp = await axios.get(`/messages/${id}`, { signal: controller.signal });
+				console.log(resp);
+				if (resp.status === 200) {
+					if (id) {
 						setMessages(resp.data.messages);
-						setLoading(false);
 					}
-				} catch (error: unknown) {
-					if (error instanceof AxiosError && error.response) {
-						navigate('/chat');
-						console.log(error);
-					}
+					setLoading(false);
 				}
-			})()
-		} else {
-			setMessages(null);
+			} catch (error: unknown) {
+				if (error instanceof AxiosError && error.response) {
+					navigate('/chat');
+					console.log(error);
+				}
+			}
+		};
+		
+		if (id) {
+			fetchData();
 		}
-
+		
 		// Disable scroll mobile
 		function preventDefault(e: Event): void {
 			e.preventDefault();
@@ -108,23 +108,24 @@ export default function Chat() {
 		const wheelOpt: AddEventListenerOptions | boolean = 
 			'onwheel' in document.createElement('div') ? { passive: false } : false;
 
-		scrollBoxRef.current?.addEventListener('touchmove', (e: Event): void => {
-			if (focused || scrollBoxRef.current?.offsetHeight == scrollBoxRef.current?.scrollHeight) {
+		chatInputRef.current?.addEventListener('touchmove', (e: Event): void => {
+			if (wantCurrect < 1) {
+				console.log('scroll lock');
 				e.preventDefault();
+			} else {
+				console.log('scroll unlock');
 			}
 		}, wheelOpt);
-
-		chatInputRef.current?.addEventListener('touchmove', preventDefault, wheelOpt);
 
 		// iOS detect
 		function isiOS(): boolean {
 			return [
-			'iPad Simulator',
-			'iPhone Simulator',
-			'iPod Simulator',
-			'iPad',
-			'iPhone',
-			'iPod'
+				'iPad Simulator',
+				'iPhone Simulator',
+				'iPod Simulator',
+				'iPad',
+				'iPhone',
+				'iPod'
 			].includes(navigator.platform)
 			// iPad on iOS 13 detection
 			|| (navigator.userAgent.includes("Mac") && "ontouchend" in document)
@@ -139,12 +140,16 @@ export default function Chat() {
 		function mouseUpFix() {
 			textareaRef.current?.blur();
 			textareaRef.current?.focus({ preventScroll: true });
-			setTimeout(() => {focused = false}, 1000);
+			setTimeout(() => {
+				console.log('focused false');
+				focused = false;
+			}, 1000);
 		}
 
 		textareaRef.current?.addEventListener("mouseup", mouseUpFix);
 
 		// Fix height
+		let wantCurrect = 0;
 		const w = (window.visualViewport || window) as Window & typeof window.visualViewport;
 		let setViewportVH = false; // HasFocus = false
 		let lastVH: number | undefined;
@@ -158,7 +163,10 @@ export default function Chat() {
 			lastVH = vh;
 
 			document.documentElement.style.setProperty('--vh', `${vh}px`);
-			
+
+			messagesEndRef.current?.scrollIntoView();
+			wantCurrect = 0;
+
 			chatInputRef.current?.addEventListener('touchmove', preventDefault, wheelOpt);
 		};
 
@@ -170,7 +178,7 @@ export default function Chat() {
 			focused = true;
 			setViewportVH = true;
 			setVH();
-		
+
 			if('addEventListener' in w) {
 				window.removeEventListener('resize', setVH);
 				w.addEventListener('resize', setVH);
@@ -180,13 +188,29 @@ export default function Chat() {
 		textareaRef.current?.addEventListener('focus', toggleResizeMode);
 
 		// Fix opportunity to correct what was written
-		let wantCurrect = 0;
 		textareaRef.current?.addEventListener("click", () => {
 			wantCurrect++;
-			if (wantCurrect > 1) {
-				chatInputRef.current?.removeEventListener('touchmove', preventDefault);
-			}
 		});
+
+		// Fix scroll bounce
+		const scrollContainer: HTMLElement | null = scrollRef.current;
+		let startY: number | null = null;
+		
+		scrollContainer?.addEventListener("touchstart", (e: TouchEvent) => {
+			const touch = e.touches[0];
+			startY = touch.clientY;
+		});
+		
+		scrollContainer?.addEventListener("touchmove", (e: TouchEvent) => {
+			const touch = e.touches[0];
+			const currentY = touch.clientY;
+			
+			if (scrollContainer?.scrollTop === 0 && currentY > startY!) {
+				e.preventDefault();
+			} else if (scrollContainer?.scrollHeight - scrollContainer?.scrollTop === scrollContainer?.clientHeight && currentY < startY!) {
+				e.preventDefault();
+			}
+		});		
 
 		return () => {
 			window.removeEventListener('resize', setVH);
@@ -194,19 +218,38 @@ export default function Chat() {
 			textareaRef.current?.removeEventListener('focus', toggleResizeMode);
 			textareaRef.current?.removeEventListener("mouseup", mouseUpFix);
 			document.documentElement.style.removeProperty('--vh');
-			// cleaning up the listeners here
+
+			controller.abort();
+			setLoading(false);
+			setMessages(null);
+		};
+	}, []);
+
+
+	// Handle send message
+	const handleSend = async () => {
+		try {
+			if (textareaRef.current) {
+				const resp = await axios.post('/messages/'+id, { text: textareaRef.current.value });
+				console.log(resp);
+				if (resp.status === 200) {
+					setMessages(resp.data.messages);
+				}
+			}
+		} catch (error: unknown) {
+			if (error instanceof AxiosError && error.response) {
+				// Delete error
+			}
 		}
-	}, [location.pathname]);
+	};
 
 	return (
 		<>
 		<div className='whole page-chats'>
 		<div className="chat tabs-tab active">
 			{(loading ? <Loader /> : '')}
-			<div className="bubbles"  ref={scrollBoxRef}>
-				<div className='scrollable scrollable-y'>
-					<div className='bubbles-inner'>
-						<div className="bubbles-date-group">
+			<div className="bubbles">
+				<div className='bubbles-inner scrollable scrollable-y' ref={scrollRef}>
 							{messages && messages.map((message) => (
 								<Message 
 									key={message.id}
@@ -216,8 +259,7 @@ export default function Chat() {
 									time={message.time}
 								/>
 							))}
-						</div>
-					</div>
+							<div ref={messagesEndRef} />
 				</div>
 			</div>
 				<div className='chat-input' ref={chatInputRef}>
@@ -244,7 +286,12 @@ export default function Chat() {
 								variant="unstyled"
 							/>
 							<ActionIcon
-								onClick={() => console.log('send message')}
+								onClick={() => {
+									handleSend();
+									if (textareaRef.current) {
+										textareaRef.current.value = '';
+									}
+								}}
 								variant="hover"
 								size="lg"
 								style={{  margin: '5px' }}

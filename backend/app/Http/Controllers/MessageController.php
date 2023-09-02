@@ -12,6 +12,51 @@ use Carbon\Carbon;
 
 class MessageController extends Controller
 {
+    public function getAllMessages($dialog) {
+        $messages = $dialog->messages;
+
+        $formattedMessages = [];
+        $currentDate = null;
+        foreach ($messages as $message) {
+            $formattedMessage = [];
+
+            if ($message->role === 'user') {
+                $formattedMessage['you'] = true;
+            }
+
+            $date = Carbon::parse($message->created_at);
+
+            if (!$currentDate || !$date->isSameDay($currentDate)) {
+                $date = Carbon::parse($message->created_at);
+                $now = Carbon::now();
+
+                if ($date->isToday()) {
+                    $formattedDate = 'Сегодня';
+                } elseif ($date->isYesterday()) {
+                    $formattedDate = 'Вчера';
+                } else {
+                    if ($date->year !== $now->year) {
+                        $formattedDate = $date->locale('ru')->isoFormat('D MMMM YYYY');
+                    } else {
+                        $formattedDate = $date->locale('ru')->isoFormat('D MMMM');
+                    }
+                }
+
+                $formattedMessage['marker'] = $formattedDate;
+            }
+
+            $currentDate = $date;
+
+            $formattedMessage['time'] = $date->format('g:i');
+            $formattedMessage['text'] = $message->text;
+            $formattedMessage['id'] = $message->id;
+
+            $formattedMessages[] = $formattedMessage;
+        }
+
+        return $formattedMessages;
+    }
+    
     public function index(Request $request, $id)
     {
         $user = $request->user();
@@ -19,50 +64,10 @@ class MessageController extends Controller
         $dialog = $user->dialogs()->where('id', $id)->first();
 
         if ($dialog) {
-            //$messages = $dialog->messages()->select('created_at', 'text', 'role')->get();
-            $messages = $dialog->messages;
-
-            $formattedMessages = [];
-            $currentDate = null;
-            foreach ($messages as $message) {
-                $formattedMessage = [];
-
-                if ($message->role === 'user') {
-                    $formattedMessage['you'] = true;
-                }
-
-                $date = Carbon::parse($message->created_at);
-
-                if (!$currentDate || !$date->isSameDay($currentDate)) {
-                    $date = Carbon::parse($message->created_at);
-                    $now = Carbon::now();
-    
-                    if ($date->isToday()) {
-                        $formattedDate = 'Сегодня';
-                    } elseif ($date->isYesterday()) {
-                        $formattedDate = 'Вчера';
-                    } else {
-                        if ($date->year !== $now->year) {
-                            $formattedDate = $date->locale('ru')->isoFormat('D MMMM YYYY');
-                        } else {
-                            $formattedDate = $date->locale('ru')->isoFormat('D MMMM');
-                        }
-                    }
-
-                    $formattedMessage['marker'] = $formattedDate;
-                }
-
-                $currentDate = $date;
-
-                $formattedMessage['time'] = $date->format('g:i');
-                $formattedMessage['text'] = $message->text;
-                $formattedMessage['id'] = $message->id;
-
-                $formattedMessages[] = $formattedMessage;
-            }
+            $messages = $this->getAllMessages($dialog);
 
             return response()->json([
-                'messages' => $formattedMessages,
+                'messages' => $messages,
             ]);
         } else {
             return response()->json([
@@ -71,7 +76,7 @@ class MessageController extends Controller
         }
     }
 
-    public function store(Request $request, $id)
+    public function store(Request $request, $id = false)
     {
         $user = $request->user();
 
@@ -86,7 +91,11 @@ class MessageController extends Controller
                 'text' => $request->text,
                 'role' => 'user',
             ]);
-            return true;
+            
+            $messages = $this->getAllMessages($dialog);
+            return response()->json([
+                'messages' => $messages,
+            ]);
         } elseif (!$id) {
             $dialog = $user->dialogs()->create([
                 'title' => $request->text,
@@ -95,7 +104,11 @@ class MessageController extends Controller
                 'text' => $request->text,
                 'role' => 'user',
             ]);
-            return true;
+
+            $messages = $this->getAllMessages($dialog);
+            return response()->json([
+                'messages' => $messages,
+            ]);
         } else {
             return response()->json([
                 'error' => 'Unknown error',

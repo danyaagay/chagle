@@ -21,6 +21,19 @@ class DialogController extends Controller
         ]);
     }
 
+    public function update(Request $request, $id)
+    {
+        $user = $request->user();
+
+        $dialog = $user->dialogs()->find($id);
+
+        $dialog->title = $request->title;
+
+        $dialog->save();
+
+        return true;
+    }
+
     public function destroy(Request $request, $id)
     {
         $user = $request->user();
