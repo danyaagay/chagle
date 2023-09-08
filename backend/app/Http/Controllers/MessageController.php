@@ -12,6 +12,45 @@ use Carbon\Carbon;
 
 class MessageController extends Controller
 {
+    public function openAi($text) {
+        return 'answer';
+        
+        $tokens = [
+            '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',
+            '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'
+        ];
+
+        $json = [
+            'model' => 'gpt-3.5-turbo',
+            'messages' => [
+                ['role' => 'user', 'content' => $text]
+            ],
+            'max_tokens' => 1024,
+        ];
+
+        $ch = curl_init();
+
+        curl_setopt_array($ch, array(
+            CURLOPT_URL => 'https://api.openai.com/v1/chat/completions',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => json_encode($json, JSON_UNESCAPED_UNICODE),
+            CURLOPT_HTTPHEADER => [
+                "Authorization: Bearer {$tokens[0]}",
+                'Content-Type: application/json'
+            ]
+        ));
+    
+        $response = curl_exec($ch);
+        $response = json_decode($response);
+    
+        if (!isset($response->error)) {
+            return $response->choices[0]->message->content;
+        } else {
+            return $response->error->message;
+        }
+    }
+
     public function getAllMessages($dialog) {
         $messages = $dialog->messages;
 
@@ -47,6 +86,7 @@ class MessageController extends Controller
 
             $currentDate = $date;
 
+            $formattedMessage['date'] = $date;
             $formattedMessage['time'] = $date->format('g:i');
             $formattedMessage['text'] = $message->text;
             $formattedMessage['id'] = $message->id;
@@ -87,27 +127,42 @@ class MessageController extends Controller
                     'error' => 'Unknown error',
                 ]);
             }
-            $dialog->messages()->create([
+            $message = $dialog->messages()->create([
                 'text' => $request->text,
                 'role' => 'user',
             ]);
+
+            $answer = $this->openAi($request->text);
+            $answer = $dialog->messages()->create([
+                'text' => $answer,
+                'role' => 'assistant',
+            ]);
             
-            $messages = $this->getAllMessages($dialog);
+            //$messages = $this->getAllMessages($dialog);
             return response()->json([
-                'messages' => $messages,
+                'message' => $message,
+                'answer' => $answer,
             ]);
         } elseif (!$id) {
             $dialog = $user->dialogs()->create([
                 'title' => $request->text,
             ]);
-            $dialog->messages()->create([
+            $message = $dialog->messages()->create([
                 'text' => $request->text,
                 'role' => 'user',
             ]);
 
-            $messages = $this->getAllMessages($dialog);
+            $answer = $this->openAi($request->text);
+            $answer = $dialog->messages()->create([
+                'text' => $answer,
+                'role' => 'assistant',
+            ]);
+
+            //$messages = $this->getAllMessages($dialog);
             return response()->json([
-                'messages' => $messages,
+                'message' =>  $message,
+                'answer' => $answer,
+                'dialog' => $dialog,
             ]);
         } else {
             return response()->json([

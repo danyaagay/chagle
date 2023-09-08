@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Navigate, Outlet, NavLink, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, Outlet, NavLink, useNavigate } from 'react-router-dom';
 import axios from '../axios';
 import { AxiosError } from 'axios';
 import { useAuth } from '../contexts/AuthContext';
@@ -23,9 +23,9 @@ import {
 	UnstyledButton
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
-import ChatDialogButton from '../components/ChatDialogButton';
 import MobileTitleContext from '../contexts/MobileTitleContext';
-import DialogsContext from '../contexts/DialogsContext';
+import { DialogsProvider } from '../contexts/DialogsContext';
+import DialogsList from '../components/DialogsList';
 
 const useStyles = createStyles((theme) => ({
 	header: {
@@ -90,20 +90,11 @@ export default function DefaultLayout() {
 	const { user, setUser } = useAuth();
 	const { classes } = useStyles();
 	const [ mobileTitle, setMobileTitle ] = useState<string | false>(false);
-	const defaultDialogs = [
-		{
-			id: '1',
-			title: 'hello'
-		}
-	];
-	const [dialogs, setDialogs] = useState<Array<{ id: string, title: string }> | null>(defaultDialogs); //null
 	const navigate = useNavigate();
-	const [opened, setOpened] = useState(false);
+	const [ opened, setOpened ] = useState(false);
 	const theme = useMantineTheme();
 	const topbarRef = useRef<HTMLInputElement>(null);
 	const mobileScreen = useMediaQuery('(max-width: 767px)');
-
-	const { id } = useParams();
 
 	useEffect(() => {
 		// Set mobile title when loading page first time
@@ -115,9 +106,9 @@ export default function DefaultLayout() {
 		} else {
 			setMobileTitle(false);
 		}
-
+		
+		// Check if user is logged in or not from server
 		(async () => {
-			// Check if user is logged in or not from server
 			try {
 				const resp = await axios.get('/user', user);
 				if (resp.status === 200) {
@@ -127,19 +118,6 @@ export default function DefaultLayout() {
 				if (error instanceof AxiosError && error.response && error.response.status === 401) {
 					localStorage.removeItem('user');
 					window.location.href = '/';
-					console.log(error);
-				}
-			}
-
-			// Get all dialogs
-			try {
-				const resp = await axios.get('/dialogs');
-				console.log(resp);
-				if (resp.status === 200) {
-					setDialogs(resp.data.dialogs);
-				}
-			} catch (error: unknown) {
-				if (error instanceof AxiosError && error.response) {
 					console.log(error);
 				}
 			}
@@ -174,10 +152,8 @@ export default function DefaultLayout() {
 		}
 	};
 
-	//console.log(activeChat);
-
 	return (
-		<DialogsContext.Provider value={{ dialogs, setDialogs }}>
+		<DialogsProvider>
 		<MobileTitleContext.Provider value={{ mobileTitle, setMobileTitle }}>
 		<AppShell
 			styles={{
@@ -231,19 +207,7 @@ export default function DefaultLayout() {
 					</Navbar.Section>
 
 					<Navbar.Section grow>
-						{dialogs && dialogs.map((dialog: any) => (
-							<ChatDialogButton
-								key={dialog.id}
-								dialogId={dialog.id}
-								title={dialog.title}
-								active={id == dialog.id ? true : false}
-								onClick={() => {
-									setOpened((o) => !o);
-									setMobileTitle(dialog.title);
-									navigate('chat/'+dialog.id);
-								}}
-							/>
-						))}
+						<DialogsList />
 					</Navbar.Section>
 
 					<Navbar.Section className={classes.footer}>
@@ -287,6 +251,6 @@ export default function DefaultLayout() {
 			<Outlet />
 	  	</AppShell>
 		</MobileTitleContext.Provider>
-		</DialogsContext.Provider>
+		</DialogsProvider>
 	);
 }

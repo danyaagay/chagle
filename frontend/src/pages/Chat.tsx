@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useContext } from 'react';
 import {
 	IconSend
 } from '@tabler/icons-react';
@@ -10,10 +10,11 @@ import {
 	Card,
 	Loader,
 } from '@mantine/core';
-import Message from '../components/ChatMessage';
-import { useLocation, useParams, useNavigate } from 'react-router-dom';
+import Message from '../components/Message';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from '../axios';
 import { AxiosError } from 'axios';
+import DialogsContext from '../contexts/DialogsContext';
 
 const useStyles = createStyles((theme) => ({
 	container: {
@@ -54,18 +55,24 @@ const useStyles = createStyles((theme) => ({
 
 export default function Chat() {
 	const chatInputRef = useRef<HTMLInputElement>(null);
-	const scrollBoxRef = useRef<HTMLInputElement>(null);
 	const scrollRef = useRef<HTMLInputElement>(null);
 	const messagesEndRef = useRef<HTMLInputElement>(null);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const { classes } = useStyles();
-	const [messages, setMessages] = useState<Array<{
+
+	type Message = {
 		id: number;
+		date: string;
 		text: string;
 		marker?: string;
 		time: string;
 		you?: boolean;
-	}> | null>(null);
+	};
+	type Messages = Array<Message> | null;
+	const [messages, setMessages] = useState<Messages>(null);
+
+	const { addDialog } = useContext(DialogsContext);
+	  
 	const [loading, setLoading] = useState(false);
 
 	const location = useLocation();
@@ -136,14 +143,9 @@ export default function Chat() {
 		}
 
 		// Fix auto scroll on focus
-		let focused = false;
 		function mouseUpFix() {
 			textareaRef.current?.blur();
 			textareaRef.current?.focus({ preventScroll: true });
-			setTimeout(() => {
-				console.log('focused false');
-				focused = false;
-			}, 1000);
 		}
 
 		textareaRef.current?.addEventListener("mouseup", mouseUpFix);
@@ -175,7 +177,6 @@ export default function Chat() {
 
 		// Focused input
 		const toggleResizeMode = () => {
-			focused = true;
 			setViewportVH = true;
 			setVH();
 
@@ -195,45 +196,132 @@ export default function Chat() {
 		// Fix scroll bounce
 		const scrollContainer: HTMLElement | null = scrollRef.current;
 		let startY: number | null = null;
-		
-		scrollContainer?.addEventListener("touchstart", (e: TouchEvent) => {
-			const touch = e.touches[0];
-			startY = touch.clientY;
-		});
-		
-		scrollContainer?.addEventListener("touchmove", (e: TouchEvent) => {
-			const touch = e.touches[0];
-			const currentY = touch.clientY;
-			
-			if (scrollContainer?.scrollTop === 0 && currentY > startY!) {
-				e.preventDefault();
-			} else if (scrollContainer?.scrollHeight - scrollContainer?.scrollTop === scrollContainer?.clientHeight && currentY < startY!) {
-				e.preventDefault();
-			}
-		});		
+
+		const touchStartHandler = (e: TouchEvent): void => {
+		const touch: Touch = e.touches[0];
+		startY = touch.clientY;
+		};
+
+		const touchMoveHandler = (e: TouchEvent): void => {
+		const touch: Touch = e.touches[0];
+		const currentY: number = touch.clientY;
+
+		if (scrollContainer?.scrollTop === 0 && currentY > startY!) {
+			e.preventDefault();
+		} else if (
+			scrollContainer &&
+			scrollContainer?.scrollHeight - scrollContainer?.scrollTop ===
+			scrollContainer?.clientHeight &&
+			currentY < startY!
+		) {
+			e.preventDefault();
+		}
+		};
+
+		scrollContainer?.addEventListener("touchstart", touchStartHandler);
+		scrollContainer?.addEventListener("touchmove", touchMoveHandler);
 
 		return () => {
 			window.removeEventListener('resize', setVH);
 			w.removeEventListener('resize', setVH);
+
 			textareaRef.current?.removeEventListener('focus', toggleResizeMode);
 			textareaRef.current?.removeEventListener("mouseup", mouseUpFix);
+
 			document.documentElement.style.removeProperty('--vh');
 
+			scrollContainer?.removeEventListener("touchstart", touchStartHandler);
+			scrollContainer?.removeEventListener("touchmove", touchMoveHandler);
+
 			controller.abort();
+
 			setLoading(false);
 			setMessages(null);
 		};
-	}, []);
+	}, [location]);
 
+	// Messeges send or update to bottom
+	useEffect(() => {
+		messagesEndRef.current?.scrollIntoView();
+	}, [messages]);
+
+	// Add message
+	const messageAdd = (text: string) => {
+		const date = new Date(); 
+		const dateFormatted = date.toISOString();
+		let marker;
+
+		if (messages && messages.length > 0) {
+			const lastMessageWithMarker = messages.filter(message => message.marker)[messages.filter(message => message.marker).length - 1];
+
+			if (lastMessageWithMarker && lastMessageWithMarker.marker != 'Сегодня') {
+				marker = 'Сегодня';
+			}
+		}
+
+		const newMessage = {
+			id: 0,
+			date: dateFormatted,
+			text: text,
+			time: dateFormatted.split('T')[1].slice(0, 5),
+			you: true,
+			...(marker ? { marker } : {})
+		};
+
+		const newMessage1 = {
+			id: -1,
+			date: dateFormatted,
+			text: 'Печатает сообщение...',
+			time: dateFormatted.split('T')[1].slice(0, 5),
+			you: false
+		};
+		
+		let newMessages;
+		if (messages !== null) {
+			newMessages = [...messages, newMessage, newMessage1];
+		} else {
+			newMessages = [newMessage, newMessage1];
+		}
+
+		setMessages(newMessages);
+
+		return newMessages;
+	}
 
 	// Handle send message
 	const handleSend = async () => {
 		try {
 			if (textareaRef.current) {
-				const resp = await axios.post('/messages/'+id, { text: textareaRef.current.value });
+
+				const newMessages = messageAdd(textareaRef.current.value);
+
+				const resp = await axios.post('/messages/'+ (id ? id : ''), { text: textareaRef.current.value });
 				console.log(resp);
 				if (resp.status === 200) {
-					setMessages(resp.data.messages);
+					if (newMessages) {
+						const messagesUpdate = newMessages.map(message => {
+							if (message.id === 0) {
+							  return {
+								...message,
+								id: resp.data.message.id
+							  };
+							} else if (message.id === -1) {
+								return {
+									...message,
+									id: resp.data.answer.id,
+									text: resp.data.answer.text
+								};
+							}
+							return message;
+						});
+
+						setMessages(messagesUpdate);
+					}
+
+					if (resp.data.dialog) {
+						addDialog(resp.data.dialog.title, resp.data.dialog.id);
+						navigate('/chat/'+resp.data.dialog.id);
+					}
 				}
 			}
 		} catch (error: unknown) {
@@ -242,7 +330,7 @@ export default function Chat() {
 			}
 		}
 	};
-
+	
 	return (
 		<>
 		<div className='whole page-chats'>
@@ -250,16 +338,16 @@ export default function Chat() {
 			{(loading ? <Loader /> : '')}
 			<div className="bubbles">
 				<div className='bubbles-inner scrollable scrollable-y' ref={scrollRef}>
-							{messages && messages.map((message) => (
-								<Message 
-									key={message.id}
-									text={message.text}
-									marker={message.marker} 
-									you={message.you}
-									time={message.time}
-								/>
-							))}
-							<div ref={messagesEndRef} />
+					{messages && messages.map((message) => (
+						<Message 
+							key={message.id}
+							text={message.text}
+							marker={message.marker} 
+							you={message.you}
+							time={message.time}
+						/>
+					))}
+					<div ref={messagesEndRef} />
 				</div>
 			</div>
 				<div className='chat-input' ref={chatInputRef}>
@@ -290,6 +378,7 @@ export default function Chat() {
 									handleSend();
 									if (textareaRef.current) {
 										textareaRef.current.value = '';
+										textareaRef.current.focus();
 									}
 								}}
 								variant="hover"

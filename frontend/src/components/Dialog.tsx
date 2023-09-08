@@ -96,7 +96,7 @@ export default function ChatDialogButton({
 	const mobileScreen = useMediaQuery('(max-width: 767px)');
 	const navigate = useNavigate();
 	const { setMobileTitle } = useContext(MobileTitleContext);
-	const { dialogs, setDialogs } = useContext(DialogsContext);
+	const { updateDialog, deleteDialog } = useContext(DialogsContext);
 
 	useEffect(() => {
 		// Set mobile title when loading page first time
@@ -104,30 +104,6 @@ export default function ChatDialogButton({
 			setMobileTitle(dialogTitle);
 		}
 	}, [setMobileTitle]);
-
-	// Edit dialog
-	const updateTitle = (newTitle: string): void => {
-		if (dialogs) {
-			const updatedDialogs = dialogs.map(dialog => {
-				if (dialog.id === dialogId) {
-					return { ...dialog, title: newTitle };
-				}
-				return dialog;
-			});
-			setDialogTitle(newTitle);
-			setDialogs(updatedDialogs);
-			if (active) {
-				setMobileTitle(newTitle);
-			}
-		}
-	};
-
-	// Delete dialog
-	const deleteDialog = (): void => {
-		if (dialogs) {
-			setDialogs(dialogs.filter(dialog => dialog.id !== dialogId));
-		}
-	};
 
 	// Handle delete dialog
 	const handleDelete = async () => {
@@ -148,7 +124,11 @@ export default function ChatDialogButton({
 	const handleEdit = async () => {
 		try {
 			if (dialogTitleRef.current) {
-				updateTitle(dialogTitleRef.current.value)
+				updateDialog(dialogTitleRef.current.value, dialogId);
+				setDialogTitle(dialogTitleRef.current.value);
+				if (active) {
+					setMobileTitle(dialogTitleRef.current.value);
+				}
 				const resp = await axios.patch('/dialogs/'+dialogId, { title: dialogTitleRef.current.value });
 				console.log(resp);
 				if (resp.status === 200) {
@@ -226,7 +206,7 @@ export default function ChatDialogButton({
 									onClick={(e) => {
 										e.stopPropagation();
 										handleDelete();
-										deleteDialog();
+										deleteDialog(dialogId);
 										if (active) {
 											navigate('/chat');
 										}
