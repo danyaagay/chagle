@@ -96,7 +96,7 @@ export default function ChatDialogButton({
 	const mobileScreen = useMediaQuery('(max-width: 767px)');
 	const navigate = useNavigate();
 	const { setMobileTitle } = useContext(MobileTitleContext);
-	const { updateDialog, deleteDialog } = useContext(DialogsContext);
+	const { dispatchDialogs } = useContext(DialogsContext);
 
 	useEffect(() => {
 		// Set mobile title when loading page first time
@@ -124,7 +124,13 @@ export default function ChatDialogButton({
 	const handleEdit = async () => {
 		try {
 			if (dialogTitleRef.current) {
-				updateDialog(dialogTitleRef.current.value, dialogId);
+				dispatchDialogs({
+					type: 'change',
+					dialog: {
+						title: dialogTitleRef.current.value,
+						id: dialogId
+					}
+				});
 				setDialogTitle(dialogTitleRef.current.value);
 				if (active) {
 					setMobileTitle(dialogTitleRef.current.value);
@@ -206,7 +212,10 @@ export default function ChatDialogButton({
 									onClick={(e) => {
 										e.stopPropagation();
 										handleDelete();
-										deleteDialog(dialogId);
+										dispatchDialogs({
+											type: 'delete',
+											id: dialogId
+										});
 										if (active) {
 											navigate('/chat');
 										}

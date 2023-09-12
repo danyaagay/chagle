@@ -28,6 +28,6 @@ root.render(
 					<Notifications />
 					<RouterProvider router={router} />
 			</MantineProvider>
-			</AuthProvider>
+		</AuthProvider>
 	</React.StrictMode>
 );

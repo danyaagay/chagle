@@ -1,13 +1,12 @@
-import { useState, useContext } from 'react';
+import { useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Dialog from '../components/Dialog';
 import DialogsContext from '../contexts/DialogsContext';
+import MobileTitleContext from '../contexts/MobileTitleContext';
 
-const DialogsList = () => {
-	const { dialogs } = useContext(DialogsContext);
-	const { id } = useParams();
-	const [ opened, setOpened ] = useState(false);
-	const [ mobileTitle, setMobileTitle ] = useState<string | false>(false);
+const DialogsList = ({ opened, setOpened }: { opened: boolean, setOpened: React.Dispatch<React.SetStateAction<boolean>> }) => {
+	const { dialogs, active } = useContext(DialogsContext);
+	const { setMobileTitle } = useContext(MobileTitleContext);
 	const navigate = useNavigate();
   
 	return (
@@ -17,7 +16,7 @@ const DialogsList = () => {
 					key={dialog.id}
 					dialogId={dialog.id}
 					title={dialog.title}
-					active={id == dialog.id ? true : false}
+					active={active == dialog.id ? true : false}
 					onClick={() => {
 						setOpened((o) => !o);
 						setMobileTitle(dialog.title);
