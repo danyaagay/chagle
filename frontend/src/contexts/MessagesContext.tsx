@@ -87,26 +87,31 @@ function messagesReducer(messages: Message[], action: Action): Message[] {
     case 'set':
         return action.messages || [];
     case 'add':
-		const date = new Date(); 
-		const dateFormatted = date.toISOString();
-		let marker;
+        const date = new Date();
+        const dateFormatted = date.toISOString();
 
-		//if (messages && messages.length > 0) {
-			const lastMessageWithMarker = messages.filter(message => message.marker)[messages.filter(message => message.marker).length - 1];
+        const timeString = dateFormatted.split('T')[1].slice(0, 5);
+        let [hours, minutes] = timeString.split(':');
+        hours = parseInt(hours).toString();
 
-			if (lastMessageWithMarker && lastMessageWithMarker.marker != 'Сегодня' || !lastMessageWithMarker) {
-				marker = 'Сегодня';
-			}
-		//}
+        let marker;
+        
+        //if (messages && messages.length > 0) {
+             const lastMessageWithMarker = messages.filter(message => message.marker)[messages.filter(message => message.marker).length - 1];
+        
+             if (lastMessageWithMarker && lastMessageWithMarker.marker != 'Сегодня' || !lastMessageWithMarker) {
+                 marker = 'Сегодня';
+             }
+        //}
         
         return [...messages, {
             id: action.message.id,
             date: dateFormatted,
-            time: dateFormatted.split('T')[1].slice(0, 5),
+            time: `${hours}:${minutes}`,
             text: action.message.text,
             you: action.message.you,
             ...(marker ? { marker } : {})
-        }];
+        }];      
     case 'change':
         return messages.map(message =>
             message.id === action.id ? {

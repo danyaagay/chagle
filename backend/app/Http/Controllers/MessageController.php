@@ -13,7 +13,11 @@ use Carbon\Carbon;
 class MessageController extends Controller
 {
     public function openAi($text) {
-        return 'answer';
+        //return 'answer';
+
+        header('Access-Control-Allow-Origin: http://192.168.0.116:5173');
+        header('Access-Control-Allow-Credentials: true');
+        header('Access-Control-Allow-Headers: *');
         
         $tokens = [
             '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',
@@ -25,6 +29,7 @@ class MessageController extends Controller
             'messages' => [
                 ['role' => 'user', 'content' => $text]
             ],
+            'stream' => true,
             'max_tokens' => 1024,
         ];
 
@@ -36,19 +41,54 @@ class MessageController extends Controller
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => json_encode($json, JSON_UNESCAPED_UNICODE),
             CURLOPT_HTTPHEADER => [
-                "Authorization: Bearer {$tokens[0]}",
+                "Authorization: Bearer {$tokens[1]}",
                 'Content-Type: application/json'
             ]
         ));
+
+        $answer = '11';
+        $obj = $this;
+        $this->result = '';
+        $callback = function ($ch, $data) use ($obj) {
+            $lines = explode("\n\n", $data);
+            $lines = array_diff($lines, array(null));
+            $parsedLines = array_map(function ($line) {
+                return json_decode(trim(str_replace('data: ', '', $line)), true);
+            }, $lines);
+            
+            foreach ($parsedLines as $parsedLine) {
+                @$choices = $parsedLine['choices'];
+                @$delta = $choices[0]['delta'];
+                @$content = $delta['content'];
+                
+                if ($content) {
+                    $obj->result .= $content;
+
+                    $json = [];
+                    $json['message'] = $obj->result;
+                    $json = json_encode($json);
+                    
+                    echo $json."\n";
+                }
+            }
+            
+            //if (strlen($data) > 5) {
+            //    echo $data;
+            //}
+            return strlen($data);
+        };
+
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, $callback);
     
-        $response = curl_exec($ch);
-        $response = json_decode($response);
+        curl_exec($ch);
+        return $this->result;
+        //$response = json_decode($response);
     
-        if (!isset($response->error)) {
-            return $response->choices[0]->message->content;
-        } else {
-            return $response->error->message;
-        }
+        //if (!isset($response->error)) {
+        //    return $response->choices[0]->message->content;
+        //} else {
+        //    return $response->error->message;
+        //}
     }
 
     public function getAllMessages($dialog) {
@@ -133,6 +173,7 @@ class MessageController extends Controller
             ]);
 
             $answer = $this->openAi($request->text);
+
             $answer = $dialog->messages()->create([
                 'text' => $answer,
                 'role' => 'assistant',
