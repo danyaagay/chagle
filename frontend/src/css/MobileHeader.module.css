@@ -1,0 +1,11 @@
+.headerBox {
+    display: flex;
+    align-Items: center;
+    height: 100%;
+}
+
+.header {
+    @media (min-width: $mantine-breakpoint-sm) {
+        display: none;
+    }
+}

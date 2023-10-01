@@ -7,72 +7,20 @@ import {
 	IconCheck
 } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
-import { createStyles, getStylesRef, rem, ActionIcon, TextInput } from '@mantine/core';
+import {
+	ActionIcon,
+	TextInput,
+	Modal,
+	Button,
+	Group
+} from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { useHover, useDisclosure } from '@mantine/hooks';
-import axios from '../axios';
-import { AxiosError } from 'axios';
 import MobileTitleContext from '../contexts/MobileTitleContext';
 import DialogsContext from '../contexts/DialogsContext';
-  
-const useStyles = createStyles((theme) => ({
-	header: {
-	  paddingBottom: theme.spacing.md,
-	},
-  
-	footer: {
-	  paddingTop: theme.spacing.md,
-	  marginTop: theme.spacing.md,
-	  borderTop: `${rem(1)} solid ${
-		theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]
-	  }`,
-	},
-  
-	link: {
-	  ...theme.fn.focusStyles(),
-	  display: 'flex',
-	  alignItems: 'center',
-	  textDecoration: 'none',
-	  fontSize: theme.fontSizes.nm,
-	  color: theme.colorScheme === 'dark' ? theme.colors.dark[1] : theme.colors.gray[7],
-	  padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-	  borderRadius: theme.radius.md,
-	  cursor: 'pointer',
-	  fontWeight: 400,
-	  height: '48px',
-  
-	  '&:hover': {
-		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
-		color: theme.colorScheme === 'dark' ? theme.white : theme.black,
-  
-		[`& .${getStylesRef('icon')}`]: {
-		  color: theme.colorScheme === 'dark' ? theme.white : theme.black,
-		},
-	  },
-	},
-  
-	linkIcon: {
-	  ref: getStylesRef('icon'),
-	  color: theme.colorScheme === 'dark' ? theme.colors.dark[2] : theme.colors.gray[6],
-	  marginRight: theme.spacing.sm,
-	},
-  
-	linkActive: {
-		backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
-		color: theme.colorScheme === 'dark' ? theme.white : theme.black,
-  
-		[`& .${getStylesRef('icon')}`]: {
-		  color: theme.colorScheme === 'dark' ? theme.white : theme.black,
-		},
-	},
-
-	buttonBox: {
-		display: 'flex',
-		position: 'absolute',
-		right: 0,
-		marginRight: '12px'
-	}
-}));
+import axios from '../axios';
+import { AxiosError } from 'axios';
+import classes from '../css/ProtectedLayout.module.css';
   
 interface ChatDialogButtonProps {
 	dialogId: string,
@@ -89,9 +37,9 @@ export default function ChatDialogButton({
 	...props
 }: ChatDialogButtonProps & React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>) {
 	const dialogTitleRef = useRef<HTMLInputElement>(null);
-	const { classes } = useStyles();
 	const { hovered, ref } = useHover();
-	const [ editable, toggle ]  = useDisclosure(false);
+	const [ editable, editToggle ]  = useDisclosure(false);
+	const [ deleting, { open, close } ]  = useDisclosure(false);
 	const [ dialogTitle, setDialogTitle] = useState(title);
 	const mobileScreen = useMediaQuery('(max-width: 767px)');
 	const navigate = useNavigate();
@@ -149,6 +97,28 @@ export default function ChatDialogButton({
 	};
   
 	return (
+		<>
+		<Modal opened={deleting} onClose={close} title={`Удалить чат "${dialogTitle}"?`} centered withCloseButton={false}>
+			<Group>
+				<Button variant="subtle" onClick={close}>Отмена</Button>
+				<Button
+					variant="subtle"
+					color="red"
+					onClick={(e) => {
+						e.stopPropagation();
+						handleDelete();
+						dispatchDialogs({
+							type: 'delete',
+							id: dialogId
+						});
+						if (active) {
+							navigate('/chat');
+						}
+					}}>
+					Удалить
+				</Button>
+			</Group>
+		</Modal>
 		<div ref={ref} {...props} onClick={(e) => {
 			if (editable) {
 				e.stopPropagation();
@@ -163,7 +133,7 @@ export default function ChatDialogButton({
 					<TextInput
       					variant="unstyled"
 						defaultValue={dialogTitle}
-						size='nm'
+						size='sm'
 						ref={dialogTitleRef}
     				/>
 				) : (
@@ -179,7 +149,7 @@ export default function ChatDialogButton({
 									size="lg"
 									onClick={() => {
 										handleEdit();
-										toggle.toggle();
+										editToggle.toggle();
 									}}
 								>
 									<IconCheck className={classes.linkIcon} stroke={1.5} />
@@ -188,7 +158,7 @@ export default function ChatDialogButton({
 									variant="transparent"
 									size="lg"
 									onClick={() => {
-										toggle.toggle();
+										editToggle.toggle();
 									}}
 								>
 									<IconX className={classes.linkIcon} stroke={1.5} />
@@ -201,7 +171,7 @@ export default function ChatDialogButton({
 									size="lg"
 									onClick={(e) => {
 										e.stopPropagation();
-										toggle.toggle();
+										editToggle.toggle();
 									}}
 								>
 									<IconPencil className={classes.linkIcon} stroke={1.5} />
@@ -211,14 +181,7 @@ export default function ChatDialogButton({
 									size="lg"
 									onClick={(e) => {
 										e.stopPropagation();
-										handleDelete();
-										dispatchDialogs({
-											type: 'delete',
-											id: dialogId
-										});
-										if (active) {
-											navigate('/chat');
-										}
+										open();
 									}}
 								>
 									<IconTrash className={classes.linkIcon} stroke={1.5} />
@@ -229,5 +192,6 @@ export default function ChatDialogButton({
 				) : '' }
 			</a>
 		</div>
+		</>
 	);
   }

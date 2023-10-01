@@ -4,7 +4,6 @@ import axios from '../axios';
 import { AxiosError } from 'axios';
 import {
 	TextInput,
-	createStyles,
 	PasswordInput,
 	Text,
 	Button,
@@ -18,6 +17,8 @@ import { notifications } from '@mantine/notifications';
 import FloatingLabelInput from '../components/FloatingLabelInput';
 import { useForm } from '@mantine/form';
 
+import classes from '../css/Settings.module.css';
+
 export interface FormValues {
 	email: string;
 	name: string;
@@ -25,25 +26,9 @@ export interface FormValues {
 	password_confirmation: string;
 }
 
-const useStyles = createStyles(() => ({
-	container: {
-		maxWidth: '500px',
-		height: '100%',
-	},
-	form: {
-		display: 'block',
-		position: 'relative',
-		height: '100%',
-	},
-    title: {
-		fontWeight: 500,
-		color: '#495057',
-	},
-}));
 
 export default function Settings() {
 	const { setUser, user } = useAuth();
-	const { classes } = useStyles();
 	const [ isLoading, setIsLoading ] = useState(false);
 
 	useEffect(() => {
@@ -163,9 +148,8 @@ export default function Settings() {
 		<>
 		<Container className={classes.container} px={8}>
 			<form onSubmit={form.onSubmit(handleSubmit)} className={classes.form}>
-				<div className='scrollable scrollable-y'>
-					<Stack spacing="xl" pt={16}>
-						<Text fz="md" className={classes.title}>
+					<Stack gap="md" pt={16}>
+						<Text fz="md" fw={500}>
 							Основная информация
 						</Text>
 						<FloatingLabelInput
@@ -187,8 +171,8 @@ export default function Settings() {
 							error={form.errors.email}
 						/>
 					</Stack>
-					<Stack mt="2rem" spacing="xl">
-						<Text fz="md" className={classes.title}>
+					<Stack mt="2rem" gap="md">
+						<Text fz="md" fw={500}>
 							Смена пароля
 						</Text>
 						<FloatingLabelInput
@@ -209,10 +193,9 @@ export default function Settings() {
 							error={form.errors.password_confirmation}
 						/>
 					</Stack>
-					<Button loading={isLoading} type="submit" mt="2rem" mb="2rem" size="md" radius="md" style={{ fontWeight: 500 }}>
+					<Button loading={isLoading} type="submit" mt="2rem" mb="2rem" size="md" radius="md" fw={500}>
 						Сохранить
 					</Button>
-				</div>
 			</form>
 		</Container>
 		</>

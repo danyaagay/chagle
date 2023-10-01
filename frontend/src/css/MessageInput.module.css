@@ -1,0 +1,24 @@
+.linkIcon {
+    width: 28px;
+    height: 28px;
+    transform: rotate(40deg);
+    color: var(--mantine-color-gray-6);
+}
+
+.send {
+    margin: 10px 5px !important;
+}
+
+.root {
+    flex-grow: 1;
+}
+
+.input {
+    padding: 10px 5px !important;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    &::-webkit-scrollbar {
+        width: 0 !important;
+    }
+    font-size: 1rem;
+}

@@ -15,7 +15,7 @@ export default function Chat() {
 			e.preventDefault();
 		}
 
-		const wheelOpt: AddEventListenerOptions | boolean = 
+		const wheelOpt: AddEventListenerOptions | boolean =
 			'onwheel' in document.createElement('div') ? { passive: false } : false;
 
 		chatInputRef.current?.addEventListener('touchmove', (e: Event): void => {
@@ -37,8 +37,8 @@ export default function Chat() {
 				'iPhone',
 				'iPod'
 			].includes(navigator.platform)
-			// iPad on iOS 13 detection
-			|| (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+				// iPad on iOS 13 detection
+				|| (navigator.userAgent.includes("Mac") && "ontouchend" in document)
 		}
 
 		if (isiOS()) {
@@ -61,7 +61,7 @@ export default function Chat() {
 		const setVH = (): void => {
 			let vh = (setViewportVH ? w.height || w.innerHeight : window.innerHeight) * 0.01;
 			vh = +vh.toFixed(2);
-			if(lastVH === vh) {
+			if (lastVH === vh) {
 				return;
 			}
 
@@ -83,7 +83,7 @@ export default function Chat() {
 			setViewportVH = true;
 			setVH();
 
-			if('addEventListener' in w) {
+			if ('addEventListener' in w) {
 				window.removeEventListener('resize', setVH);
 				w.addEventListener('resize', setVH);
 			}
@@ -101,24 +101,24 @@ export default function Chat() {
 		let startY: number | null = null;
 
 		const touchStartHandler = (e: TouchEvent): void => {
-		const touch: Touch = e.touches[0];
-		startY = touch.clientY;
+			const touch: Touch = e.touches[0];
+			startY = touch.clientY;
 		};
 
 		const touchMoveHandler = (e: TouchEvent): void => {
-		const touch: Touch = e.touches[0];
-		const currentY: number = touch.clientY;
+			const touch: Touch = e.touches[0];
+			const currentY: number = touch.clientY;
 
-		if (scrollContainer?.scrollTop === 0 && currentY > startY!) {
-			e.preventDefault();
-		} else if (
-			scrollContainer &&
-			scrollContainer?.scrollHeight - scrollContainer?.scrollTop ===
-			scrollContainer?.clientHeight &&
-			currentY < startY!
-		) {
-			e.preventDefault();
-		}
+			if (scrollContainer?.scrollTop === 0 && currentY > startY!) {
+				e.preventDefault();
+			} else if (
+				scrollContainer &&
+				scrollContainer?.scrollHeight - scrollContainer?.scrollTop ===
+				scrollContainer?.clientHeight &&
+				currentY < startY!
+			) {
+				e.preventDefault();
+			}
 		};
 
 		scrollContainer?.addEventListener("touchstart", touchStartHandler);
@@ -140,16 +140,16 @@ export default function Chat() {
 
 	return (
 		<MessagesProvider>
-		<div className='whole page-chats'>
-			<div className="chat tabs-tab active">
-				<MessagesList scrollRef={scrollRef} messagesEndRef={messagesEndRef} />
-				<div className='chat-input' ref={chatInputRef}>
-					<div className='chat-input-container'>
-						<MessageInput textareaRef={textareaRef} />
+			<div className='whole page-chats'>
+				<div className="chat tabs-tab active">
+					<MessagesList scrollRef={scrollRef} messagesEndRef={messagesEndRef} />
+					<div className='chat-input' ref={chatInputRef}>
+						<div className='chat-input-container'>
+							<MessageInput textareaRef={textareaRef} />
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
 		</MessagesProvider>
 	);
 }

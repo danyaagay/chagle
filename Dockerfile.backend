@@ -26,7 +26,7 @@ RUN composer install --no-dev --prefer-dist --no-scripts --no-progress --no-inte
 COPY backend .
 
 # установка прав доступа
-RUN chown -R www-data:www-data /var/www/backend/storage
+RUN chown -R www-data:www-data /var/www/backend
 
 # запуск Laravel
 CMD php artisan serve --host=0.0.0.0 --port=8000

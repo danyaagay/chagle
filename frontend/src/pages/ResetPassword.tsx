@@ -5,16 +5,13 @@ import {
 	TextInput,
 	PasswordInput,
 	Text,
-	Paper,
 	Button,
 	Stack,
-	MediaQuery,
 	Alert,
 } from '@mantine/core';
-
 import { useForm } from '@mantine/form';
-
 import FloatingLabelInput from '../components/FloatingLabelInput';
+import classes from '../css/Authentication.module.css';
 
 export interface FormValues {
 	email: string;
@@ -105,135 +102,107 @@ export default function () {
 //Начало формы
 
 	return (
-		<Paper style={{
-			width: 'auto',
-			height: '100%',
-			display: 'flex',
-    		flexDirection: 'column',
-    		justifyContent: 'space-between',
-    		minHeight: '100%',
-		}}>
-		<MediaQuery
-      		query="(min-width:600px)"
-     		styles={{ 
-				padding: '100px !important',
-			}}
-    	>
-		<Paper style={{ 
-			width: 'auto',
-			display: 'flex',
-   			justifyContent: 'center',
-    		justifyItems: 'center',
-			padding: '60px 20px',
-		}}>
-		<div className='w-[350px]'>
-		<Text    
-			variant="gradient"
-	  		gradient={{ from: 'indigo', to: '', deg: 45 }}
-	  		ta="center"
-	  		fw={700}
-			size="1.5rem" 
-			style={{
-			flex: '0 0 auto',
-		}}>
-			-+-
-		</Text>
-		  <MediaQuery
-		  		query="(min-width:600px)"
-				styles={{ 
-					fontSize: '1.7rem !important',
-				}}
-		  >
-			<Text ta="center" weight={500} style={{
-				fontSize: '1.5rem',
-				padding: '15px 0 0 0'
-			}}>
-				Сброс пароля
-			</Text>
-		  </MediaQuery>
-		  <form onSubmit={form.onSubmit(handleSubmit)}>
+		<div className={classes.main}>
+			<div className={classes.container}>
+				<div className='w-[350px]'>
+					<Text    
+						variant="gradient"
+						gradient={{ from: 'indigo', to: '', deg: 45 }}
+						ta="center"
+						fw={700}
+						size="1.5rem" 
+						style={{
+							flex: '0 0 auto',
+						}}
+					>
+						-+-
+					</Text>
 
-{token && isSended && (
-	<>
-		<Stack mt="2rem">
-			<Alert color="teal" radius="md" styles={{ message: { fontSize: '1rem' }}}>
-				Пароль обновлен, перенаправление на страницу входа..
-			</Alert>
-		</Stack>
-	</>
-)}
+					<Text ta="center" weight={500} className={classes.title}>
+						Сброс пароля
+					</Text>
 
-{token && !isSended && (
-    <>
-	  	<Stack mt="2rem">
-			<FloatingLabelInput
-				label={'Электронная почта'}
-				field='email'
-				InputType={TextInput}
-				required
-				autoComplete='email'
-				value={form.values.email}
-				onChange={(value) => form.setFieldValue('email', value)}
-				error={form.errors.email}
-			/>
-		  	<FloatingLabelInput
-				label={'Пароль'}
-				field='password'
-				InputType={PasswordInput}
-				needStrength
-				required
-				value={form.values.password}
-				onChange={(value) => form.setFieldValue('password', value)}
-				error={form.errors.password}
-		  	/>
-			<FloatingLabelInput
-			    label={'Повторите пароль'}
-			    field='password_confirmation'
-			    InputType={PasswordInput}
-				required
-				value={form.values.password_confirmation}
-				onChange={(value) => form.setFieldValue('password_confirmation', value)}
-				error={form.errors.password_confirmation}
-			/>
-		</Stack>
-		<Button loading={isLoading} type="submit" fullWidth mt="xl" size="lg" radius="md">
-			Далее
-		</Button>
-  </>
-)}
+					<form onSubmit={form.onSubmit(handleSubmit)}>
+						{token && isSended && (
+							<>
+							<Stack mt="2rem">
+								<Alert color="teal" radius="md" styles={{ message: { fontSize: '1rem' }}}>
+									Пароль обновлен, перенаправление на страницу входа..
+								</Alert>
+							</Stack>
+							</>
+						)}
 
-{!token && (
-    <>
-	    <Stack mt="2rem">
-			{isSended && (
-				<Alert color="teal" radius="md" styles={{ message: { fontSize: '1rem' }}}>
-					Ссылка для смены пароля отправлена на Вашу почту, если не можете найти письмо проверьте папку Спам
-			  	</Alert>
-			)}
-			<FloatingLabelInput
-				label={'Электронная почта'}
-				field='email'
-				InputType={TextInput}
-				required
-				autoComplete='email'
-				value={form.values.email}
-				onChange={(value) => form.setFieldValue('email', value)}
-				error={form.errors.email}
-			/>
-		</Stack>
-		<Button loading={isLoading} type="submit" fullWidth mt="xl" size="lg" radius="md">
-			Далее
-		</Button>
-  </>
-)}
+						{token && !isSended && (
+							<>
+							<Stack mt="2rem">
+								<FloatingLabelInput
+									label={'Электронная почта'}
+									field='email'
+									InputType={TextInput}
+									required
+									autoComplete='email'
+									value={form.values.email}
+									onChange={(value) => form.setFieldValue('email', value)}
+									error={form.errors.email}
+								/>
+								<FloatingLabelInput
+									label={'Пароль'}
+									field='password'
+									InputType={PasswordInput}
+									needStrength
+									required
+									value={form.values.password}
+									onChange={(value) => form.setFieldValue('password', value)}
+									error={form.errors.password}
+								/>
+								<FloatingLabelInput
+									label={'Повторите пароль'}
+									field='password_confirmation'
+									InputType={PasswordInput}
+									required
+									value={form.values.password_confirmation}
+									onChange={(value) => form.setFieldValue('password_confirmation', value)}
+									error={form.errors.password_confirmation}
+								/>
+							</Stack>
+							<Button loading={isLoading} type="submit" fullWidth mt="xl" size="lg" radius="md">
+								Далее
+							</Button>
+						</>
+						)}
 
-			<Button variant="subtle" onClick={() => navigate('/login')} fullWidth radius="md" ta="center" mt="lg" size="lg" styles={{ root: { fontWeight: 'normal' } }}>
-				Вход
-			</Button>
-		  </form>
+						{!token && (
+							<>
+							<Stack mt="2rem">
+								{isSended && (
+									<Alert color="teal" radius="md" styles={{ message: { fontSize: '1rem' }}}>
+										Ссылка для смены пароля отправлена на Вашу почту, если не можете найти письмо проверьте папку Спам
+									</Alert>
+								)}
+								<FloatingLabelInput
+									label={'Электронная почта'}
+									field='email'
+									InputType={TextInput}
+									required
+									autoComplete='email'
+									value={form.values.email}
+									onChange={(value) => form.setFieldValue('email', value)}
+									error={form.errors.email}
+								/>
+							</Stack>
+							<Button loading={isLoading} type="submit" fullWidth mt="xl" size="lg" radius="md">
+								Далее
+							</Button>
+							</>
+						)}
+
+						<Button variant="subtle" onClick={() => navigate('/login')} fullWidth radius="md" ta="center" mt="lg" size="lg" styles={{ root: { fontWeight: 'normal' } }}>
+							Вход
+						</Button>
+					</form>
+				</div>
+			</div>
 		</div>
-		</Paper>
-		</MediaQuery>
-		</Paper>
-	  );
+	);
 }

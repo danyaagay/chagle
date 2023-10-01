@@ -1,0 +1,32 @@
+.root {
+    position: relative;
+}
+
+.label {
+    position: absolute;
+    z-index: 2;
+    top: rem(10);
+    left: var(--mantine-spacing-lg);
+    pointer-events: none;
+    transform-origin: left center;
+    color: var(--mantine-color-gray-5);
+    transition: .2s transform, .2s color, .2s font-size, .2s padding, font-weight 0s .1s;
+    transform: none;
+    font-weight: 400;
+    background-color: #ffffff;
+    padding: none;
+
+    &[data-floating] {
+        transform: translate(-.4475rem, calc(50px / -2 + .0625rem)) scale(.75);
+        font-weight: 500;
+        padding: 0 5px;
+    }
+
+    &[data-focused] {
+        color: #228be6;
+    }
+
+    &[data-invalid] {
+        color: #fa5252;
+    }
+}

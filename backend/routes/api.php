@@ -24,10 +24,11 @@ use App\Models\User;
 |
 */
 
-Route::post('/register', [AuthController::class, 'register']);
+Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
+
     Route::get('/user', [AuthController::class, 'user']);
     Route::get('/dialogs', [DialogController::class, 'index']);
     Route::patch('/dialogs/{id}', [DialogController::class, 'update']);
@@ -36,6 +37,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/messages/{id?}', [MessageController::class, 'store']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/settings-update', [SettingController::class, 'update']);
+
+    Route::post('/email/verify/resend', function (Request $request) {
+        $request->user()->sendEmailVerificationNotification();
+        return response()->json(['message' => 'Verification link sent!']);
+    })->middleware(['throttle:6,1'])->name('verification.send');
+
 });
 
 Route::post('/forgot-password', function (Request $request) {

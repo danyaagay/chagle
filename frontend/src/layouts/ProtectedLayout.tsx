@@ -11,11 +11,12 @@ import { MobileTitleProvider } from '../contexts/MobileTitleContext';
 import { DialogsProvider } from '../contexts/DialogsContext';
 import MobileHeader from '../components/MobileHeader';
 import Menu from '../components/Menu';
+import classes from '../css/ProtectedLayout.module.css';
 
 
 export default function DefaultLayout() {
 	const { user, setUser } = useAuth();
-	const [ opened, setOpened ] = useState(false);
+	const [opened, setOpened] = useState(false);
 
 	const mobileScreen = useMediaQuery('(max-width: 767px)');
 
@@ -42,40 +43,45 @@ export default function DefaultLayout() {
 		return <Navigate to="/" />;
 	}
 
+	// If user is not verify email, redirect to verify page
+	if (!user.email_verified_at) {
+		return <Navigate to="/verify" />;
+	}
+
 	return (
 		<MobileTitleProvider>
-		<DialogsProvider>
-		<AppShell
-			styles={{
-				main: {
-					height: '100%',
-					minHeight: '100%',
-					paddingBottom: '0px',
-					paddingTop: '60px',
-					...(mobileScreen ? { paddingRight: '0px !important', paddingLeft: '0px !important' } : { paddingTop: '0px' }),
-				},
-				root: {
-					height: '100%',
-					minHeight: '100%',
-				},
-				body: {
-					height: '100%',
-					minHeight: '100%',
-				}
-			}}
-			layout='alt'
-			navbarOffsetBreakpoint="sm"
-			asideOffsetBreakpoint="sm"
-			navbar={
-				<Menu opened={opened} setOpened={setOpened} />
-			}
-			header={
-				<MobileHeader opened={opened} setOpened={setOpened} />
-			}
-	  	>
-			<Outlet />
-	  	</AppShell>
-		</DialogsProvider>
+			<DialogsProvider>
+				<AppShell
+					styles={{
+						main: {
+							height: '100%',
+							minHeight: '100%',
+							paddingBottom: '0px',
+							paddingTop: '60px',
+							...(mobileScreen ? { paddingRight: '0px !important', paddingLeft: '0px !important' } : { paddingTop: '0px' }),
+						},
+						root: {
+							height: '100%',
+							minHeight: '100%',
+						},
+					}}
+					layout='alt'
+					header={{ height: { base: 60, md: 70 } }}
+					navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
+				>
+					<AppShell.Header hiddenFrom="sm" className={classes.header} p="md">
+						<MobileHeader opened={opened} setOpened={setOpened} />
+					</AppShell.Header>
+
+					<AppShell.Navbar className={classes.navbar}>
+						<Menu opened={opened} setOpened={setOpened} />
+					</AppShell.Navbar>
+
+					<AppShell.Main>
+						<Outlet />
+					</AppShell.Main>
+				</AppShell>
+			</DialogsProvider>
 		</MobileTitleProvider>
 	);
 }

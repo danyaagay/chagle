@@ -12,6 +12,8 @@ use Carbon\Carbon;
 
 class MessageController extends Controller
 {
+    private $result;
+    
     public function openAi($text) {
         //return 'answer';
 
@@ -34,7 +36,6 @@ class MessageController extends Controller
         ];
 
         $ch = curl_init();
-
         curl_setopt_array($ch, array(
             CURLOPT_URL => 'https://api.openai.com/v1/chat/completions',
             CURLOPT_RETURNTRANSFER => true,
@@ -46,49 +47,36 @@ class MessageController extends Controller
             ]
         ));
 
-        $answer = '11';
-        $obj = $this;
         $this->result = '';
-        $callback = function ($ch, $data) use ($obj) {
+        $callback = function ($ch, $data) {
             $lines = explode("\n\n", $data);
-            $lines = array_diff($lines, array(null));
+            $lines = array_filter($lines);
             $parsedLines = array_map(function ($line) {
                 return json_decode(trim(str_replace('data: ', '', $line)), true);
             }, $lines);
-            
+        
             foreach ($parsedLines as $parsedLine) {
-                @$choices = $parsedLine['choices'];
-                @$delta = $choices[0]['delta'];
-                @$content = $delta['content'];
-                
+                $choices = $parsedLine['choices'] ?? null;
+                $delta = $choices[0]['delta'] ?? null;
+                $content = $delta['content'] ?? null;
+        
                 if ($content) {
-                    $obj->result .= $content;
-
-                    $json = [];
-                    $json['message'] = $obj->result;
-                    $json = json_encode($json);
-                    
-                    echo $json."\n";
+                    $this->result .= $content;
+        
+                    $json = [
+                        'message' => $this->result
+                    ];
+        
+                    echo json_encode($json) . PHP_EOL;
                 }
             }
-            
-            //if (strlen($data) > 5) {
-            //    echo $data;
-            //}
+        
             return strlen($data);
         };
-
+        
         curl_setopt($ch, CURLOPT_WRITEFUNCTION, $callback);
-    
         curl_exec($ch);
         return $this->result;
-        //$response = json_decode($response);
-    
-        //if (!isset($response->error)) {
-        //    return $response->choices[0]->message->content;
-        //} else {
-        //    return $response->error->message;
-        //}
     }
 
     public function getAllMessages($dialog) {
@@ -164,7 +152,7 @@ class MessageController extends Controller
             $dialog = $user->dialogs()->where('id', $id)->first();
             if (!$dialog) {
                 return response()->json([
-                    'error' => 'Unknown error',
+                    'error' => 'Unknown error 1',
                 ]);
             }
             $message = $dialog->messages()->create([
@@ -207,7 +195,7 @@ class MessageController extends Controller
             ]);
         } else {
             return response()->json([
-                'error' => 'Unknown error',
+                'error' => 'Unknown error 2',
             ], 400);
         }
     }

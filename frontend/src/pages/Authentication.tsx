@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import {  Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import axios from '../axios';
 import { AxiosError } from 'axios';
 import { useAuth } from '../contexts/AuthContext';
@@ -7,16 +7,14 @@ import {
 	TextInput,
 	PasswordInput,
 	Text,
-	Paper,
 	Button,
 	Stack,
-	MediaQuery,
 	Stepper,
 	Anchor,
 } from '@mantine/core';
-
 import { useForm } from '@mantine/form';
 import FloatingLabelInput from '../components/FloatingLabelInput';
+import classes from '../css/Authentication.module.css';
 
 export interface FormValues {
 	email: string;
@@ -36,18 +34,28 @@ export default function () {
 
 	useEffect(() => {
 		document.title = defaultType === 'signup'
-		? 'Регистрация'
-		: 'Вход';
+			? 'Регистрация'
+			: 'Вход';
 	}, []);
 
 	const handleSubmit = async () => {
 		setIsLoading(true);
-		await csrfToken();
+
+		if (type === 'login') {
+			await csrfToken();
+		}
+
 		try {
 			const resp = await axios.post(`/${type}`, form.values);
 			if (resp.status === 200) {
 				setUser(resp.data.user);
-				return <Navigate to="/profile"/>;
+
+				// If user is not verify email, redirect to verify page
+				if (!resp.data.user.email_verified_at) {
+					return <Navigate to="/verify" />;
+				}
+
+				return <Navigate to="/chat" />;
 			}
 			setIsLoading(false);
 		} catch (error: unknown) {
@@ -96,9 +104,9 @@ export default function () {
 			email: '',
 			name: '',
 			password: '',
-		 	password_confirmation: '',
+			password_confirmation: '',
 		},
-	
+
 		validate: (values) => {
 			if (type === 'signup') {
 				if (active === 0) {
@@ -115,183 +123,156 @@ export default function () {
 			} else {
 				return {
 					email: (/^\S+@\S+$/.test(values.email) ? null : 'Неверный адрес электронной почты.'),
-					password: (values.password.length <= 6 ? 'Пароль должен содержать минимум 6 символов.' : null),	
+					password: (values.password.length <= 6 ? 'Пароль должен содержать минимум 6 символов.' : null),
 				}
 			}
 		},
 	});
 
-//Начало Шаги формы регистрации
+	//Начало Шаги формы регистрации
 
 	const [active, setActive] = useState(0);
 	const nextStep = () =>
-    setActive((current) => {
-      if (form.validate().hasErrors) {
-        return current;
-      }
-      return current < 2 ? current + 1 : current;
-    });
+		setActive((current) => {
+			if (form.validate().hasErrors) {
+				return current;
+			}
+			return current < 2 ? current + 1 : current;
+		});
 	const prevStep = () => setActive((current) => (current > 0 ? current - 1 : current));
 
 	return (
-		<Paper style={{
-			width: 'auto',
-			height: '100%',
-			display: 'flex',
-    		flexDirection: 'column',
-    		justifyContent: 'space-between',
-    		minHeight: '100%',
-		}}>
-		<MediaQuery
-      		query="(min-width:600px)"
-     		styles={{ 
-				padding: '100px !important',
-			}}
-    	>
-		<Paper style={{ 
-			width: 'auto',
-			display: 'flex',
-   			justifyContent: 'center',
-    		justifyItems: 'center',
-			padding: '60px 20px',
-		}}>
-		<div className='w-[350px]'>
-		<Text    
-			variant="gradient"
-	  		gradient={{ from: 'indigo', to: '', deg: 45 }}
-	  		ta="center"
-	  		fw={700}
-			size="1.5rem" 
-			style={{
-			flex: '0 0 auto',
-		}}>
-			-+-
-		</Text>
-		  <MediaQuery
-		  		query="(min-width:600px)"
-				styles={{ 
-					fontSize: '1.7rem !important',
-				}}
-		  >
-			<Text ta="center" weight={500} style={{
-				fontSize: '1.5rem',
-				padding: '15px 0 0 0'
-			}}>
-				{type === 'signup' ?
-					'Регистрация в Луми' :
-					'Вход в Луми'}
-			</Text>
-		  </MediaQuery>
-		  <form onSubmit={form.onSubmit(handleSubmit)}>
-			  {type === 'signup' && (
-    <>
-	<Stepper active={active} styles={{ steps: { display: 'none' }, content: { padding: '0' } }}>
-	  <Stepper.Step>
-	    <Stack mt="2rem">
-	  		<FloatingLabelInput
-				autoComplete='name'
-				label={'Имя'}
-				field='name'
-				InputType={TextInput}
-				value={form.values.name}
-				onChange={(value) => form.setFieldValue('name', value)}
-				error={form.errors.name}
-			/>
-			<FloatingLabelInput
-				autoComplete='email'
-				label={'Электронная почта'}
-				field='email'
-				InputType={TextInput}
-				required
-				value={form.values.email}
-				onChange={(value) => form.setFieldValue('email', value)}
-				error={form.errors.email}
-			/>
-		</Stack>
-	  </Stepper.Step>
+		<div className={classes.main}>
+			<div className={classes.container}>
+				<div className='w-[350px]'>
+					<Text
+						variant="gradient"
+						gradient={{ from: 'indigo', to: '', deg: 45 }}
+						ta="center"
+						fw={700}
+						size="1.5rem"
+						style={{
+							flex: '0 0 auto',
+						}}
+					>
+						-+-
+					</Text>
 
-	  <Stepper.Step>
-	  	<Stack mt="2rem">
-		  	<FloatingLabelInput
-				label={'Пароль'}
-				field='password'
-				InputType={PasswordInput}
-				needStrength
-				required
-				value={form.values.password}
-				onChange={(value) => form.setFieldValue('password', value)}
-				error={form.errors.password}
-		  	/>
-			<FloatingLabelInput
-			    label={'Повторите пароль'}
-			    field='password_confirmation'
-			    InputType={PasswordInput}
-				required
-				value={form.values.password_confirmation}
-				onChange={(value) => form.setFieldValue('password_confirmation', value)}
-				error={form.errors.password_confirmation}
-			/>
-		</Stack>
-	  </Stepper.Step>
-	</Stepper>
+					<Text className={classes.title} ta="center" weight={500}>
+						{type === 'signup' ?
+							'Регистрация в Луми' :
+							'Вход в Луми'}
+					</Text>
 
-	<Stack>
-	  {active !== 0 && (
-		<Stack spacing="xs">
-			<Button loading={isLoading} type="submit" fullWidth mt="xl" size="lg" radius="md">
-				Зарегистрироваться
-			</Button>
-			<Button variant="light" color="gray" fullWidth size="lg" radius="md" styles={{ root: { fontWeight: 'normal' } }} onClick={prevStep}>
-		  	Назад
-			</Button>
-		</Stack>
-	  )}
-	  {active !== 1 && <Button fullWidth mt="xl" size="lg" radius="md" onClick={nextStep}>Далее</Button>}
-	</Stack>
-  </>
-			  )}
+					<form onSubmit={form.onSubmit(handleSubmit)}>
+						{type === 'signup' && (
+							<>
+								<Stepper active={active} classNames={{ content: classes.stepperContend, steps: classes.stepperSteps }}>
+									<Stepper.Step>
+										<Stack mt="2rem">
+											<FloatingLabelInput
+												autoComplete='name'
+												label={'Имя'}
+												field='name'
+												InputType={TextInput}
+												value={form.values.name}
+												onChange={(value) => form.setFieldValue('name', value)}
+												error={form.errors.name}
+											/>
+											<FloatingLabelInput
+												autoComplete='email'
+												label={'Электронная почта'}
+												field='email'
+												InputType={TextInput}
+												required
+												value={form.values.email}
+												onChange={(value) => form.setFieldValue('email', value)}
+												error={form.errors.email}
+											/>
+										</Stack>
+									</Stepper.Step>
 
-{type !== 'signup' && (
-    <>
-	    <Stack mt="2rem">
-			<FloatingLabelInput
-				label={'Электронная почта'}
-				field='email'
-				InputType={TextInput}
-				required
-				autoComplete='username'
-				value={form.values.email}
-				onChange={(value) => form.setFieldValue('email', value)}
-				error={form.errors.email}
-			/>
-	  		<FloatingLabelInput
-				label={'Пароль'}
-				field='password'
-				InputType={PasswordInput}
-				required
-				value={form.values.password}
-				onChange={(value) => form.setFieldValue('password', value)}
-				error={form.errors.password}
-			/>
-          <Anchor component="button" size="md" onClick={() => navigate('/reset-password')} ta="left">
-		  Забыли пароль?
-          </Anchor>
-		</Stack>
-		<Button loading={isLoading} type="submit" fullWidth mt="xl" size="lg" radius="md">
-			Войти
-		</Button>
-  </>
-			  )}
+									<Stepper.Step>
+										<Stack mt="2rem">
+											<FloatingLabelInput
+												label={'Пароль'}
+												field='password'
+												InputType={PasswordInput}
+												needStrength
+												required
+												value={form.values.password}
+												onChange={(value) => form.setFieldValue('password', value)}
+												error={form.errors.password}
+											/>
+											<FloatingLabelInput
+												label={'Повторите пароль'}
+												field='password_confirmation'
+												InputType={PasswordInput}
+												required
+												value={form.values.password_confirmation}
+												onChange={(value) => form.setFieldValue('password_confirmation', value)}
+												error={form.errors.password_confirmation}
+											/>
+										</Stack>
+									</Stepper.Step>
+								</Stepper>
 
-			<Button variant="subtle" onClick={() => toggleType()} fullWidth radius="md" ta="center" mt="lg" size="lg" styles={{ root: { fontWeight: 'normal' } }}>
-				{type === 'signup' ?
-					'Вход' :
-					'Регистрация'}
-			</Button>
-		  </form>
+								<Stack>
+									{active !== 0 && (
+										<Stack spacing="xs">
+											<Button loading={isLoading} type="submit" fullWidth mt="xl" size="lg" radius="md">
+												Зарегистрироваться
+											</Button>
+											<Button variant="light" color="gray" fullWidth size="lg" radius="md" styles={{ root: { fontWeight: 'normal' } }} onClick={prevStep}>
+												Назад
+											</Button>
+										</Stack>
+									)}
+									{active !== 1 && <Button fullWidth mt="xl" size="lg" radius="md" onClick={nextStep}>Далее</Button>}
+								</Stack>
+							</>
+						)}
+
+						{type !== 'signup' && (
+							<>
+								<Stack mt="2rem">
+									<FloatingLabelInput
+										label={'Электронная почта'}
+										field='email'
+										InputType={TextInput}
+										required
+										autoComplete='username'
+										value={form.values.email}
+										onChange={(value) => form.setFieldValue('email', value)}
+										error={form.errors.email}
+									/>
+									<FloatingLabelInput
+										label={'Пароль'}
+										field='password'
+										InputType={PasswordInput}
+										required
+										value={form.values.password}
+										onChange={(value) => form.setFieldValue('password', value)}
+										error={form.errors.password}
+									/>
+									<Anchor component="button" size="md" onClick={() => navigate('/reset-password')} ta="left">
+										Забыли пароль?
+									</Anchor>
+								</Stack>
+								<Button loading={isLoading} type="submit" fullWidth mt="xl" size="lg" radius="md">
+									Войти
+								</Button>
+							</>
+						)}
+
+						<Button variant="subtle" onClick={() => toggleType()} fullWidth radius="md" ta="center" mt="lg" size="lg" styles={{ root: { fontWeight: 'normal' } }}>
+							{type === 'signup' ?
+								'Вход' :
+								'Регистрация'}
+						</Button>
+					</form>
+				</div>
+			</div>
 		</div>
-		</Paper>
-		</MediaQuery>
-		</Paper>
-	  );
+	);
 }

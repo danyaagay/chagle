@@ -1,10 +1,10 @@
 import { useContext } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Dialog from '../components/Dialog';
 import DialogsContext from '../contexts/DialogsContext';
 import MobileTitleContext from '../contexts/MobileTitleContext';
 
-const DialogsList = ({ opened, setOpened }: { opened: boolean, setOpened: React.Dispatch<React.SetStateAction<boolean>> }) => {
+const DialogsList = ({ setOpened }: { opened: boolean, setOpened: React.Dispatch<React.SetStateAction<boolean>> }) => {
 	const { dialogs, active } = useContext(DialogsContext);
 	const { setMobileTitle } = useContext(MobileTitleContext);
 	const navigate = useNavigate();

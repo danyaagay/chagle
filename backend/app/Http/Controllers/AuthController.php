@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Auth\Events\Registered;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
-    // register a new user method
-    public function register(RegisterRequest $request) {
-
+    // signup a new user method
+    public function signup(RegisterRequest $request)
+    {
         $data = $request->validated();
 
         $user = User::create([
@@ -22,9 +25,11 @@ class AuthController extends Controller
             'password' => Hash::make($data['password']),
         ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        event(new Registered($user));
 
-        $cookie = cookie('token', $token, 60 * 24); // 1 day
+        $token = $user->createToken('auth_token', ['*'], Carbon::now()->addDay(2))->plainTextToken;
+
+        $cookie = cookie('token', $token, 60 * 24 * 365); // one year
 
         return response()->json([
             'user' => new UserResource($user),
@@ -32,28 +37,31 @@ class AuthController extends Controller
     }
 
     // login a user method
-    public function login(LoginRequest $request) {
+    public function login(LoginRequest $request)
+    {
         $data = $request->validated();
 
-        $user = User::where('email', $data['email'])->first();
+        if (Auth::attempt($data)) {
+            /** @var \App\Models\User $user **/
+            $user = Auth::user();
 
-        if (!$user || !Hash::check($data['password'], $user->password)) {
+            $token = $user->createToken('auth_token', ['*'], Carbon::now()->addDay(2))->plainTextToken;
+
+            $cookie = cookie('token', $token, 60 * 24 * 365); // one year
+    
             return response()->json([
-                'message' => 'Email or password is incorrect!'
-            ], 401);
+                'user' => new UserResource($user),
+            ])->withCookie($cookie);
         }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        $cookie = cookie('token', $token, 60 * 24); // 1 day
-
         return response()->json([
-            'user' => new UserResource($user),
-        ])->withCookie($cookie);
+            'message' => 'Email или пароль указан неверно'
+        ], 401);
     }
 
     // logout a user method
-    public function logout(Request $request) {
+    public function logout(Request $request)
+    {
         $request->user()->currentAccessToken()->delete();
 
         $cookie = cookie()->forget('token');
@@ -64,7 +72,17 @@ class AuthController extends Controller
     }
 
     // get the authenticated user method
-    public function user(Request $request) {
-        return new UserResource($request->user());
+    public function user(Request $request)
+    {
+        $user = $request->user();
+    
+        if( $user ):            
+            $token = $user->currentAccessToken();
+            $token->forceFill([
+                'expires_at' => Carbon::now()->addDay(2)
+            ])->save();
+        endif;
+
+        return new UserResource($user);
     }
 }

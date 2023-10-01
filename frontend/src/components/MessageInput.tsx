@@ -3,30 +3,18 @@ import {
 	IconSend
 } from '@tabler/icons-react';
 import {
-	createStyles,
 	Textarea,
 	Group,
 	ActionIcon,
 	Card,
 } from '@mantine/core';
 import { useParams } from 'react-router-dom';
-import axios from '../axios';
 import { AxiosError } from 'axios';
 import DialogsContext from '../contexts/DialogsContext';
 import MessagesContext from '../contexts/MessagesContext';
-
-const useStyles = createStyles((theme) => ({
-	linkIcon: {
-		width: '28px',
-		height: '28px',
-		transform: 'rotate(40deg)',
-		color: theme.colorScheme === 'dark' ? theme.colors.dark[2] : theme.colors.gray[6],
-	}
-}));
+import classes from '../css/MessageInput.module.css';
 
 export default function MessageInput({ textareaRef }: { textareaRef: React.RefObject<HTMLTextAreaElement> }) {
-	const { classes } = useStyles();
-
 	const [isLoading, setIsLoading] = useState(false);
 
 	const { dispatchDialogs, setActive } = useContext(DialogsContext);
@@ -68,7 +56,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 				const requestBody = { text };
 
-				const url = 'http://192.168.0.116:8000/api/messages/' + id;
+				const url = 'http://192.168.0.116:8000/api/messages/' + (id ? id : '');
 
 				try {
 					const response = await fetch(url, {
@@ -171,31 +159,22 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 	return (
 		<Card shadow="0" padding="0" radius="lg" withBorder style={{ width: '100%' }}>
-			<Group position="right" p="xs" style={{ padding: '5px 20px 5px 20px', alignItems: 'end' }}>
+			<Group justify="right" p="xs" style={{ padding: '5px 20px 5px 20px', alignItems: 'end' }}>
 				<Textarea
 					ref={textareaRef}
-					sx={{ flexGrow: 1 }}
 					placeholder="Сообщение"
 					autosize
 					minRows={1}
 					maxRows={6}
 					size="lg"
-					styles={{
-						input: {
-							padding: '8px 9px 9px 9px !important',
-							scrollbarWidth: "none",
-							msOverflowStyle: "none",
-							'&::-webkit-scrollbar': { width: ' 0 !important' },
-							fontSize: '1rem',
-						}
-					}}
+					classNames={{ input: classes.input, root: classes.root }}
 					variant="unstyled"
 				/>
 				<ActionIcon
 					onClick={handleSend}
-					variant="hover"
+					variant="transparent"
 					size="lg"
-					style={{ margin: '5px' }}
+					className={classes.send}
 				>
 					<IconSend stroke={1.5} className={classes.linkIcon} />
 				</ActionIcon>
