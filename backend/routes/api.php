@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\DialogController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\StreamsController;
 
 use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
@@ -27,6 +28,8 @@ use App\Models\User;
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/login', [AuthController::class, 'login']);
 
+//Route::get('/stream', [StreamsController::class, 'stream']);
+
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/user', [AuthController::class, 'user']);
@@ -35,13 +38,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/dialogs/{id}', [DialogController::class, 'destroy']);
     Route::get('/messages/{id}', [MessageController::class, 'index']);
     Route::post('/messages/{id?}', [MessageController::class, 'store']);
+    Route::post('/messages-cancel', [MessageController::class, 'cancel']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/settings-update', [SettingController::class, 'update']);
 
     Route::post('/email/verify/resend', function (Request $request) {
         $request->user()->sendEmailVerificationNotification();
         return response()->json(['message' => 'Verification link sent!']);
-    })->middleware(['throttle:6,1'])->name('verification.send');
+    })->middleware(['throttle:1,1'])->name('verification.send');
 
 });
 

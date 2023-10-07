@@ -5,12 +5,10 @@ import { AxiosError } from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import {
 	Text,
-	Paper,
 	Button,
 	Stack,
 	Stepper,
 } from '@mantine/core';
-import { IconPhoto } from '@tabler/icons-react';
 import classes from '../css/Authentication.module.css';
 
 export interface FormValues {
@@ -26,7 +24,8 @@ export default function () {
 	const [active, setActive] = useState(0);
 	const { user, setUser, csrfToken } = useAuth();
 	const [isLoading, setIsLoading] = useState(false);
-
+	const [remainingTime, setRemainingTime] = useState(0);
+	const [isButtonDisabled, setIsButtonDisabled] = useState(false);
     let status = useParams().status ? useParams().status : '';
 
 	useEffect(() => {
@@ -113,11 +112,25 @@ export default function () {
 				}
 			}
 		}
+
+		setIsButtonDisabled(true);
+
+		// Запускаем таймер, который каждую секунду обновляет оставшееся время
+		const timer = setInterval(() => {
+			setRemainingTime((prevTime) => prevTime + 1000);
+		}, 1000);
+
+		setTimeout(() => {
+			clearInterval(timer);
+			setIsButtonDisabled(false);
+			setRemainingTime(0);
+			setIsLoading(false);
+		}, 60000);
 	};
 
 	return (
-		<Paper className={classes.main}>
-			<Paper className={classes.container}>
+		<div className={classes.main}>
+			<div className={classes.container}>
 				<div className='w-[350px]'>
 					<Text    
 						variant="gradient"
@@ -132,7 +145,7 @@ export default function () {
 						-+-
 					</Text>
 
-					<Text ta="center" weight={500} className={classes.title}>
+					<Text ta="center" fw={500} className={classes.title}>
 						{status ? 'Почта подтверждена' : 'Проверьте почту'}
 					</Text>
 
@@ -163,7 +176,7 @@ export default function () {
 						<Stack>
 						{active === 0 && (
 							<>
-							<Button leftSection={<IconPhoto size={14} />} fullWidth mt="xl" size="lg" radius="md" onClick={handleSubmit}>Отправить повторно</Button>
+							<Button loading={isLoading} disabled={isButtonDisabled} rightSection={<Text size="sm">{isButtonDisabled ? `${Math.floor((60000 - remainingTime) / 1000)} сек.` : ''}</Text>} fullWidth mt="xl" size="lg" radius="md" onClick={handleSubmit}>Отправить повторно</Button>
 							{/*
 										<Stack spacing="xs">
 											<Button fullWidth mt="xl" size="lg" radius="md" onClick={() => {
@@ -183,7 +196,7 @@ export default function () {
 						</>
 					)}
 				</div>
-			</Paper>
-		</Paper>
+			</div>
+		</div>
 	);
 }

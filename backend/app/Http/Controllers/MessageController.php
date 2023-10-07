@@ -3,24 +3,23 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Requests\SettingRequest;
-use App\Http\Resources\UserResource;
-use App\Models\Dialog;
-use App\Models\Message;
-use App\Http\Requests\SettingUpdatePasswordRequest;
+use Illuminate\Support\Facades\Redis;
+use App\Http\Controllers\StreamsController;
 use Carbon\Carbon;
 
 class MessageController extends Controller
 {
     private $result;
-    
-    public function openAi($text) {
+
+    public function openAi($text)
+    {
         //return 'answer';
 
+        ignore_user_abort(true);
         header('Access-Control-Allow-Origin: http://192.168.0.116:5173');
         header('Access-Control-Allow-Credentials: true');
         header('Access-Control-Allow-Headers: *');
-        
+
         $tokens = [
             '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',
             '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'
@@ -49,37 +48,61 @@ class MessageController extends Controller
 
         $this->result = '';
         $callback = function ($ch, $data) {
+            echo PHP_EOL;
+            if (connection_aborted()) {
+                return false;
+            }
+
             $lines = explode("\n\n", $data);
             $lines = array_filter($lines);
             $parsedLines = array_map(function ($line) {
                 return json_decode(trim(str_replace('data: ', '', $line)), true);
             }, $lines);
-        
+
             foreach ($parsedLines as $parsedLine) {
+                echo PHP_EOL;
+                flush();
+                if (connection_aborted()) {
+                    return false;
+                }
+
                 $choices = $parsedLine['choices'] ?? null;
                 $delta = $choices[0]['delta'] ?? null;
                 $content = $delta['content'] ?? null;
-        
+
                 if ($content) {
                     $this->result .= $content;
-        
+
                     $json = [
                         'message' => $this->result
                     ];
-        
+
+                    echo PHP_EOL;
+                    flush();
+                    if (connection_aborted()) {
+                        return false;
+                    }
+
                     echo json_encode($json) . PHP_EOL;
                 }
             }
-        
+
+            echo PHP_EOL;
+            flush();
+            if (connection_aborted()) {
+                return false;
+            }
+
             return strlen($data);
         };
-        
+
         curl_setopt($ch, CURLOPT_WRITEFUNCTION, $callback);
         curl_exec($ch);
         return $this->result;
     }
 
-    public function getAllMessages($dialog) {
+    public function getAllMessages($dialog)
+    {
         $messages = $dialog->messages;
 
         $formattedMessages = [];
@@ -124,7 +147,7 @@ class MessageController extends Controller
 
         return $formattedMessages;
     }
-    
+
     public function index(Request $request, $id)
     {
         $user = $request->user();
@@ -149,28 +172,29 @@ class MessageController extends Controller
         $user = $request->user();
 
         if ($id) {
-            $dialog = $user->dialogs()->where('id', $id)->first();
-            if (!$dialog) {
-                return response()->json([
-                    'error' => 'Unknown error 1',
+            return response()->stream(function () use ($user, $request, $id) {
+                $dialog = $user->dialogs()->find($id);
+
+                if (!$dialog) {
+                    return response()->json([
+                        'error' => 'Unknown error 1',
+                    ]);
+                }
+
+                $message = $dialog->messages()->create([
+                    'text' => $request->text,
+                    'role' => 'user',
                 ]);
-            }
-            $message = $dialog->messages()->create([
-                'text' => $request->text,
-                'role' => 'user',
-            ]);
 
-            $answer = $this->openAi($request->text);
+                $stream = new StreamsController;
+                $stream->stream($request->text, $dialog);
 
-            $answer = $dialog->messages()->create([
-                'text' => $answer,
-                'role' => 'assistant',
-            ]);
-            
-            //$messages = $this->getAllMessages($dialog);
-            return response()->json([
-                'message' => $message,
-                'answer' => $answer,
+                echo 'data: {"messageId":"' . $message->id . '"}';
+                echo "\n\n";
+            }, 200, [
+                'Cache-Control' => 'no-cache',
+                'X-Accel-Buffering' => 'no',
+                'Content-Type' => 'text/event-stream',
             ]);
         } elseif (!$id) {
             $dialog = $user->dialogs()->create([
@@ -198,5 +222,11 @@ class MessageController extends Controller
                 'error' => 'Unknown error 2',
             ], 400);
         }
+    }
+
+    public function cancel(Request $request)
+    {
+        Redis::del($request->id);
+        return true;
     }
 }

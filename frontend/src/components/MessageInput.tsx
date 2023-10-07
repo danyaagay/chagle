@@ -16,17 +16,17 @@ import classes from '../css/MessageInput.module.css';
 
 export default function MessageInput({ textareaRef }: { textareaRef: React.RefObject<HTMLTextAreaElement> }) {
 	const [isLoading, setIsLoading] = useState(false);
-
 	const { dispatchDialogs, setActive } = useContext(DialogsContext);
 	const { messages, dispatch } = useContext(MessagesContext);
-
 	const { id } = useParams();
+	const [tempId, setTempId] = useState('');
+	const [abortController, setAbortController] = useState(new AbortController() || null);
 
 	// Handle send message
 	const handleSend = async () => {
 		if (!isLoading && textareaRef.current) {
 			try {
-				setIsLoading(true);
+				//setIsLoading(true);
 
 				const text = textareaRef.current.value;
 
@@ -41,7 +41,6 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 						you: true,
 					}
 				});
-
 
 				dispatch({
 					type: 'add',
@@ -58,15 +57,24 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 				const url = 'http://192.168.0.116:8000/api/messages/' + (id ? id : '');
 
+				const controller = new AbortController();
+				setAbortController(controller);
+
+				//const eventSource = new EventSource('http://192.168.0.116:8000/api/stream');
+
+				//eventSource.onmessage = (e) => {
+				//	console.log(e.data);
+				//};
+
 				try {
 					const response = await fetch(url, {
 						method: "POST",
 						body: JSON.stringify(requestBody),
 						headers: {
-							"Content-Type": "application/json",
-							"Accept": "application/json",
+							'Content-Type': 'application/json'
 						},
 						credentials: "include",
+						signal: controller.signal,
 					});
 
 					if (!response.body) {
@@ -77,7 +85,8 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 					// Read the response as a stream of data
 					const reader = response.body.getReader();
 					const decoder = new TextDecoder("utf-8");
-					let nowChunk = '';
+					
+					let answer = '';
 
 					while (true) {
 						const { done, value } = await reader.read();
@@ -89,65 +98,70 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 						console.log(chunk);
 
-						const lines = chunk.split("\n");
+						const lines = chunk.split("\n\n");
 
 						console.log(lines);
 
 						const parsedLines = lines
-							.map((line) => line.trim())
-							.filter((line) => line !== "") // Remove empty lines and "[DONE]"
+							.map((line) => line.replace(/^data: /, "").trim()) // Remove the "data: " prefix
+							.filter((line) => line !== "" && line !== "ping") // Remove empty lines and "[DONE]"
 							.map((line) => JSON.parse(line)); // Parse the JSON string
 
 						console.log(parsedLines);
 
 						for (const parsedLine of parsedLines) {
 							console.log(parsedLine);
-							const { message, answer, dialog } = parsedLine;
+							const { message, answerId, messageId, dialog } = parsedLine;
+							
+							console.log(answer, message);
+
+							console.log(answerId, messageId);
 							// Update the UI with the new content
-							if (answer) {
-								nowChunk = nowChunk + message;
+							if (message) {
+								answer += message;
+								
+								dispatch({
+									type: 'change',
+									id: -2,
+									message: {
+										text: answer
+									}
+								});
+							} else if (messageId) {
+								dispatch({
+									type: 'change',
+									id: -2,
+									message: {
+										id: messageId,
+									}
+								});
+								console.log('change message');
+							} else if (answerId) {
+								console.log('here');
 								dispatch({
 									type: 'change',
 									id: -1,
 									message: {
-										id: message.id,
+										id: answerId,
 									}
 								});
-
-								dispatch({
-									type: 'change',
-									id: -2,
-									message: {
-										id: answer.id,
-									}
+								console.log('change answer');
+							} else if (dialog) {
+								dispatchDialogs({
+									type: 'add',
+									title: dialog.title,
+									id: dialog.id
 								});
-
-								if (dialog) {
-									dispatchDialogs({
-										type: 'add',
-										title: dialog.title,
-										id: dialog.id
-									});
-									setActive(dialog.id);
-									window.history.replaceState(null, dialog.title, '/chat/' + dialog.id);
-								}
-
-								setIsLoading(false);
-							} else if (message) {
-								dispatch({
-									type: 'change',
-									id: -2,
-									message: {
-										text: message
-									}
-								});
+								setActive(dialog.id);
+								window.history.replaceState(null, dialog.title, '/chat/' + dialog.id);
 							}
 						}
 					}
 				} catch (error) {
 					console.error(error);
-					setIsLoading(false);
 				}
+
+				//setIsLoading(false);
 			} catch (error: unknown) {
 				if (error instanceof AxiosError && error.response) {
 					// Delete error
@@ -156,8 +170,15 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 		}
 	};
 
+	const handleStop = () => {
+		abortController.abort();
+	};
 
 	return (
+		<>
+		<ActionIcon className={classes.link} onClick={handleStop}>
+			  <span>Остановить</span>
+		</ActionIcon>
 		<Card shadow="0" padding="0" radius="lg" withBorder style={{ width: '100%' }}>
 			<Group justify="right" p="xs" style={{ padding: '5px 20px 5px 20px', alignItems: 'end' }}>
 				<Textarea
@@ -180,5 +201,6 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 				</ActionIcon>
 			</Group>
 		</Card>
+		</>
 	);
 }

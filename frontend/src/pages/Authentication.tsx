@@ -158,7 +158,7 @@ export default function () {
 						-+-
 					</Text>
 
-					<Text className={classes.title} ta="center" weight={500}>
+					<Text className={classes.title} ta="center" fw={500}>
 						{type === 'signup' ?
 							'Регистрация в Луми' :
 							'Вход в Луми'}
@@ -219,11 +219,11 @@ export default function () {
 
 								<Stack>
 									{active !== 0 && (
-										<Stack spacing="xs">
+										<Stack gap="xs">
 											<Button loading={isLoading} type="submit" fullWidth mt="xl" size="lg" radius="md">
 												Зарегистрироваться
 											</Button>
-											<Button variant="light" color="gray" fullWidth size="lg" radius="md" styles={{ root: { fontWeight: 'normal' } }} onClick={prevStep}>
+											<Button variant="light" color="gray" fullWidth size="lg" radius="md" fw={500} onClick={prevStep}>
 												Назад
 											</Button>
 										</Stack>
