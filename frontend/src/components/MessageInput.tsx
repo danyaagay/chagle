@@ -15,11 +15,11 @@ import MessagesContext from '../contexts/MessagesContext';
 import classes from '../css/MessageInput.module.css';
 
 export default function MessageInput({ textareaRef }: { textareaRef: React.RefObject<HTMLTextAreaElement> }) {
-	const [isLoading, setIsLoading] = useState(false);
+	const [isLoading] = useState(false);
 	const { dispatchDialogs, setActive } = useContext(DialogsContext);
 	const { messages, dispatch } = useContext(MessagesContext);
 	const { id } = useParams();
-	const [tempId, setTempId] = useState('');
+	//const [tempId, setTempId] = useState('');
 	const [abortController, setAbortController] = useState(new AbortController() || null);
 
 	// Handle send message

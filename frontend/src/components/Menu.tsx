@@ -4,7 +4,6 @@ import {
     Burger,
     useMantineTheme,
     Button,
-    UnstyledButton,
 } from '@mantine/core';
 import {
     IconSettings,

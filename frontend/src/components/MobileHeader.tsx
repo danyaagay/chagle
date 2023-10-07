@@ -3,7 +3,6 @@ import {
     Text,
     Burger,
     useMantineTheme,
-    AppShell,
 } from '@mantine/core';
 import { useMobileTitle } from '../contexts/MobileTitleContext';
 import classes from '../css/MobileHeader.module.css';

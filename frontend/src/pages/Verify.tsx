@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import {  Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
+import {  Navigate, useParams } from 'react-router-dom';
 import axios from '../axios';
 import { AxiosError } from 'axios';
 import { useAuth } from '../contexts/AuthContext';
@@ -21,7 +21,7 @@ export interface FormValues {
 //Сам компонент
 
 export default function () {
-	const [active, setActive] = useState(0);
+	const [active] = useState(0);
 	const { user, setUser, csrfToken } = useAuth();
 	const [isLoading, setIsLoading] = useState(false);
 	const [remainingTime, setRemainingTime] = useState(0);

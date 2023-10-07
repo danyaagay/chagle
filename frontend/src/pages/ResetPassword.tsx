@@ -118,7 +118,7 @@ export default function () {
 						-+-
 					</Text>
 
-					<Text ta="center" weight={500} className={classes.title}>
+					<Text ta="center" className={classes.title}>
 						Сброс пароля
 					</Text>
 

@@ -46,7 +46,6 @@ function FloatingLabelInput({
 			.fill(0)
 			.map((_, index) => (
 				<Progress
-					styles={{ bar: { transitionDuration: '0ms' } }}
 					value={
 						value.length > 0 && index === 0 ? 100 : strength >= ((index + 1) / 4) * 100 ? 100 : 0
 					}
@@ -81,7 +80,7 @@ function FloatingLabelInput({
 			/>
 			{(needStrength && (value || focused)) && (
 				<>
-					<Group spacing={5} grow mt="xs" mb="md">
+					<Group gap={5} grow mt="xs" mb="md">
 						{bars}
 					</Group>
 					<PasswordRequirement label="Содержит минимум 6 символов" meets={value.length > 5} />
