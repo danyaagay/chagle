@@ -1,0 +1,33 @@
+# базовый образ для PHP с поддержкой Laravel
+FROM php:8.2-fpm
+
+# установка необходимых пакетов
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    libzip-dev \
+    libonig-dev \
+    libpq-dev \
+    && docker-php-ext-install pdo_mysql zip mbstring
+
+# установка Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# добавление расширений PHP
+RUN pecl install redis && docker-php-ext-enable redis
+
+# установка Laravel
+WORKDIR /var/www/backend
+COPY backend/composer.json .
+COPY backend/composer.lock .
+RUN composer install --no-dev --prefer-dist --no-scripts --no-progress --no-interaction
+
+# установка зависимостей Laravel
+COPY backend .
+
+# Copy existing application directory permissions
+RUN chown -R www-data:www-data /var/www/backend
+
+# запуск Laravel
+EXPOSE 9000
+CMD ["php-fpm"]
