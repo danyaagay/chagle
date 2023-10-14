@@ -13,7 +13,7 @@ class StreamsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function stream($question, $dialog)
+    public function stream($question)
     {
         ignore_user_abort(true);
 

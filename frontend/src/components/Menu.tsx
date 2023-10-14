@@ -10,7 +10,7 @@ import {
     IconLogout,
     IconPlus,
 } from '@tabler/icons-react';
-import DialogsList from '../components/DialogsList';
+import ChatsList from './ChatsList';
 import { useMobileTitle } from '../contexts/MobileTitleContext';
 import classes from '../css/ProtectedLayout.module.css';
 
@@ -61,7 +61,7 @@ export default function MobileHeader({ opened, setOpened }: { opened: boolean, s
             </Button>
 
             <div className={classes.navbarMain}>
-                <DialogsList opened={opened} setOpened={setOpened} />
+                <ChatsList opened={opened} setOpened={setOpened} />
             </div>
 
             <div className={classes.footer}>

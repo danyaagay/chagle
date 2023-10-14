@@ -17,46 +17,46 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useHover, useDisclosure } from '@mantine/hooks';
 import MobileTitleContext from '../contexts/MobileTitleContext';
-import DialogsContext from '../contexts/DialogsContext';
+import ChatsContext from '../contexts/ChatsContext';
 import axios from '../axios';
 import { AxiosError } from 'axios';
 import classes from '../css/ProtectedLayout.module.css';
   
-interface ChatDialogButtonProps {
-	dialogId: string,
+interface ChatChatButtonProps {
+	chatId: string,
 	title: string,
 	active: boolean,
 	onClick(value: string): void,
 }
   
-export default function ChatDialogButton({
-	dialogId,
+export default function ChatChatButton({
+	chatId,
 	title,
 	active,
 	onClick,
 	...props
-}: ChatDialogButtonProps & React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>) {
-	const dialogTitleRef = useRef<HTMLInputElement>(null);
+}: ChatChatButtonProps & React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>) {
+	const chatTitleRef = useRef<HTMLInputElement>(null);
 	const { hovered, ref } = useHover();
 	const [ editable, editToggle ]  = useDisclosure(false);
 	const [ deleting, { open, close } ]  = useDisclosure(false);
-	const [ dialogTitle, setDialogTitle] = useState(title);
+	const [ chatTitle, setChatTitle] = useState(title);
 	const mobileScreen = useMediaQuery('(max-width: 767px)');
 	const navigate = useNavigate();
 	const { setMobileTitle } = useContext(MobileTitleContext);
-	const { dispatchDialogs } = useContext(DialogsContext);
+	const { dispatchChats } = useContext(ChatsContext);
 
 	useEffect(() => {
 		// Set mobile title when loading page first time
 		if (active) {
-			setMobileTitle(dialogTitle);
+			setMobileTitle(chatTitle);
 		}
 	}, [setMobileTitle]);
 
-	// Handle delete dialog
+	// Handle delete chat
 	const handleDelete = async () => {
 		try {
-			const resp = await axios.delete('/dialogs/'+dialogId);
+			const resp = await axios.delete('/chats/'+chatId);
 			console.log(resp);
 			if (resp.status === 200) {
 				// Done delete
@@ -68,22 +68,22 @@ export default function ChatDialogButton({
 		}
 	};
 
-	// Handle edit dialog
+	// Handle edit chat
 	const handleEdit = async () => {
 		try {
-			if (dialogTitleRef.current) {
-				dispatchDialogs({
+			if (chatTitleRef.current) {
+				dispatchChats({
 					type: 'change',
-					dialog: {
-						title: dialogTitleRef.current.value,
-						id: dialogId
+					chat: {
+						title: chatTitleRef.current.value,
+						id: chatId
 					}
 				});
-				setDialogTitle(dialogTitleRef.current.value);
+				setChatTitle(chatTitleRef.current.value);
 				if (active) {
-					setMobileTitle(dialogTitleRef.current.value);
+					setMobileTitle(chatTitleRef.current.value);
 				}
-				const resp = await axios.patch('/dialogs/'+dialogId, { title: dialogTitleRef.current.value });
+				const resp = await axios.patch('/chats/'+chatId, { title: chatTitleRef.current.value });
 				console.log(resp);
 				if (resp.status === 200) {
 					// Done change title
@@ -98,7 +98,7 @@ export default function ChatDialogButton({
   
 	return (
 		<>
-		<Modal opened={deleting} onClose={close} title={`Удалить чат "${dialogTitle}"?`} centered withCloseButton={false}>
+		<Modal opened={deleting} onClose={close} title={`Удалить чат "${chatTitle}"?`} centered withCloseButton={false}>
 			<Group>
 				<Button variant="subtle" onClick={close}>Отмена</Button>
 				<Button
@@ -107,9 +107,9 @@ export default function ChatDialogButton({
 					onClick={(e) => {
 						e.stopPropagation();
 						handleDelete();
-						dispatchDialogs({
+						dispatchChats({
 							type: 'delete',
-							id: dialogId
+							id: chatId
 						});
 						if (active) {
 							navigate('/chat');
@@ -132,12 +132,12 @@ export default function ChatDialogButton({
 				{ editable ? (
 					<TextInput
       					variant="unstyled"
-						defaultValue={dialogTitle}
+						defaultValue={chatTitle}
 						size='sm'
-						ref={dialogTitleRef}
+						ref={chatTitleRef}
     				/>
 				) : (
-					<span>{dialogTitle}</span>
+					<span>{chatTitle}</span>
 				) }
 
 				{ !mobileScreen && hovered || active || editable ? (

@@ -101,9 +101,9 @@ class MessageController extends Controller
         return $this->result;
     }
 
-    public function getAllMessages($dialog)
+    public function getAllMessages($chat)
     {
-        $messages = $dialog->messages;
+        $messages = $chat->messages;
 
         $formattedMessages = [];
         $currentDate = null;
@@ -152,17 +152,17 @@ class MessageController extends Controller
     {
         $user = $request->user();
 
-        $dialog = $user->dialogs()->where('id', $id)->first();
+        $chat = $user->chats()->where('id', $id)->first();
 
-        if ($dialog) {
-            $messages = $this->getAllMessages($dialog);
+        if ($chat) {
+            $messages = $this->getAllMessages($chat);
 
             return response()->json([
                 'messages' => $messages,
             ]);
         } else {
             return response()->json([
-                'error' => 'Dialog not found',
+                'error' => 'Chat not found',
             ], 400);
         }
     }
@@ -173,36 +173,36 @@ class MessageController extends Controller
 
         return response()->stream(function () use ($user, $request, $id) {
             if ($id) {
-                $dialog = $user->dialogs()->find($id);
+                $chat = $user->chats()->find($id);
             } else {
-                $dialog = $user->dialogs()->create([
+                $chat = $user->chats()->create([
                     'title' => $request->text,
                 ]);
 
-                echo 'data: {"dialogId":"' . $dialog->id . '"}';
+                echo 'data: {"chatId":"' . $chat->id . '"}';
                 echo "\n\n";
             }
 
-            if (!$dialog) {
+            if (!$chat) {
                 return response()->json([
                     'error' => 'Unknown error 1',
                 ]);
             }
 
-            $message = $dialog->messages()->create([
+            $message = $chat->messages()->create([
                 'text' => $request->text,
                 'role' => 'user',
             ]);
 
             $stream = new StreamsController;
-            $answer = $stream->stream($request->text, $dialog);
+            $answer = $stream->stream($request->text, $chat);
 
-            $dialogAnswer = $dialog->messages()->create([
+            $chatAnswer = $chat->messages()->create([
                 'text' => $answer,
                 'role' => 'assistant',
             ]);
 
-            echo 'data: {"answerId":"' . $dialogAnswer->id . '"}';
+            echo 'data: {"answerId":"' . $chatAnswer->id . '"}';
             echo "\n\n";
 
             echo 'data: {"messageId":"' . $message->id . '"}';

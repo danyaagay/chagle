@@ -10,13 +10,13 @@ import {
 } from '@mantine/core';
 import { useParams } from 'react-router-dom';
 import { AxiosError } from 'axios';
-import DialogsContext from '../contexts/DialogsContext';
+import ChatsContext from '../contexts/ChatsContext';
 import MessagesContext from '../contexts/MessagesContext';
 import classes from '../css/MessageInput.module.css';
 
 export default function MessageInput({ textareaRef }: { textareaRef: React.RefObject<HTMLTextAreaElement> }) {
 	const [isLoading, setIsLoading] = useState(false);
-	const { dispatchDialogs, setActive } = useContext(DialogsContext);
+	const { dispatchChats, setActive } = useContext(ChatsContext);
 	const { messages, dispatch } = useContext(MessagesContext);
 	const { id } = useParams();
 	const [tempId, setTempId] = useState('');
@@ -111,7 +111,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 						for (const parsedLine of parsedLines) {
 							console.log(parsedLine);
-							const { message, answerId, messageId, dialogId, tempId } = parsedLine;
+							const { message, answerId, messageId, chatId, tempId } = parsedLine;
 							
 							console.log(answer, message);
 
@@ -148,14 +148,14 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 									}
 								});
 								console.log('change answer');
-							} else if (dialogId) {
-								dispatchDialogs({
+							} else if (chatId) {
+								dispatchChats({
 									type: 'add',
 									title: text,
-									id: dialogId
+									id: chatId
 								});
-								setActive(dialogId);
-								window.history.replaceState(null, text, '/chat/' + dialogId);
+								setActive(chatId);
+								window.history.replaceState(null, text, '/chat/' + chatId);
 							}
 						}
 					}

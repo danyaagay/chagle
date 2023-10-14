@@ -8,7 +8,7 @@ import {
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { MobileTitleProvider } from '../contexts/MobileTitleContext';
-import { DialogsProvider } from '../contexts/DialogsContext';
+import { ChatsProvider } from '../contexts/ChatsContext';
 import MobileHeader from '../components/MobileHeader';
 import Menu from '../components/Menu';
 import classes from '../css/ProtectedLayout.module.css';
@@ -50,7 +50,7 @@ export default function DefaultLayout() {
 
 	return (
 		<MobileTitleProvider>
-			<DialogsProvider>
+			<ChatsProvider>
 				<AppShell
 					styles={{
 						main: {
@@ -81,7 +81,7 @@ export default function DefaultLayout() {
 						<Outlet />
 					</AppShell.Main>
 				</AppShell>
-			</DialogsProvider>
+			</ChatsProvider>
 		</MobileTitleProvider>
 	);
 }

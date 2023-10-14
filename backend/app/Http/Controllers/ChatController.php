@@ -5,19 +5,19 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\SettingRequest;
 use App\Http\Resources\UserResource;
-use App\Models\Dialog;
+use App\Models\Chat;
 use App\Http\Requests\SettingUpdatePasswordRequest;
 
-class DialogController extends Controller
+class ChatController extends Controller
 {
     public function index(Request $request)
     {
         $user = $request->user();
 
-        $dialogs = $user->dialogs;
+        $chats = $user->chats;
 
         return response()->json([
-            'dialogs' => $dialogs,
+            'chats' => $chats,
         ]);
     }
 
@@ -25,11 +25,11 @@ class DialogController extends Controller
     {
         $user = $request->user();
 
-        $dialog = $user->dialogs()->find($id);
+        $chat = $user->chats()->find($id);
 
-        $dialog->title = $request->title;
+        $chat->title = $request->title;
 
-        $dialog->save();
+        $chat->save();
 
         return true;
     }
@@ -38,9 +38,9 @@ class DialogController extends Controller
     {
         $user = $request->user();
 
-        $dialog = $user->dialogs()->find($id);
+        $chat = $user->chats()->find($id);
 
-        $dialog->delete();
+        $chat->delete();
 
         return true;
     }

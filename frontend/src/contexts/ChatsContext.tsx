@@ -3,43 +3,43 @@ import { useParams, useLocation } from 'react-router-dom';
 import axios from '../axios';
 import { AxiosError, AxiosResponse } from 'axios';
 
-type Dialog = {
+type Chat = {
 	id: string;
 	title: string;
 };
 
-type DialogsContextProps = {
-	dialogs: Dialog[] | null;
-	dispatchDialogs: React.Dispatch<Action>;
+type ChatsContextProps = {
+	chats: Chat[] | null;
+	dispatchChats: React.Dispatch<Action>;
 	active: string | undefined;
 	setActive: React.Dispatch<React.SetStateAction<string | undefined>>,
 };
 
-const DialogsContext = createContext<DialogsContextProps>({
-	dialogs: null,
-	dispatchDialogs: () => { },
+const ChatsContext = createContext<ChatsContextProps>({
+	chats: null,
+	dispatchChats: () => { },
 	active: undefined,
 	setActive: () => { },
 });
 
-type DialogsProviderProps = {
+type ChatsProviderProps = {
 	children: ReactNode;
 };
 
-function DialogsProvider(props: DialogsProviderProps) {
-	const [dialogs, dispatchDialogs] = useReducer(dialogsReducer, []);
+function ChatsProvider(props: ChatsProviderProps) {
+	const [chats, dispatchChats] = useReducer(chatsReducer, []);
 	const [active, setActive] = useState<string | undefined>(undefined);
 	const location = useLocation();
 	const { id } = useParams();
 
 	useEffect(() => {
-		// Get all dialogs
+		// Get all chats
 		(async () => {
 			try {
-				const resp: AxiosResponse<{ dialogs: Dialog[] }> = await axios.get('/dialogs');
+				const resp: AxiosResponse<{ chats: Chat[] }> = await axios.get('/chats');
 				console.log(resp);
 				if (resp.status === 200) {
-					dispatchDialogs({ type: 'set', dialogs: resp.data.dialogs });
+					dispatchChats({ type: 'set', chats: resp.data.chats });
 				}
 			} catch (error: unknown) {
 				if (error instanceof AxiosError && error.response) {
@@ -50,7 +50,7 @@ function DialogsProvider(props: DialogsProviderProps) {
 
 		return () => {
 			setActive(undefined);
-			dispatchDialogs({ type: 'set', dialogs: null });
+			dispatchChats({ type: 'set', chats: null });
 		}
 	}, []);
 
@@ -60,42 +60,42 @@ function DialogsProvider(props: DialogsProviderProps) {
 	}, [location]);
 
 	return (
-		<DialogsContext.Provider value={{ dialogs, dispatchDialogs, active, setActive }}>
+		<ChatsContext.Provider value={{ chats, dispatchChats, active, setActive }}>
 			{props.children}
-		</DialogsContext.Provider>
+		</ChatsContext.Provider>
 	);
 }
 
 type Action =
-	| { type: 'set', dialogs: Dialog[] | null }
+	| { type: 'set', chats: Chat[] | null }
 	| { type: 'add', id: string, title: string }
-	| { type: 'change', dialog: Dialog }
+	| { type: 'change', chat: Chat }
 	| { type: 'delete', id: string };
 
-function dialogsReducer(dialogs: Dialog[], action: Action): Dialog[] {
+function chatsReducer(chats: Chat[], action: Action): Chat[] {
 	switch (action.type) {
 		case 'set':
-			return action.dialogs || [];
+			return action.chats || [];
 		case 'add':
-			return [...dialogs, {
+			return [...chats, {
 				id: action.id,
 				title: action.title
 			}];
 		case 'change':
-			return dialogs.map(dialog => {
-				if (dialog.id === action.dialog.id) {
-					return action.dialog;
+			return chats.map(chat => {
+				if (chat.id === action.chat.id) {
+					return action.chat;
 				} else {
-					return dialog;
+					return chat;
 				}
 			});
 		case 'delete':
-			return dialogs.filter(dialog => dialog.id !== action.id);
+			return chats.filter(chat => chat.id !== action.id);
 		default:
 			const { type } = action as never;
 			throw new Error('Unknown action: ' + type);
 	}
 }
 
-export default DialogsContext;
-export { DialogsProvider };
+export default ChatsContext;
+export { ChatsProvider };

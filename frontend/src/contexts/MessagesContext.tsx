@@ -36,7 +36,7 @@ function MessagesProvider(props: MessagesProviderProps) {
     const [ messages, dispatch ] = useReducer(messagesReducer, []);
     const [ messagesTemp, setMessagesTemp ] = useState<MessagesTempState>({});
     const [ loading, setLoading ] = useState(false);
-    //const location = useLocation();
+    const location = useLocation();
     const navigate = useNavigate();
     const { id } = useParams();
 
@@ -90,7 +90,7 @@ function MessagesProvider(props: MessagesProviderProps) {
             setLoading(false);
             dispatch({type: 'set', messages: null});
         }
-    }, [id]);
+    }, [location]);
 
   return (
     <MessagesContext.Provider value={{ messages, dispatch, loading }}>
