@@ -1,34 +1,33 @@
-FROM php:8.2-fpm-alpine
+# базовый образ для PHP с поддержкой Laravel
+FROM php:8.2-fpm
 
-# Extensions
-RUN apk --update --no-cache add \
-#    build-base \
-    curl \
+# установка необходимых пакетов
+RUN apt-get update && apt-get install -y \
     git \
-    zip \
     unzip \
     libzip-dev \
-    oniguruma-dev \
-    php82-pecl-redis \
+    libonig-dev \
+    libpq-dev \
     && docker-php-ext-install pdo_mysql zip mbstring
 
-# RUN docker-php-ext-enable redis
-
-# Composer
+# установка Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Composer install?
+# добавление расширений PHP
+RUN pecl install redis && docker-php-ext-enable redis
+
+# установка Laravel
 WORKDIR /var/www/backend
 COPY backend/composer.json .
 COPY backend/composer.lock .
 RUN composer install --no-dev --prefer-dist --no-scripts --no-progress --no-interaction
 
-# Laravel
+# установка зависимостей Laravel
 COPY backend .
 
-# Permissions
+# Copy existing application directory permissions
 RUN chown -R www-data:www-data /var/www/backend
 
-# Run server workers
+# запуск Laravel
 EXPOSE 9000
 CMD ["php-fpm"]

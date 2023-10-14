@@ -17,6 +17,9 @@ class StreamsController extends Controller
     {
         ignore_user_abort(true);
 
+        $tempId = Str::random(15);
+        Redis::set($tempId, true);
+
         $answer = '';
 
         $stream = [
@@ -96,45 +99,29 @@ class StreamsController extends Controller
         //    'max_tokens' => 1024,
         //]);
 
-        while (ob_get_level()){
-            ob_get_contents();
-            ob_end_clean();
-        }
+        //while (ob_get_level()){
+        //    ob_get_contents();
+        //    ob_end_clean();
+        //}
 
         if (ob_get_level() == 0) ob_start();
 
+        echo 'data: {"tempId":"' . $tempId . '"}';
+        echo "\n\n";
+        ob_flush();
+        flush();
+
         foreach ($stream as $response) {
             //$text = $response->choices[0]->delta->content;
-            echo 'data: ping';
-            ob_flush();
-            flush();
-            if (connection_aborted()) {
-                if (isset($dialogAnswer)) {
-                    $dialogAnswer->update([
-                        'text' => $answer,
-                    ]);
-                }
-
+            if (connection_aborted() || !Redis::get($tempId)) {
                 break;
             }
 
-            $text = $response;
-
-            if (!isset($dialogAnswer)) {
-                $dialogAnswer = $dialog->messages()->create([
-                    'text' => $text,
-                    'role' => 'assistant',
-                ]);
-
-                echo 'data: {"answerId":"' . $dialogAnswer->id . '"}';
-                echo "\n\n";
-            }
-
-            $answer .= $text;
+            $answer .= $response;
 
             usleep(895000);
 
-            echo 'data: {"message":"' . $text . '"}';
+            echo 'data: {"message":"' . $response . '"}';
             echo "\n\n";
             ob_flush();
             flush();

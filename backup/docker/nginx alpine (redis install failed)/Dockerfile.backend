@@ -1,0 +1,34 @@
+FROM php:8.2-fpm-alpine
+
+# Extensions
+RUN apk --update --no-cache add \
+#    build-base \
+    curl \
+    git \
+    zip \
+    unzip \
+    libzip-dev \
+    oniguruma-dev \
+    php82-pecl-redis \
+    && docker-php-ext-install pdo_mysql zip mbstring
+
+# RUN docker-php-ext-enable redis
+
+# Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Composer install?
+WORKDIR /var/www/backend
+COPY backend/composer.json .
+COPY backend/composer.lock .
+RUN composer install --no-dev --prefer-dist --no-scripts --no-progress --no-interaction
+
+# Laravel
+COPY backend .
+
+# Permissions
+RUN chown -R www-data:www-data /var/www/backend
+
+# Run server workers
+EXPOSE 9000
+CMD ["php-fpm"]

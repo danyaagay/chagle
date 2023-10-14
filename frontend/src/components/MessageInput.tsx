@@ -15,18 +15,18 @@ import MessagesContext from '../contexts/MessagesContext';
 import classes from '../css/MessageInput.module.css';
 
 export default function MessageInput({ textareaRef }: { textareaRef: React.RefObject<HTMLTextAreaElement> }) {
-	const [isLoading] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 	const { dispatchDialogs, setActive } = useContext(DialogsContext);
 	const { messages, dispatch } = useContext(MessagesContext);
 	const { id } = useParams();
-	//const [tempId, setTempId] = useState('');
-	const [abortController, setAbortController] = useState(new AbortController() || null);
+	const [tempId, setTempId] = useState('');
+	//const [abortController, setAbortController] = useState(new AbortController() || null);
 
 	// Handle send message
 	const handleSend = async () => {
 		if (!isLoading && textareaRef.current) {
 			try {
-				//setIsLoading(true);
+				setIsLoading(true);
 
 				const text = textareaRef.current.value;
 
@@ -57,8 +57,8 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 				const url = 'http://192.168.0.116:8000/api/messages/' + (id ? id : '');
 
-				const controller = new AbortController();
-				setAbortController(controller);
+				//const controller = new AbortController();
+				//setAbortController(controller);
 
 				//const eventSource = new EventSource('http://192.168.0.116:8000/api/stream');
 
@@ -74,7 +74,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 							'Content-Type': 'application/json'
 						},
 						credentials: "include",
-						signal: controller.signal,
+						//signal: controller.signal,
 					});
 
 					if (!response.body) {
@@ -111,7 +111,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 						for (const parsedLine of parsedLines) {
 							console.log(parsedLine);
-							const { message, answerId, messageId, dialog } = parsedLine;
+							const { message, answerId, messageId, dialogId, tempId } = parsedLine;
 							
 							console.log(answer, message);
 
@@ -127,6 +127,8 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 										text: answer
 									}
 								});
+							} else if (tempId) {
+								setTempId(tempId);
 							} else if (messageId) {
 								dispatch({
 									type: 'change',
@@ -146,14 +148,14 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 									}
 								});
 								console.log('change answer');
-							} else if (dialog) {
+							} else if (dialogId) {
 								dispatchDialogs({
 									type: 'add',
-									title: dialog.title,
-									id: dialog.id
+									title: text,
+									id: dialogId
 								});
-								setActive(dialog.id);
-								window.history.replaceState(null, dialog.title, '/chat/' + dialog.id);
+								setActive(dialogId);
+								window.history.replaceState(null, text, '/chat/' + dialogId);
 							}
 						}
 					}
@@ -161,7 +163,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 					console.error(error);
 				}
 
-				//setIsLoading(false);
+				setIsLoading(false);
 			} catch (error: unknown) {
 				if (error instanceof AxiosError && error.response) {
 					// Delete error
@@ -170,8 +172,16 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 		}
 	};
 
-	const handleStop = () => {
-		abortController.abort();
+	const handleStop = async() => {
+		await fetch('http://192.168.0.116:8000/api/messages-cancel', {
+		    method: 'POST',
+		    headers: {
+		      'Content-Type': 'application/json'
+		    },
+			credentials: "include",
+		    body: JSON.stringify({ id: tempId })
+		});
+		//abortController.abort();
 	};
 
 	return (

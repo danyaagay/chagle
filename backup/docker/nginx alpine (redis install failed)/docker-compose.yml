@@ -1,0 +1,98 @@
+version: '3'
+services:
+  # PHP Service
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: backend
+    tty: true
+    working_dir: /var/www/backend
+    environment:
+      SERVICE_NAME: backend
+      SERVICE_TAGS: dev
+    volumes:
+      - ./backend:/var/www/backend
+      - ./conf/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - app-network
+
+  # Nginx Service
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    tty: true
+    ports:
+      - "8000:8000"
+      - "443:443"
+    volumes:
+      - ./backend:/var/www/backend
+      - ./conf/nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: frontend
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./frontend:/var/www/frontend
+      - /var/www/frontend/node_modules
+    depends_on:
+      - nginx
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: app
+      MYSQL_USER: user
+      MYSQL_PASSWORD: secret
+    networks:
+      - app-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    ports:
+      - '8080:80'
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: secret
+    networks:
+      - app-network
+
+  redis:
+    image: redis:6.2
+    container_name: redis
+    ports:
+      - '6379:6379'
+    networks:
+      - app-network
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - '8025:8025'
+      - '1025:1025'
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

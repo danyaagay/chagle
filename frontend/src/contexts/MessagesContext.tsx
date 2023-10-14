@@ -28,46 +28,69 @@ type MessagesProviderProps = {
   children: ReactNode;
 };
 
+type MessagesTempState = {
+    [id: string]: Message[];
+};
+
 function MessagesProvider(props: MessagesProviderProps) {
     const [ messages, dispatch ] = useReducer(messagesReducer, []);
+    const [ messagesTemp, setMessagesTemp ] = useState<MessagesTempState>({});
     const [ loading, setLoading ] = useState(false);
-    const location = useLocation();
+    //const location = useLocation();
     const navigate = useNavigate();
     const { id } = useParams();
 
-    useEffect(() => {
-        // Get all messages in chat
-        const controller = new AbortController();
+    const controller = new AbortController();
 
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const resp = await axios.get(`/messages/${id}`, { signal: controller.signal });
-                console.log(resp);
-                if (resp.status === 200) {
-                    if (id) {
-                        dispatch({type: 'set', messages: resp.data.messages});
-                    }
-                    setLoading(false);
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const resp = await axios.get(`/messages/${id}`, { signal: controller.signal });
+            console.log(resp);
+            if (resp.status === 200) {
+                if (id) {
+                    dispatch({type: 'set', messages: resp.data.messages});
+                    setMessagesTemp(prevMessages => ({
+                        ...prevMessages,
+                        [id]: resp.data.messages,
+                    }));
                 }
-            } catch (error: unknown) {
-                if (error instanceof AxiosError && error.response) {
-                    navigate('/chat');
-                    console.log(error);
-                }
+                setLoading(false);
             }
-        };
-        
-        if (id) {
-            fetchData();
+        } catch (error: unknown) {
+            if (error instanceof AxiosError && error.response) {
+                navigate('/chat');
+                console.log(error);
+            }
         }
+    };
 
-        return () => {
+    useEffect(() => {
+        if (id) {
+            if (messages != messagesTemp[id]) {
+                setMessagesTemp(prevMessages => ({
+                    ...prevMessages,
+                    [id]: messages,
+                }));
+            }
+        }
+    }, [messages]);
+        
+    useEffect(() => {
+        if (id) {
+            if (messagesTemp[id]) {
+                console.log(messagesTemp[id]);
+                dispatch({type: 'set', messages: messagesTemp[id]});
+                return;
+            }
+
+            fetchData();
+        } else {
             controller.abort();
             setLoading(false);
             dispatch({type: 'set', messages: null});
         }
-    }, [location]);
+    }, [id]);
 
   return (
     <MessagesContext.Provider value={{ messages, dispatch, loading }}>

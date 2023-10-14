@@ -171,57 +171,47 @@ class MessageController extends Controller
     {
         $user = $request->user();
 
-        if ($id) {
-            return response()->stream(function () use ($user, $request, $id) {
+        return response()->stream(function () use ($user, $request, $id) {
+            if ($id) {
                 $dialog = $user->dialogs()->find($id);
-
-                if (!$dialog) {
-                    return response()->json([
-                        'error' => 'Unknown error 1',
-                    ]);
-                }
-
-                $message = $dialog->messages()->create([
-                    'text' => $request->text,
-                    'role' => 'user',
+            } else {
+                $dialog = $user->dialogs()->create([
+                    'title' => $request->text,
                 ]);
 
-                $stream = new StreamsController;
-                $stream->stream($request->text, $dialog);
-
-                echo 'data: {"messageId":"' . $message->id . '"}';
+                echo 'data: {"dialogId":"' . $dialog->id . '"}';
                 echo "\n\n";
-            }, 200, [
-                'Cache-Control' => 'no-cache',
-                'X-Accel-Buffering' => 'no',
-                'Content-Type' => 'text/event-stream',
-            ]);
-        } elseif (!$id) {
-            $dialog = $user->dialogs()->create([
-                'title' => $request->text,
-            ]);
+            }
+
+            if (!$dialog) {
+                return response()->json([
+                    'error' => 'Unknown error 1',
+                ]);
+            }
+
             $message = $dialog->messages()->create([
                 'text' => $request->text,
                 'role' => 'user',
             ]);
 
-            $answer = $this->openAi($request->text);
-            $answer = $dialog->messages()->create([
+            $stream = new StreamsController;
+            $answer = $stream->stream($request->text, $dialog);
+
+            $dialogAnswer = $dialog->messages()->create([
                 'text' => $answer,
                 'role' => 'assistant',
             ]);
 
-            //$messages = $this->getAllMessages($dialog);
-            return response()->json([
-                'message' =>  $message,
-                'answer' => $answer,
-                'dialog' => $dialog,
-            ]);
-        } else {
-            return response()->json([
-                'error' => 'Unknown error 2',
-            ], 400);
-        }
+            echo 'data: {"answerId":"' . $dialogAnswer->id . '"}';
+            echo "\n\n";
+
+            echo 'data: {"messageId":"' . $message->id . '"}';
+            echo "\n\n";
+        }, 200, [
+            'Cache-Control' => 'no-cache',
+            'X-Accel-Buffering' => 'no',
+            'Content-Type' => 'text/event-stream',
+        ]);
     }
 
     public function cancel(Request $request)
