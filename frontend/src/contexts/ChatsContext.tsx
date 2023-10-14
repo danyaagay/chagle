@@ -37,7 +37,7 @@ function ChatsProvider(props: ChatsProviderProps) {
 		(async () => {
 			try {
 				const resp: AxiosResponse<{ chats: Chat[] }> = await axios.get('/chats');
-				console.log(resp);
+				//console.log(resp);
 				if (resp.status === 200) {
 					dispatchChats({ type: 'set', chats: resp.data.chats });
 				}

@@ -119,7 +119,7 @@ class StreamsController extends Controller
 
             $answer .= $response;
 
-            usleep(895000);
+            usleep(50000);
 
             echo 'data: {"message":"' . $response . '"}';
             echo "\n\n";

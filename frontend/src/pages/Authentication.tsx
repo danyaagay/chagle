@@ -255,7 +255,7 @@ export default function () {
 										onChange={(value) => form.setFieldValue('password', value)}
 										error={form.errors.password}
 									/>
-									<Anchor component="button" size="md" onClick={() => navigate('/reset-password')} ta="left">
+									<Anchor component="button" type="button" size="md" onClick={() => navigate('/reset-password')} ta="left">
 										Забыли пароль?
 									</Anchor>
 								</Stack>

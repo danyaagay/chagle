@@ -17,10 +17,14 @@ import classes from '../css/MessageInput.module.css';
 export default function MessageInput({ textareaRef }: { textareaRef: React.RefObject<HTMLTextAreaElement> }) {
 	const [isLoading, setIsLoading] = useState(false);
 	const { dispatchChats, setActive } = useContext(ChatsContext);
-	const { messages, dispatch } = useContext(MessagesContext);
+	const { messages, dispatch, tempIdRef } = useContext(MessagesContext);
 	const { id } = useParams();
-	const [tempId, setTempId] = useState('');
 	//const [abortController, setAbortController] = useState(new AbortController() || null);
+
+	const handleSend1 = () => {
+		//tempIdRef.current = '123132';
+		console.log(tempIdRef.current);
+	};
 
 	// Handle send message
 	const handleSend = async () => {
@@ -96,26 +100,26 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 						// Massage and parse the chunk of data
 						const chunk = decoder.decode(value);
 
-						console.log(chunk);
+						//console.log(chunk);
 
 						const lines = chunk.split("\n\n");
 
-						console.log(lines);
+						//console.log(lines);
 
 						const parsedLines = lines
 							.map((line) => line.replace(/^data: /, "").trim()) // Remove the "data: " prefix
 							.filter((line) => line !== "" && line !== "ping") // Remove empty lines and "[DONE]"
 							.map((line) => JSON.parse(line)); // Parse the JSON string
 
-						console.log(parsedLines);
+						//console.log(parsedLines);
 
 						for (const parsedLine of parsedLines) {
-							console.log(parsedLine);
+							//console.log(parsedLine);
 							const { message, answerId, messageId, chatId, tempId } = parsedLine;
 							
-							console.log(answer, message);
+							//console.log(answer, message);
 
-							console.log(answerId, messageId);
+							//console.log(answerId, messageId);
 							// Update the UI with the new content
 							if (message) {
 								answer += message;
@@ -128,7 +132,9 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 									}
 								});
 							} else if (tempId) {
-								setTempId(tempId);
+								tempIdRef.current = tempId;
+								console.log(tempId);
+								console.log('temp', tempIdRef.current);
 							} else if (messageId) {
 								dispatch({
 									type: 'change',
@@ -137,9 +143,9 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 										id: messageId,
 									}
 								});
-								console.log('change message');
+								//console.log('change message');
 							} else if (answerId) {
-								console.log('here');
+								//console.log('here');
 								dispatch({
 									type: 'change',
 									id: -1,
@@ -147,15 +153,20 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 										id: answerId,
 									}
 								});
-								console.log('change answer');
+								//console.log('change answer');
 							} else if (chatId) {
+								console.log('temp', tempIdRef.current);
+
 								dispatchChats({
 									type: 'add',
 									title: text,
 									id: chatId
 								});
-								setActive(chatId);
-								window.history.replaceState(null, text, '/chat/' + chatId);
+
+								if (tempIdRef.current) {
+									setActive(chatId);
+									window.history.replaceState(null, text, '/chat/' + chatId);
+								}
 							}
 						}
 					}
@@ -179,7 +190,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 		      'Content-Type': 'application/json'
 		    },
 			credentials: "include",
-		    body: JSON.stringify({ id: tempId })
+		    body: JSON.stringify({ id: tempIdRef.current })
 		});
 		//abortController.abort();
 	};

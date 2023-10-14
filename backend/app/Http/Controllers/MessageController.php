@@ -178,9 +178,6 @@ class MessageController extends Controller
                 $chat = $user->chats()->create([
                     'title' => $request->text,
                 ]);
-
-                echo 'data: {"chatId":"' . $chat->id . '"}';
-                echo "\n\n";
             }
 
             if (!$chat) {
@@ -207,6 +204,11 @@ class MessageController extends Controller
 
             echo 'data: {"messageId":"' . $message->id . '"}';
             echo "\n\n";
+
+            if (!$id) {
+                echo 'data: {"chatId":"' . $chat->id . '"}';
+                echo "\n\n";
+            }
         }, 200, [
             'Cache-Control' => 'no-cache',
             'X-Accel-Buffering' => 'no',
