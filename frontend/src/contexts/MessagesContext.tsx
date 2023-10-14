@@ -93,7 +93,7 @@ function MessagesProvider(props: MessagesProviderProps) {
                     return;
                 }
 
-                if (chats) {
+                if (chats && chats.length > 0) {
                     const chatExists = chats.some(chat => chat.id == id);
                     if (chatExists) {
                         fetchData();
@@ -107,7 +107,8 @@ function MessagesProvider(props: MessagesProviderProps) {
     }, [location]);
 
     useEffect(() => {
-        if (id && chats) {
+        if (chats && chats.length > 0 && id) {
+            console.log(chats);
             const chatExists = chats.some(chat => chat.id == id);
             if (chatExists) {
                 fetchData();
