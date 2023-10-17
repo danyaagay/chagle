@@ -8,6 +8,7 @@ import '@mantine/core/styles.css';
 import './css/chat.css';
 import { MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
+import { MobileHeaderProvider } from './contexts/MobileHeaderContext';
 
 // Main component
 let root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
@@ -23,8 +24,10 @@ root.render(
 				}}
 				classNamesPrefix='asdsda'
 			>
-				<Notifications />
-				<RouterProvider router={router} />
+				<MobileHeaderProvider>
+					<Notifications />
+					<RouterProvider router={router} />
+				</MobileHeaderProvider>
 			</MantineProvider>
 		</AuthProvider>
 	</React.StrictMode>

@@ -2,11 +2,11 @@ import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Chat from './Chat';
 import ChatsContext from '../contexts/ChatsContext';
-import MobileTitleContext from '../contexts/MobileTitleContext';
+import MobileHeaderContext from '../contexts/MobileHeaderContext';
 
-const ChatsList = ({ setOpened }: { opened: boolean, setOpened: React.Dispatch<React.SetStateAction<boolean>> }) => {
-	const { chats, active } = useContext(ChatsContext);
-	const { setMobileTitle } = useContext(MobileTitleContext);
+const ChatsList = () => {
+	const { chats, active, setActive } = useContext(ChatsContext);
+	const { setMobileTitle } = useContext(MobileHeaderContext);
 	const navigate = useNavigate();
   
 	return (
@@ -18,9 +18,10 @@ const ChatsList = ({ setOpened }: { opened: boolean, setOpened: React.Dispatch<R
 					title={chat.title}
 					active={active == chat.id ? true : false}
 					onClick={() => {
-						setOpened((o) => !o);
+						setActive(chat.id);
 						setMobileTitle(chat.title);
 						navigate('chat/'+chat.id);
+						//setOpened((o) => !o);
 					}}
 				/>
 			))}

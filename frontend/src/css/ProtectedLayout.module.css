@@ -62,6 +62,17 @@
     }
 }
 
+.linkMobile {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    font-size: var(--mantine-font-size-sm);
+    color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-1));
+    padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+    border-radius: var(--mantine-radius-sm);
+    font-weight: 500;
+}
+
 .linkIcon {
     color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-2));
     margin-right: var(--mantine-spacing-sm);
@@ -71,7 +82,7 @@
 
 .linkActive {
     background-Color: var(--mantine-color-gray-0);
-    color: var(--mantine-color-white);
+    color: #000000;
 }
 
 .buttonBox {

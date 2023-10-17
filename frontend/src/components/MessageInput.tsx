@@ -1,4 +1,5 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
+import { useMediaQuery } from '@mantine/hooks';
 import {
 	IconSend
 } from '@tabler/icons-react';
@@ -17,17 +18,39 @@ import classes from '../css/MessageInput.module.css';
 export default function MessageInput({ textareaRef }: { textareaRef: React.RefObject<HTMLTextAreaElement> }) {
 	const [isLoading, setIsLoading] = useState(false);
 	const { dispatchChats, setActive } = useContext(ChatsContext);
-	const { messages, dispatch, tempIdRef } = useContext(MessagesContext);
+	const { dispatch, tempIdRef } = useContext(MessagesContext);
 	const { id } = useParams();
+	const [ idChat, setIdChat ] = useState<string | undefined>(id);
 	//const [abortController, setAbortController] = useState(new AbortController() || null);
 
-	const handleSend1 = () => {
-		//tempIdRef.current = '123132';
-		console.log(tempIdRef.current);
-	};
+	const mobileScreen = useMediaQuery('(max-width: 767px)');
+	const [keyboardOpen, setKeyboardOpen] = useState(false);
+	useEffect(() => {
+		const handleResize = () => {
+			const VIEWPORT_VS_CLIENT_HEIGHT_RATIO = 0.75;
+			const { visualViewport, screen } = window;
+
+			if (visualViewport && (visualViewport.height * visualViewport.scale) / screen.height < VIEWPORT_VS_CLIENT_HEIGHT_RATIO) {
+				setKeyboardOpen(true);
+				console.log('keyboard is shown');
+			} else {
+				setKeyboardOpen(false);
+				console.log('keyboard is hidden');
+			}
+		};
+
+		if ('visualViewport' in window && window.visualViewport && mobileScreen) {
+			window.visualViewport.addEventListener('resize', handleResize);
+		}
+	}, []);
+
+	useEffect(() => {
+		setIdChat(id);
+	}, [id]);
 
 	// Handle send message
 	const handleSend = async () => {
+		console.log(idChat);
 		if (!isLoading && textareaRef.current) {
 			try {
 				setIsLoading(true);
@@ -35,7 +58,10 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 				const text = textareaRef.current.value;
 
 				textareaRef.current.value = '';
-				textareaRef.current.focus();
+
+				if (keyboardOpen || !mobileScreen) {
+					textareaRef.current.focus();
+				}
 
 				dispatch({
 					type: 'add',
@@ -55,11 +81,11 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 					}
 				});
 
-				console.log(messages);
+				console.log(idChat);
 
 				const requestBody = { text };
 
-				const url = 'http://192.168.0.116:8000/api/messages/' + (id ? id : '');
+				const url = 'http://192.168.0.116:8000/api/messages/' + (idChat ? idChat : '');
 
 				//const controller = new AbortController();
 				//setAbortController(controller);
@@ -89,7 +115,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 					// Read the response as a stream of data
 					const reader = response.body.getReader();
 					const decoder = new TextDecoder("utf-8");
-					
+
 					let answer = '';
 
 					while (true) {
@@ -116,14 +142,14 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 						for (const parsedLine of parsedLines) {
 							//console.log(parsedLine);
 							const { message, answerId, messageId, chatId, tempId } = parsedLine;
-							
+
 							//console.log(answer, message);
 
 							//console.log(answerId, messageId);
 							// Update the UI with the new content
 							if (message) {
 								answer += message;
-								
+
 								dispatch({
 									type: 'change',
 									id: -2,
@@ -165,6 +191,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 								if (tempIdRef.current) {
 									setActive(chatId);
+									setIdChat(chatId);
 									window.history.replaceState(null, text, '/chat/' + chatId);
 								}
 							}
@@ -183,45 +210,45 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 		}
 	};
 
-	const handleStop = async() => {
+	const handleStop = async () => {
 		await fetch('http://192.168.0.116:8000/api/messages-cancel', {
-		    method: 'POST',
-		    headers: {
-		      'Content-Type': 'application/json'
-		    },
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
 			credentials: "include",
-		    body: JSON.stringify({ id: tempIdRef.current })
+			body: JSON.stringify({ id: tempIdRef.current })
 		});
 		//abortController.abort();
 	};
 
 	return (
 		<>
-		<ActionIcon className={classes.link} onClick={handleStop}>
-			  <span>Остановить</span>
-		</ActionIcon>
-		<Card shadow="0" padding="0" radius="lg" withBorder style={{ width: '100%' }}>
-			<Group justify="right" p="xs" style={{ padding: '5px 20px 5px 20px', alignItems: 'end' }}>
-				<Textarea
-					ref={textareaRef}
-					placeholder="Сообщение"
-					autosize
-					minRows={1}
-					maxRows={6}
-					size="lg"
-					classNames={{ input: classes.input, root: classes.root }}
-					variant="unstyled"
-				/>
-				<ActionIcon
-					onClick={handleSend}
-					variant="transparent"
-					size="lg"
-					className={classes.send}
-				>
-					<IconSend stroke={1.5} className={classes.linkIcon} />
-				</ActionIcon>
-			</Group>
-		</Card>
+			<ActionIcon className={classes.link} onClick={handleStop}>
+				<span>Остановить</span>
+			</ActionIcon>
+			<Card shadow="0" padding="0" radius="lg" withBorder style={{ width: '100%' }}>
+				<Group justify="right" p="xs" style={{ padding: '5px 20px 5px 20px', alignItems: 'end' }}>
+					<Textarea
+						ref={textareaRef}
+						placeholder="Сообщение"
+						autosize
+						minRows={1}
+						maxRows={6}
+						size="lg"
+						classNames={{ input: classes.input, root: classes.root }}
+						variant="unstyled"
+					/>
+					<ActionIcon
+						onClick={handleSend}
+						variant="transparent"
+						size="lg"
+						className={classes.send}
+					>
+						<IconSend stroke={1.5} className={classes.linkIcon} />
+					</ActionIcon>
+				</Group>
+			</Card>
 		</>
 	);
 }

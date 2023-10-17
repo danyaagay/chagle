@@ -1,21 +1,17 @@
-import { useContext, useEffect } from 'react';
-import {
-    Loader,
-} from '@mantine/core';
+import { useContext, useLayoutEffect } from 'react';
 import Message from '../components/Message';
 import MessagesContext from '../contexts/MessagesContext';
 
 const MessageList = ({ scrollRef, messagesEndRef }: { scrollRef: React.RefObject<HTMLInputElement>, messagesEndRef: React.RefObject<HTMLInputElement> }) => {
-    const { messages, loading } = useContext(MessagesContext);
+    const { messages } = useContext(MessagesContext);
 
     // Messeges send or update to bottom
-    useEffect(() => {
+    useLayoutEffect(() => {
         messagesEndRef.current?.scrollIntoView();
     }, [messages]);
 
     return (
         <div className="bubbles">
-            {(loading ? <Loader /> : '')}
             <div className='bubbles-inner scrollable scrollable-y' ref={scrollRef}>
                 {messages && messages.map((message) => (
                     <Message

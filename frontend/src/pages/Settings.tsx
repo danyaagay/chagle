@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import axios from '../axios';
 import { AxiosError } from 'axios';
@@ -16,9 +16,8 @@ import {
 import { notifications } from '@mantine/notifications';
 import FloatingLabelInput from '../components/FloatingLabelInput';
 import { useForm } from '@mantine/form';
-
 import classes from '../css/Settings.module.css';
-
+import MobileHeaderContext from '../contexts/MobileHeaderContext';
 export interface FormValues {
 	email: string;
 	name: string;
@@ -29,25 +28,30 @@ export interface FormValues {
 
 export default function Settings() {
 	const { setUser, user } = useAuth();
-	const [ isLoading, setIsLoading ] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
+	const { opened, toggle } = useContext(MobileHeaderContext);
 
 	useEffect(() => {
 		if (!location.pathname.includes('/settings')) {
 			return;
 		}
 
+		if (opened) {
+			toggle();
+		}
+
 		// iOS detect
 		function isiOS(): boolean {
 			return [
-			'iPad Simulator',
-			'iPhone Simulator',
-			'iPod Simulator',
-			'iPad',
-			'iPhone',
-			'iPod'
+				'iPad Simulator',
+				'iPhone Simulator',
+				'iPod Simulator',
+				'iPad',
+				'iPhone',
+				'iPod'
 			].includes(navigator.platform)
-			// iPad on iOS 13 detection
-			|| (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+				// iPad on iOS 13 detection
+				|| (navigator.userAgent.includes("Mac") && "ontouchend" in document)
 		}
 
 		if (isiOS()) {
@@ -61,7 +65,7 @@ export default function Settings() {
 		const setVH = (): void => {
 			let vh = (setViewportVH ? w.height || w.innerHeight : window.innerHeight) * 0.01;
 			vh = +vh.toFixed(2);
-			if(lastVH === vh) {
+			if (lastVH === vh) {
 				return;
 			}
 
@@ -76,7 +80,7 @@ export default function Settings() {
 			// cleaning up the listeners here
 		}
 	}, [location.pathname]);
-  	
+
 	const handleSubmit = async () => {
 		const dirtyValues: Partial<FormValues> = {};
 
@@ -125,7 +129,7 @@ export default function Settings() {
 			}
 		}
 	};
-	
+
 	const form = useForm({
 		initialValues: {
 			email: user.email,
@@ -133,7 +137,7 @@ export default function Settings() {
 			password: '',
 			password_confirmation: '',
 		},
-	
+
 		validate: (values) => {
 			return {
 				name: (values.name && values.name.length < 2 ? 'Имя должно состоять как минимум из 2 букв' : null),
@@ -146,8 +150,8 @@ export default function Settings() {
 
 	return (
 		<>
-		<Container className={classes.container} px={8}>
-			<form onSubmit={form.onSubmit(handleSubmit)} className={classes.form}>
+			<Container className={classes.container} px={8}>
+				<form onSubmit={form.onSubmit(handleSubmit)} className={classes.form}>
 					<Stack gap="md" pt={16}>
 						<Text fz="md" fw={500}>
 							Основная информация
@@ -196,8 +200,8 @@ export default function Settings() {
 					<Button loading={isLoading} type="submit" mt="2rem" mb="2rem" size="md" radius="md" fw={500}>
 						Сохранить
 					</Button>
-			</form>
-		</Container>
+				</form>
+			</Container>
 		</>
 	);
 }

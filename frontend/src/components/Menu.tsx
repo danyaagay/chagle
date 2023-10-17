@@ -11,11 +11,11 @@ import {
     IconPlus,
 } from '@tabler/icons-react';
 import ChatsList from './ChatsList';
-import { useMobileTitle } from '../contexts/MobileTitleContext';
+import { useMobileHeader } from '../contexts/MobileHeaderContext';
 import classes from '../css/ProtectedLayout.module.css';
 
-export default function MobileHeader({ opened, setOpened }: { opened: boolean, setOpened: React.Dispatch<React.SetStateAction<boolean>> }) {
-    const { setMobileTitle } = useMobileTitle();
+export default function MobileHeader() {
+    const { setMobileTitle, opened, toggle } = useMobileHeader();
     const navigate = useNavigate();
     const theme = useMantineTheme();
 
@@ -36,7 +36,7 @@ export default function MobileHeader({ opened, setOpened }: { opened: boolean, s
         <>
             <Burger
                 opened={opened}
-                onClick={() => setOpened((o) => !o)}
+                onClick={toggle}
                 size="sm"
                 color={theme.colors.gray[6]}
                 mb='16px'
@@ -52,16 +52,15 @@ export default function MobileHeader({ opened, setOpened }: { opened: boolean, s
                 mb='16px'
                 fw={500}
                 onClick={() => {
-                    setOpened((o) => !o);
-                    setMobileTitle('Новый чат');
                     navigate('chat');
+                    setMobileTitle('Новый чат');
                 }}
             >
                 Новый чат
             </Button>
 
             <div className={classes.navbarMain}>
-                <ChatsList opened={opened} setOpened={setOpened} />
+                <ChatsList />
             </div>
 
             <div className={classes.footer}>
@@ -69,14 +68,13 @@ export default function MobileHeader({ opened, setOpened }: { opened: boolean, s
                     to='settings'
                     className={classes.link}
                     onClick={() => {
-                        setOpened((o) => !o);
                         setMobileTitle('Настройки');
                     }}
                 >
                     <IconSettings className={classes.linkIcon} stroke={1.5} />
                     <span>Настройки</span>
                 </NavLink>
-                
+
                 <a href="#" className={classes.link} onClick={() => handleLogout()}>
                     <IconLogout className={classes.linkIcon} stroke={1.5} />
                     <span>Выйти</span>

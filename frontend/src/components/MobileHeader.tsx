@@ -4,12 +4,12 @@ import {
     Burger,
     useMantineTheme,
 } from '@mantine/core';
-import { useMobileTitle } from '../contexts/MobileTitleContext';
+import { useMobileHeader } from '../contexts/MobileHeaderContext';
 import classes from '../css/MobileHeader.module.css';
 
-export default function MobileHeader({ opened, setOpened }: { opened: boolean, setOpened: React.Dispatch<React.SetStateAction<boolean>> }) {
+export default function MobileHeader() {
     const topbarRef = useRef<HTMLInputElement>(null);
-    const { mobileTitle } = useMobileTitle();
+    const { mobileTitle, opened, toggle } = useMobileHeader();
 
     const theme = useMantineTheme();
 
@@ -30,7 +30,7 @@ export default function MobileHeader({ opened, setOpened }: { opened: boolean, s
             <div className={classes.headerBox} ref={topbarRef}>
                 <Burger
                     opened={opened}
-                    onClick={() => setOpened((o) => !o)}
+                    onClick={toggle}
                     size="sm"
                     color={theme.colors.gray[6]}
                     mr="xl"

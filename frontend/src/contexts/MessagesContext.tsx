@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from '../axios';
 import { AxiosError } from 'axios';
 import ChatsContext from '../contexts/ChatsContext';
+import MobileHeaderContext from '../contexts/MobileHeaderContext';
 
 type Message = {
     id: number;
@@ -17,14 +18,12 @@ type MessagesContextProps = {
     messages: Message[] | null;
     dispatch: React.Dispatch<Action>;
     tempIdRef: React.MutableRefObject<string>;
-    loading: boolean;
 };
 
 const MessagesContext = createContext<MessagesContextProps>({
     messages: null,
     dispatch: () => {},
     tempIdRef: { current: "" },
-    loading: false,
 });
 
 type MessagesProviderProps = {
@@ -40,18 +39,17 @@ function MessagesProvider(props: MessagesProviderProps) {
     const [ messages, dispatch ] = useReducer(messagesReducer, []);
     const [ messagesTemp, setMessagesTemp ] = useState<MessagesTempState>({});
     const tempIdRef = useRef('');
-    const [ loading, setLoading ] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
     const { id } = useParams();
+
+    const { opened, toggle } = useContext(MobileHeaderContext);
 
     const controller = new AbortController();
 
     const fetchData = async () => {
         try {
-            setLoading(true);
             const resp = await axios.get(`/messages/${id}`, { signal: controller.signal });
-            console.log(resp);
             if (resp.status === 200) {
                 if (id) {
                     dispatch({type: 'set', messages: resp.data.messages});
@@ -60,7 +58,6 @@ function MessagesProvider(props: MessagesProviderProps) {
                         [id]: resp.data.messages,
                     }));
                 }
-                setLoading(false);
             }
         } catch (error: unknown) {
             if (error instanceof AxiosError && error.response) {
@@ -84,31 +81,30 @@ function MessagesProvider(props: MessagesProviderProps) {
     useEffect(() => {
         tempIdRef.current = '';
 
-        console.log(chats);
-
-            if (id) {
-                if (messagesTemp[id]) {
-                    //console.log(messagesTemp[id]);
-                    dispatch({type: 'set', messages: messagesTemp[id]});
-                    return;
-                }
-
-                if (chats && chats.length > 0) {
-                    const chatExists = chats.some(chat => chat.id == id);
-                    if (chatExists) {
-                        fetchData();
-                    }
+        if (id) {
+            if (messagesTemp[id]) {
+                dispatch({type: 'set', messages: messagesTemp[id]});
+                if (opened) {
+                    toggle();
                 }
             } else {
-                controller.abort();
-                setLoading(false);
                 dispatch({type: 'set', messages: null});
+                if (opened) {
+                    toggle();
+                }
+                fetchData();
             }
+        } else {
+            controller.abort();
+            dispatch({type: 'set', messages: null});
+            if (opened) {
+                toggle();
+            }
+        }
     }, [location]);
 
     useEffect(() => {
         if (chats && chats.length > 0 && id) {
-            console.log(chats);
             const chatExists = chats.some(chat => chat.id == id);
             if (chatExists) {
                 fetchData();
@@ -119,7 +115,7 @@ function MessagesProvider(props: MessagesProviderProps) {
     }, [chats]);
 
   return (
-    <MessagesContext.Provider value={{ messages, dispatch, tempIdRef, loading }}>
+    <MessagesContext.Provider value={{ messages, dispatch, tempIdRef }}>
       {props.children}
     </MessagesContext.Provider>
   );

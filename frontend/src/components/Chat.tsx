@@ -16,7 +16,7 @@ import {
 } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { useHover, useDisclosure } from '@mantine/hooks';
-import MobileTitleContext from '../contexts/MobileTitleContext';
+import MobileTitleContext from '../contexts/MobileHeaderContext';
 import ChatsContext from '../contexts/ChatsContext';
 import axios from '../axios';
 import { AxiosError } from 'axios';
@@ -127,7 +127,7 @@ export default function ChatChatButton({
 			}
 		}}
 		>
-			<a className={`${classes.link} ${active ? classes.linkActive : ''}`}>
+			<a className={`${mobileScreen ? classes.linkMobile : classes.link} ${active ? classes.linkActive : ''}`}>
 				<IconMessageCircle2 className={classes.linkIcon} stroke={1.5} />
 				{ editable ? (
 					<TextInput
