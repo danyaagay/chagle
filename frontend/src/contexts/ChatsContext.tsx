@@ -27,8 +27,8 @@ type ChatsProviderProps = {
 };
 
 function ChatsProvider(props: ChatsProviderProps) {
-	const [chats, dispatchChats] = useReducer(chatsReducer, []);
-	const [active, setActive] = useState<string | undefined>(undefined);
+	const [ chats, dispatchChats ] = useReducer(chatsReducer, []);
+	const [ active, setActive ] = useState<string | undefined>(undefined);
 	const location = useLocation();
 	const { id } = useParams();
 
@@ -47,10 +47,10 @@ function ChatsProvider(props: ChatsProviderProps) {
 			}
 		})();
 
-		return () => {
-			setActive(undefined);
-			dispatchChats({ type: 'set', chats: null });
-		}
+		//return () => {
+		//	setActive(undefined);
+		//	dispatchChats({ type: 'set', chats: null });
+		//}
 	}, []);
 
 

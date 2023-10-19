@@ -1,22 +1,23 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import axios from '../axios';
 import {
     Burger,
     useMantineTheme,
     Button,
+    NavLink
 } from '@mantine/core';
 import {
     IconSettings,
     IconLogout,
     IconPlus,
+    IconHome2,
 } from '@tabler/icons-react';
 import ChatsList from './ChatsList';
 import { useMobileHeader } from '../contexts/MobileHeaderContext';
 import classes from '../css/ProtectedLayout.module.css';
 
 export default function MobileHeader() {
-    const { setMobileTitle, opened, toggle } = useMobileHeader();
-    const navigate = useNavigate();
+    const { mobileTitle, setMobileTitle, opened, toggle } = useMobileHeader();
     const theme = useMantineTheme();
 
     // Logout user
@@ -44,6 +45,8 @@ export default function MobileHeader() {
             />
 
             <Button
+                component={Link}
+                to='chat'
                 leftSection={<IconPlus />}
                 className={classes.link}
                 variant="default"
@@ -52,8 +55,11 @@ export default function MobileHeader() {
                 mb='16px'
                 fw={500}
                 onClick={() => {
-                    navigate('chat');
-                    setMobileTitle('Новый чат');
+                    if ('Новый чат' === mobileTitle) {
+                        toggle();
+                    } else {
+                        setMobileTitle('Новый чат');
+                    }
                 }}
             >
                 Новый чат
@@ -65,20 +71,44 @@ export default function MobileHeader() {
 
             <div className={classes.footer}>
                 <NavLink
+                    component={Link}
+                    className={classes.link}
+                    label="Админ панель"
+                    to='Crr183gJkwKQwkC3jE9N'
+                    onClick={() => {
+                        if ('Админ панель' === mobileTitle) {
+                            toggle();
+                        } else {
+                            setMobileTitle('Админ панель');
+                        }
+                    }}
+                    leftSection={<IconHome2 className={classes.linkIcon} stroke={1.5} />}
+                />
+
+                <NavLink
+                    component={Link}
                     to='settings'
+                    label="Настройки"
                     className={classes.link}
                     onClick={() => {
-                        setMobileTitle('Настройки');
+                        if ('Настройки' === mobileTitle) {
+                            toggle();
+                        } else {
+                            setMobileTitle('Настройки');
+                        }
                     }}
-                >
-                    <IconSettings className={classes.linkIcon} stroke={1.5} />
-                    <span>Настройки</span>
-                </NavLink>
 
-                <a href="#" className={classes.link} onClick={() => handleLogout()}>
-                    <IconLogout className={classes.linkIcon} stroke={1.5} />
-                    <span>Выйти</span>
-                </a>
+                    leftSection={<IconSettings className={classes.linkIcon} stroke={1.5} />}
+                />
+
+                <NavLink
+                    component={Link}
+                    to='settings'
+                    label="Выйти"
+                    className={classes.link}
+                    onClick={() => handleLogout()}
+                    leftSection={<IconLogout className={classes.linkIcon} stroke={1.5} />}
+                />
             </div>
         </>
     );

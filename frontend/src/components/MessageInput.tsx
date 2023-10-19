@@ -9,7 +9,6 @@ import {
 	ActionIcon,
 	Card,
 } from '@mantine/core';
-import { useParams } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import ChatsContext from '../contexts/ChatsContext';
 import MessagesContext from '../contexts/MessagesContext';
@@ -17,14 +16,12 @@ import classes from '../css/MessageInput.module.css';
 
 export default function MessageInput({ textareaRef }: { textareaRef: React.RefObject<HTMLTextAreaElement> }) {
 	const [isLoading, setIsLoading] = useState(false);
-	const { dispatchChats, setActive } = useContext(ChatsContext);
+	const { dispatchChats, active, setActive } = useContext(ChatsContext);
 	const { dispatch, tempIdRef } = useContext(MessagesContext);
-	const { id } = useParams();
-	const [ idChat, setIdChat ] = useState<string | undefined>(id);
 	//const [abortController, setAbortController] = useState(new AbortController() || null);
-
 	const mobileScreen = useMediaQuery('(max-width: 767px)');
 	const [keyboardOpen, setKeyboardOpen] = useState(false);
+
 	useEffect(() => {
 		const handleResize = () => {
 			const VIEWPORT_VS_CLIENT_HEIGHT_RATIO = 0.75;
@@ -44,13 +41,8 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 		}
 	}, []);
 
-	useEffect(() => {
-		setIdChat(id);
-	}, [id]);
-
 	// Handle send message
 	const handleSend = async () => {
-		console.log(idChat);
 		if (!isLoading && textareaRef.current) {
 			try {
 				setIsLoading(true);
@@ -81,11 +73,9 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 					}
 				});
 
-				console.log(idChat);
-
 				const requestBody = { text };
 
-				const url = 'http://192.168.0.116:8000/api/messages/' + (idChat ? idChat : '');
+				const url = 'http://192.168.0.116:8000/api/messages/' + (active ? active : '');
 
 				//const controller = new AbortController();
 				//setAbortController(controller);
@@ -159,8 +149,6 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 								});
 							} else if (tempId) {
 								tempIdRef.current = tempId;
-								console.log(tempId);
-								console.log('temp', tempIdRef.current);
 							} else if (messageId) {
 								dispatch({
 									type: 'change',
@@ -181,8 +169,6 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 								});
 								//console.log('change answer');
 							} else if (chatId) {
-								console.log('temp', tempIdRef.current);
-
 								dispatchChats({
 									type: 'add',
 									title: text,
@@ -191,7 +177,6 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 								if (tempIdRef.current) {
 									setActive(chatId);
-									setIdChat(chatId);
 									window.history.replaceState(null, text, '/chat/' + chatId);
 								}
 							}

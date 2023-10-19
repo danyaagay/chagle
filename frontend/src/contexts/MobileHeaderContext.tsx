@@ -1,4 +1,5 @@
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import ChatsContext from '../contexts/ChatsContext';
 import { useDisclosure } from '@mantine/hooks';
 
 const MobileHeaderContext = createContext<{
@@ -18,20 +19,26 @@ type MobileHeaderProviderProps = {
 };
 
 function MobileHeaderProvider(props: MobileHeaderProviderProps) {
-	const [mobileTitle, setMobileTitle] = useState<string | false>(false);
-	const [opened, { toggle }] = useDisclosure(false);
+	const { chats, active } = useContext(ChatsContext);
+	const [ mobileTitle, setMobileTitle ] = useState<string | false>(false);
+	const [ opened, { toggle } ] = useDisclosure(false);
 
+	// Set mobile title when loading page first time
 	useEffect(() => {
-		// Set mobile title when loading page first time
 		const path = window.location.pathname;
 		if (path === '/settings') {
 			setMobileTitle('Настройки');
 		} else if (path === '/chat') {
 			setMobileTitle('Новый чат');
-		} else {
-			setMobileTitle(false);
+		} else if (path === '/Crr183gJkwKQwkC3jE9N') {
+			setMobileTitle('Админ панель');
+		} else if (chats && active) {
+			const chat = chats.find(chat => chat.id == active);
+			if (chat) {
+				setMobileTitle(chat.title);
+			}
 		}
-	}, [setMobileTitle]);
+	}, [chats]);
 
 	return (
 		<MobileHeaderContext.Provider value={{ mobileTitle, setMobileTitle, opened, toggle }}>

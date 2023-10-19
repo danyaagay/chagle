@@ -28,9 +28,16 @@ export interface FormValues {
 
 export default function Settings() {
 	const { setUser, user } = useAuth();
-	const [isLoading, setIsLoading] = useState(false);
+	const [ isLoading, setIsLoading ] = useState(false);
 	const { opened, toggle } = useContext(MobileHeaderContext);
 
+	useEffect(() => {
+		if (opened) {
+			toggle();
+		}
+	}, []);
+	
+/*
 	useEffect(() => {
 		if (!location.pathname.includes('/settings')) {
 			return;
@@ -80,7 +87,7 @@ export default function Settings() {
 			// cleaning up the listeners here
 		}
 	}, [location.pathname]);
-
+*/
 	const handleSubmit = async () => {
 		const dirtyValues: Partial<FormValues> = {};
 

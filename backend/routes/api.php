@@ -7,6 +7,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\StreamsController;
+use App\Http\Controllers\AdminController;
 
 use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
@@ -41,6 +42,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/messages-cancel', [MessageController::class, 'cancel']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/settings-update', [SettingController::class, 'update']);
+
+    Route::get('/Crr183gJkwKQwkC3jE9N', [AdminController::class, 'index']);
 
     Route::post('/email/verify/resend', function (Request $request) {
         $request->user()->sendEmailVerificationNotification();

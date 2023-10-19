@@ -8,7 +8,6 @@ import {
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { useMobileHeader } from '../contexts/MobileHeaderContext';
-import { ChatsProvider } from '../contexts/ChatsContext';
 import MobileHeader from '../components/MobileHeader';
 import Menu from '../components/Menu';
 import classes from '../css/ProtectedLayout.module.css';
@@ -49,38 +48,23 @@ export default function DefaultLayout() {
 	}
 
 	return (
-		<ChatsProvider>
-			<AppShell
-				styles={{
-					main: {
-						height: '100%',
-						minHeight: '100%',
-						paddingBottom: '0px',
-						paddingTop: '60px',
-						...(mobileScreen ? { paddingRight: '0px !important', paddingLeft: '0px !important' } : { paddingTop: '0px' }),
-					},
-					root: {
-						height: '100%',
-						minHeight: '100%',
-					},
-				}}
-				layout='alt'
-				header={{ height: { base: 60, md: 70 } }}
-				navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
-				transitionDuration={0}
-			>
-				<AppShell.Header hiddenFrom="sm" className={classes.header} p="md">
-					<MobileHeader />
-				</AppShell.Header>
+		<AppShell
+			classNames={classes}
+			layout='alt'
+			navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
+			transitionDuration={0}
+		>
+			<AppShell.Header hiddenFrom="sm" p="md">
+				<MobileHeader />
+			</AppShell.Header>
 
-				<AppShell.Navbar className={classes.navbar}>
-					<Menu />
-				</AppShell.Navbar>
+			<AppShell.Navbar>
+				<Menu />
+			</AppShell.Navbar>
 
-				<AppShell.Main>
-					<Outlet />
-				</AppShell.Main>
-			</AppShell>
-		</ChatsProvider>
+			<AppShell.Main>
+				<Outlet />
+			</AppShell.Main>
+		</AppShell>
 	);
 }

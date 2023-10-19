@@ -8,6 +8,7 @@ export default function GuestLayout() {
 	if (user) {
 		return <Navigate to="/chat" />;
 	}
+	
 	return (
 		<>
 			<Outlet />

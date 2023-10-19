@@ -40,18 +40,11 @@ export default function ChatChatButton({
 	const { hovered, ref } = useHover();
 	const [ editable, editToggle ]  = useDisclosure(false);
 	const [ deleting, { open, close } ]  = useDisclosure(false);
-	const [ chatTitle, setChatTitle] = useState(title);
+	const [ chatTitle, setChatTitle ] = useState(title);
 	const mobileScreen = useMediaQuery('(max-width: 767px)');
 	const navigate = useNavigate();
 	const { setMobileTitle } = useContext(MobileTitleContext);
 	const { dispatchChats } = useContext(ChatsContext);
-
-	useEffect(() => {
-		// Set mobile title when loading page first time
-		if (active) {
-			setMobileTitle(chatTitle);
-		}
-	}, [setMobileTitle]);
 
 	// Handle delete chat
 	const handleDelete = async () => {
@@ -112,7 +105,8 @@ export default function ChatChatButton({
 							id: chatId
 						});
 						if (active) {
-							navigate('/chat');
+							setMobileTitle('Новый чат');
+							navigate('chat');
 						}
 					}}>
 					Удалить
