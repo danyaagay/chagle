@@ -1,4 +1,3 @@
-import { useAuth } from '../contexts/AuthContext';
 import { useEffect, useState } from 'react';
 import {
 	Table,
@@ -10,13 +9,14 @@ import {
 	TextInput,
 	rem
 } from '@mantine/core';
-import axios from '../axios';
 import { IconSelector, IconChevronDown, IconChevronUp, IconSearch } from '@tabler/icons-react';
 import classes from '../css/TableSort.module.css';
 
 interface RowData {
+	id: string;
 	name: string;
 	email: string;
+	token: string;
 }
 
 interface ThProps {
@@ -62,60 +62,55 @@ function filterData(data: RowData[], search: string): RowData[] {
 }
 
 function sortData(
-	data: RowData[],
-	payload: { sortBy: keyof RowData | null; reversed: boolean; search: string }
+    data: RowData[],
+    payload: { sortBy: keyof RowData | null; reversed: boolean; search: string }
 ) {
-	const { sortBy } = payload;
+    const { sortBy, reversed, search } = payload;
+    
+    if (!sortBy) {
+        return filterData(data, search);
+    }
 
-	if (!sortBy) {
-		return filterData(data, payload.search);
-	}
+    const sortedData = [...data].sort((a, b) => {
+        const valueA = a[sortBy];
+        const valueB = b[sortBy];
 
-	return filterData(
-		[...data].sort((a, b) => {
-			if (payload.reversed) {
-				return b[sortBy].localeCompare(a[sortBy]);
-			}
+        if (typeof valueA === 'string' && typeof valueB === 'string') {
+            return reversed ? valueB.localeCompare(valueA) : valueA.localeCompare(valueB);
+        } else if (typeof valueA === 'number' && typeof valueB === 'number') {
+            return reversed ? valueB - valueA : valueA - valueB;
+        }
 
-			return a[sortBy].localeCompare(b[sortBy]);
-		}),
-		payload.search
-	);
+        return 0;
+    });
+
+    return filterData(sortedData, search);
 }
 
-export function UsersList() {
-	const { user } = useAuth();
+
+
+export function TableList(props: any) {
 	const [search, setSearch] = useState('');
-	const [data, setData] = useState<RowData[]>([]);
-	const [sortedData, setSortedData] = useState<RowData[]>([]);
+	const [sortedData, setSortedData] = useState(props.data);
 	const [sortBy, setSortBy] = useState<keyof RowData | null>(null);
 	const [reverseSortDirection, setReverseSortDirection] = useState(false);
 
 	useEffect(() => {
-		(async () => {
-			try {
-				const users = await axios.get('/users', user);
-				if (users.status === 200) {
-					setData(users.data.users);
-					setSortedData(users.data.users);
-				}
-			} catch (error: unknown) {
-				console.error("Error retrieving users:", error);
-			}
-		})();
-	}, []);
+		setSortedData(props.data);
+		console.log(props.data);
+	}, [props.data]);
 
 	const setSorting = (field: keyof RowData) => {
 		const reversed = field === sortBy ? !reverseSortDirection : false;
 		setReverseSortDirection(reversed);
 		setSortBy(field);
-		setSortedData(sortData(data, { sortBy: field, reversed, search }));
+		setSortedData(sortData(props.data, { sortBy: field, reversed, search }));
 	};
 
 	const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const { value } = event.currentTarget;
 		setSearch(value);
-		setSortedData(sortData(data, { sortBy, reversed: reverseSortDirection, search: value }));
+		setSortedData(sortData(props.data, { sortBy, reversed: reverseSortDirection, search: value }));
 	};
 
 	return (
@@ -130,31 +125,29 @@ export function UsersList() {
 			<Table horizontalSpacing="md" verticalSpacing="xs" miw={700} layout="fixed">
 				<Table.Thead>
 					<Table.Tr>
-						<Th
-							sorted={sortBy === 'name'}
-							reversed={reverseSortDirection}
-							onSort={() => setSorting('name')}
-						>
-							Name
-						</Th>
-						<Th
-							sorted={sortBy === 'email'}
-							reversed={reverseSortDirection}
-							onSort={() => setSorting('email')}
-						>
-							Email
-						</Th>
+						{sortedData.length > 0 && Object.keys(sortedData[0]).map((key) => (
+							<Th
+								key={key}
+								sorted={sortBy === key}
+								reversed={reverseSortDirection}
+								onSort={() => setSorting(key)}
+							>
+								{key}
+							</Th>
+						))}
 					</Table.Tr>
 				</Table.Thead>
 				<Table.Tbody>
-					{sortedData && sortedData.map((row) => (
-						<Table.Tr key={row.name}>
-							<Table.Td>{row.name}</Table.Td>
-							<Table.Td>{row.email}</Table.Td>
+					{sortedData.length > 0 && sortedData.map((row: any) => (
+						<Table.Tr key={row.id}>
+							{Object.keys(row).map((key) => (
+								<Table.Td key={key}>{row[key]}</Table.Td>
+							))}
 						</Table.Tr>
 					))}
 				</Table.Tbody>
 			</Table>
+
 		</ScrollArea>
 	);
 }

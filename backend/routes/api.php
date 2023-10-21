@@ -8,7 +8,8 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\StreamsController;
 use App\Http\Controllers\AdminController;
-
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\TokenController;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Hash;
@@ -32,6 +33,10 @@ Route::post('/login', [AuthController::class, 'login']);
 //Route::get('/stream', [StreamsController::class, 'stream']);
 
 Route::middleware('auth:sanctum')->group(function () {
+
+    Route::get('/users', [UserController::class, 'index']);
+    Route::get('/tokens', [TokenController::class, 'index']);
+    Route::post('/tokens', [TokenController::class, 'store']);
 
     Route::get('/user', [AuthController::class, 'user']);
     Route::get('/chats', [ChatController::class, 'index']);

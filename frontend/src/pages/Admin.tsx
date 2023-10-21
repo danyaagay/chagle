@@ -1,11 +1,23 @@
 import { useAuth } from '../contexts/AuthContext';
 import { useEffect, useState, useContext } from 'react';
-import {  Navigate, useParams } from 'react-router-dom';
+import {  Navigate } from 'react-router-dom';
 import axios from '../axios';
-import { AxiosError } from 'axios';
-import { Group, Paper, Text, ThemeIcon, SimpleGrid, Tabs, rem } from '@mantine/core';
+import {
+	Group,
+	Paper,
+	Text,
+	ThemeIcon,
+	SimpleGrid,
+	Tabs,
+	TextInput,
+	ActionIcon,
+	Button,
+	Box
+} from '@mantine/core';
 import { IconArrowUpRight, IconArrowDownRight } from '@tabler/icons-react';
+import { TableList } from '../components/TableList';
 import MobileHeaderContext from '../contexts/MobileHeaderContext';
+import { IconPlus } from '@tabler/icons-react';
 
 import classes from '../css/Admin.module.css';
 
@@ -18,7 +30,10 @@ type Stat = {
 export default function StatsGridIcons() {
 	const { user } = useAuth();
 	const [ data, setData] = useState<Stat[]>([]);
+	const [ users, setUsers ] = useState([]);
+	const [ tokens, setTokens ] = useState([]);
 	const { opened, toggle } = useContext(MobileHeaderContext);
+	const [ token, setToken] = useState("");
 
 	useEffect(() => {
 		if (data.length > 0 && opened) {
@@ -27,12 +42,19 @@ export default function StatsGridIcons() {
 	}, [data]);
 
 	useEffect(() => {
-		// Check if user is logged in or not from server
 		(async () => {
 			try {
 				const resp = await axios.get('/Crr183gJkwKQwkC3jE9N', user);
 				if (resp.status === 200) {
 					setData(resp.data);
+				}
+				const users = await axios.get('/users', user);
+				if (users.status === 200) {
+					setUsers(users.data);
+				}
+				const tokens = await axios.get('/tokens', user);
+				if (tokens.status === 200) {
+					setTokens(tokens.data);
 				}
 			} catch (error: unknown) {
 				
@@ -44,6 +66,22 @@ export default function StatsGridIcons() {
 	if (user.roles[0] != 'super-admin') {
 		return <Navigate to="/" />;
 	}
+
+	const handleTokenAdd = async () => {
+		try {
+			const resp = await axios.post(`/tokens`, { token: token });
+			console.log(resp);
+			if (resp.status === 200) {
+				setTokens((prevTokens) => [...prevTokens, {id: resp.data.id, created_at: resp.data.created_at, updated_at: resp.data.updated_at, token: resp.data.token, alive: resp.data.alive}]);
+			}
+		} catch (error: unknown) {
+
+		}
+	};
+
+	const handleTokenChange = (event) => {
+		setToken(event.target.value);
+	};
 
 	const stats = data.map((stat: Stat) => {
 		const DiffIcon = stat.diff && stat.diff > 0 ? IconArrowUpRight : IconArrowDownRight;
@@ -102,12 +140,25 @@ export default function StatsGridIcons() {
 					</Tabs.Tab>
 				</Tabs.List>
 
-				<Tabs.Panel value="gallery" pt="xs">
-					Список клиентов
+				<Tabs.Panel value="users" pt="xl">
+					<TableList data={users} />
 				</Tabs.Panel>
 
-				<Tabs.Panel value="messages" pt="xs">
-					Список токенов
+				<Tabs.Panel value="tokens" pt="xl">
+					<Box mb="lg">
+						<Group gap={8}>
+							<TextInput
+								placeholder="Токен"
+								rightSectionPointerEvents="all"
+								w={500}
+								onChange={handleTokenChange}
+							/>
+							<ActionIcon variant="filled" size="lg" w={36} h={36} onClick={handleTokenAdd}>
+								<IconPlus style={{ width: '60%', height: '60%' }} stroke={1.5} />
+							</ActionIcon>
+						</Group>
+					</Box>
+					<TableList data={tokens} />
 				</Tabs.Panel>
 			</Tabs>
 		</>
