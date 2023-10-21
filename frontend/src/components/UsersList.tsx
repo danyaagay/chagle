@@ -62,25 +62,29 @@ function filterData(data: RowData[], search: string): RowData[] {
 }
 
 function sortData(
-	data: RowData[],
-	payload: { sortBy: keyof RowData | null; reversed: boolean; search: string }
+    data: RowData[],
+    payload: { sortBy: keyof RowData | null; reversed: boolean; search: string }
 ) {
-	const { sortBy } = payload;
+    const { sortBy, reversed, search } = payload;
+    
+    if (!sortBy) {
+        return filterData(data, search);
+    }
 
-	if (!sortBy) {
-		return filterData(data, payload.search);
-	}
+    const sortedData = [...data].sort((a, b) => {
+        const valueA = a[sortBy];
+        const valueB = b[sortBy];
 
-	return filterData(
-		[...data].sort((a, b) => {
-			if (payload.reversed) {
-				return b[sortBy].localeCompare(a[sortBy]);
-			}
+        if (typeof valueA === 'string' && typeof valueB === 'string') {
+            return reversed ? valueB.localeCompare(valueA) : valueA.localeCompare(valueB);
+        } else if (typeof valueA === 'number' && typeof valueB === 'number') {
+            return reversed ? valueB - valueA : valueA - valueB;
+        }
 
-			return a[sortBy].localeCompare(b[sortBy]);
-		}),
-		payload.search
-	);
+        return 0;
+    });
+
+    return filterData(sortedData, search);
 }
 
 export function UsersList() {
@@ -94,10 +98,10 @@ export function UsersList() {
 	useEffect(() => {
 		(async () => {
 			try {
-				const users = await axios.get('/users', user);
-				if (users.status === 200) {
-					setData(users.data.users);
-					setSortedData(users.data.users);
+				const resp = await axios.get('/users', user);
+				if (resp.status === 200) {
+					setData(resp.data);
+					setSortedData(resp.data);
 				}
 			} catch (error: unknown) {
 				console.error("Error retrieving users:", error);

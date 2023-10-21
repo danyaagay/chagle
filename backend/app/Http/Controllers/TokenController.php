@@ -43,6 +43,16 @@ class TokenController extends Controller
 
     public function destroy(Request $request, $id)
     {
+        $user = $request->user();
 
+        if ($user->hasRole('super-admin')) {
+            $token = Token::find($id);
+            $token->delete();
+            return true;
+        } else {
+            return response()->json([
+                'error' => 'Undefined',
+            ], 400);
+        }
     }
 }

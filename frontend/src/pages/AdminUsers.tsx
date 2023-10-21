@@ -8,9 +8,12 @@ import {
 	Text,
 	ThemeIcon,
 	SimpleGrid,
+	Box,
 } from '@mantine/core';
 import { IconArrowUpRight, IconArrowDownRight } from '@tabler/icons-react';
+import { UsersList } from '../components/UsersList';
 import MobileHeaderContext from '../contexts/MobileHeaderContext';
+
 import classes from '../css/Admin.module.css';
 
 type Stat = {
@@ -33,7 +36,7 @@ export default function StatsGridIcons() {
 	useEffect(() => {
 		(async () => {
 			try {
-				const resp = await axios.get('/summary/all', user);
+				const resp = await axios.get('/summary/users', user);
 				if (resp.status === 200) {
 					setData(resp.data);
 				}
@@ -91,6 +94,9 @@ export default function StatsGridIcons() {
 	return (
 		<>
 			<SimpleGrid cols={{ base: 1, sm: 3 }} classNames={classes}>{stats}</SimpleGrid>
+			<Box className={classes.root}>
+				<UsersList />
+			</Box>
 		</>
 	);
 }

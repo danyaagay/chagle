@@ -1,11 +1,12 @@
 import { createBrowserRouter } from 'react-router-dom';
 import Admin from './pages/Admin';
+import AdminUsers from './pages/AdminUsers';
+import AdminTokens from './pages/AdminTokens';
 import Chat from './pages/Chat';
 import Settings from './pages/Settings';
 import Authentication from './pages/Authentication';
 import ResetPassword from './pages/ResetPassword';
 import Verify from './pages/Verify';
-import ProtectedLayout from './layouts/ProtectedLayout';
 import GuestLayout from './layouts/GuestLayout';
 import ContextLayout from './layouts/ContextLayout';
 
@@ -43,6 +44,14 @@ const router = createBrowserRouter([
 			{
 				path: '/settings',
 				element: <Settings />,
+			},
+			{
+				path: '/Crr183gJkwKQwkC3jE9N/users',
+				element: <AdminUsers />,
+			},
+			{
+				path: '/Crr183gJkwKQwkC3jE9N/tokens',
+				element: <AdminTokens />,
 			},
 			{
 				path: '/Crr183gJkwKQwkC3jE9N',

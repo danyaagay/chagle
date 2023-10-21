@@ -7,7 +7,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\StreamsController;
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\TokenController;
 use Illuminate\Support\Facades\Password;
@@ -37,6 +37,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/tokens', [TokenController::class, 'index']);
     Route::post('/tokens', [TokenController::class, 'store']);
+    Route::delete('/tokens/{id}', [TokenController::class, 'destroy']);
+    Route::get('/summary/{type}', [SummaryController::class, 'index']);
 
     Route::get('/user', [AuthController::class, 'user']);
     Route::get('/chats', [ChatController::class, 'index']);
@@ -47,8 +49,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/messages-cancel', [MessageController::class, 'cancel']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/settings-update', [SettingController::class, 'update']);
-
-    Route::get('/Crr183gJkwKQwkC3jE9N', [AdminController::class, 'index']);
 
     Route::post('/email/verify/resend', function (Request $request) {
         $request->user()->sendEmailVerificationNotification();

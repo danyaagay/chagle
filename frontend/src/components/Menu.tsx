@@ -4,7 +4,9 @@ import {
     Burger,
     useMantineTheme,
     Button,
-    NavLink
+    NavLink,
+    Menu,
+    rem
 } from '@mantine/core';
 import {
     IconSettings,
@@ -30,6 +32,14 @@ export default function MobileHeader() {
             }
         } catch (error) {
             console.log(error);
+        }
+    };
+
+    const adminClick = () => {
+        if ('Админ панель' === mobileTitle) {
+            toggle();
+        } else {
+            setMobileTitle('Админ панель');
         }
     };
 
@@ -70,20 +80,27 @@ export default function MobileHeader() {
             </div>
 
             <div className={classes.footer}>
-                <NavLink
-                    component={Link}
-                    className={classes.link}
-                    label="Админ панель"
-                    to='Crr183gJkwKQwkC3jE9N'
-                    onClick={() => {
-                        if ('Админ панель' === mobileTitle) {
-                            toggle();
-                        } else {
-                            setMobileTitle('Админ панель');
-                        }
-                    }}
-                    leftSection={<IconHome2 className={classes.linkIcon} stroke={1.5} />}
-                />
+                <Menu width={200} shadow="md" position="left" offset={-80}>
+                    <Menu.Target>
+                        <NavLink
+                            className={classes.link}
+                            label="Админ панель"
+                            leftSection={<IconHome2 className={classes.linkIcon} stroke={1.5} />}
+                        />
+                    </Menu.Target>
+
+                    <Menu.Dropdown>
+                        <Menu.Item component={Link} to='Crr183gJkwKQwkC3jE9N' onClick={adminClick}>
+                            Сводка
+                        </Menu.Item>
+                        <Menu.Item component={Link} to='Crr183gJkwKQwkC3jE9N/users' onClick={adminClick}>
+                            Клиенты
+                        </Menu.Item>
+                        <Menu.Item component={Link} to='Crr183gJkwKQwkC3jE9N/tokens' onClick={adminClick}>
+                            Токены
+                        </Menu.Item>
+                    </Menu.Dropdown>
+                </Menu>
 
                 <NavLink
                     component={Link}
