@@ -20,7 +20,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 	const { dispatch, tempIdRef } = useContext(MessagesContext);
 	//const [abortController, setAbortController] = useState(new AbortController() || null);
 	const mobileScreen = useMediaQuery('(max-width: 767px)');
-	const [keyboardOpen, setKeyboardOpen] = useState(false);
+	const [ keyboardOpen, setKeyboardOpen ] = useState(false);
 
 	useEffect(() => {
 		const handleResize = () => {
@@ -36,7 +36,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 			}
 		};
 
-		if ('visualViewport' in window && window.visualViewport && mobileScreen) {
+		if ('visualViewport' in window && window.visualViewport) {
 			window.visualViewport.addEventListener('resize', handleResize);
 		}
 	}, []);
@@ -116,26 +116,26 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 						// Massage and parse the chunk of data
 						const chunk = decoder.decode(value);
 
-						//console.log(chunk);
+						console.log(chunk);
 
 						const lines = chunk.split("\n\n");
 
-						//console.log(lines);
+						console.log(lines);
 
 						const parsedLines = lines
 							.map((line) => line.replace(/^data: /, "").trim()) // Remove the "data: " prefix
 							.filter((line) => line !== "" && line !== "ping") // Remove empty lines and "[DONE]"
 							.map((line) => JSON.parse(line)); // Parse the JSON string
 
-						//console.log(parsedLines);
+						console.log(parsedLines);
 
 						for (const parsedLine of parsedLines) {
-							//console.log(parsedLine);
+							console.log(parsedLine);
 							const { message, answerId, messageId, chatId, tempId } = parsedLine;
 
-							//console.log(answer, message);
+							console.log(answer, message);
 
-							//console.log(answerId, messageId);
+							console.log(answerId, messageId);
 							// Update the UI with the new content
 							if (message) {
 								answer += message;
@@ -157,9 +157,9 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 										id: messageId,
 									}
 								});
-								//console.log('change message');
+								console.log('change message');
 							} else if (answerId) {
-								//console.log('here');
+								console.log('here');
 								dispatch({
 									type: 'change',
 									id: -1,
@@ -167,7 +167,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 										id: answerId,
 									}
 								});
-								//console.log('change answer');
+								console.log('change answer');
 							} else if (chatId) {
 								dispatchChats({
 									type: 'add',

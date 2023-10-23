@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use OpenAI;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
+use App\Http\Controllers\TokenController;
 
 class StreamsController extends Controller
 {
@@ -13,96 +14,35 @@ class StreamsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function stream($question)
+    public function stream($question, $history = false)
     {
+        $debug = false;
+         
         ignore_user_abort(true);
 
+        if (!$history) {
+            $history = [
+                ['role' => 'user', 'content' => $question]
+            ];
+        }
+
+        //Cancel temp id
         $tempId = Str::random(15);
         Redis::set($tempId, true);
 
-        $answer = '';
-
-        $stream = [
-            'h',
-            'e',
-            'l',
-            'l',
-            'o',
-            ' ',
-            'h',
-            'o',
-            'w',
-            ' ',
-            'a',
-            're',
-            ' you',
-            'h',
-            'e',
-            'l',
-            'l',
-            'o',
-            ' ',
-            'h',
-            'o',
-            'w',
-            ' ',
-            'a',
-            're',
-            ' you',
-            'h',
-            'e',
-            'l',
-            'l',
-            'o',
-            ' ',
-            'h',
-            'o',
-            'w',
-            ' ',
-            'a',
-            're',
-            ' you',
-            'h',
-            'e',
-            'l',
-            'l',
-            'o',
-            ' ',
-            'h',
-            'o',
-            'w',
-            ' ',
-            'a',
-            're',
-            ' you',            
-            'h',
-            'e',
-            'l',
-            'l',
-            'o',
-            ' ',
-            'h',
-            'o',
-            'w',
-            ' ',
-            'a',
-            're',
-            ' you'
-        ];
-
-        //$client = OpenAI::client('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');
-        //$stream = $client->chat()->createStreamed([
-        //    'model' => 'gpt-3.5-turbo',
-        //    'messages' => [
-        //        ['role' => 'user', 'content' => $question]
-        //    ],
-        //    'max_tokens' => 1024,
-        //]);
-
-        //while (ob_get_level()){
-        //    ob_get_contents();
-        //    ob_end_clean();
-        //}
+        if ($debug) {
+            $stream = [
+                'h','e','l','l','o',' ','h','o','w',' ','a','re',' you','h','e','l','l','o',' ','h','o','w',' ','a','re',' you','h','e','l','l','o',' ','h','o','w',' ','a','re',' you','h','e','l','l','o',' ','h','o','w',' ','a','re',' you','h','e','l','l','o',' ','h','o','w',' ','a','re',' you'
+            ];
+        } else {
+            $token = TokenController::getToken();
+            $client = OpenAI::client($token);
+            $stream = $client->chat()->createStreamed([
+                'model' => 'gpt-3.5-turbo',
+                'messages' => $history,
+                'max_tokens' => 1024,
+            ]);
+        }
 
         if (ob_get_level() == 0) ob_start();
 
@@ -111,17 +51,24 @@ class StreamsController extends Controller
         ob_flush();
         flush();
 
+        $answer = '';
+
         foreach ($stream as $response) {
-            //$text = $response->choices[0]->delta->content;
+
+            if ($debug) {
+                $text = $response;
+                usleep(50000);
+            } else {
+                $text = $response->choices[0]->delta->content;
+            }
+
             if (connection_aborted() || !Redis::get($tempId)) {
                 break;
             }
 
-            $answer .= $response;
+            $answer .= $text;
 
-            usleep(50000);
-
-            echo 'data: {"message":"' . $response . '"}';
+            echo 'data: {"message":"' . $text . '"}';
             echo "\n\n";
             ob_flush();
             flush();

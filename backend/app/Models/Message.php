@@ -19,6 +19,6 @@ class Message extends Authenticatable
      */
     protected $fillable = [
         'role',
-        'text'
+        'content'
     ];
 }

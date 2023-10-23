@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->string('token');
+            $table->integer('limit')->nullable();
             $table->boolean('alive')->default(1);
         });
     }

@@ -55,4 +55,13 @@ class TokenController extends Controller
             ], 400);
         }
     }
+
+    public static function getToken()
+    {
+        $token = Token::where('alive', 1)->first();
+        
+        //Limits work here
+
+        return $token->token;
+    }
 }

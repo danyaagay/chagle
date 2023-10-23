@@ -19,7 +19,7 @@ return new class extends Migration
                 ->references('id')->on('chats')
                 ->onDelete('cascade');
             $table->string('role');
-            $table->string('text');
+            $table->text('content');
         });
     }
 

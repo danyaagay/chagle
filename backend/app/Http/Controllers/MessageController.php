@@ -11,96 +11,6 @@ class MessageController extends Controller
 {
     private $result;
 
-    public function openAi($text)
-    {
-        //return 'answer';
-
-        ignore_user_abort(true);
-        header('Access-Control-Allow-Origin: http://192.168.0.116:5173');
-        header('Access-Control-Allow-Credentials: true');
-        header('Access-Control-Allow-Headers: *');
-
-        $tokens = [
-            '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',
-            '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'
-        ];
-
-        $json = [
-            'model' => 'gpt-3.5-turbo',
-            'messages' => [
-                ['role' => 'user', 'content' => $text]
-            ],
-            'stream' => true,
-            'max_tokens' => 1024,
-        ];
-
-        $ch = curl_init();
-        curl_setopt_array($ch, array(
-            CURLOPT_URL => 'https://api.openai.com/v1/chat/completions',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => json_encode($json, JSON_UNESCAPED_UNICODE),
-            CURLOPT_HTTPHEADER => [
-                "Authorization: Bearer {$tokens[1]}",
-                'Content-Type: application/json'
-            ]
-        ));
-
-        $this->result = '';
-        $callback = function ($ch, $data) {
-            echo PHP_EOL;
-            if (connection_aborted()) {
-                return false;
-            }
-
-            $lines = explode("\n\n", $data);
-            $lines = array_filter($lines);
-            $parsedLines = array_map(function ($line) {
-                return json_decode(trim(str_replace('data: ', '', $line)), true);
-            }, $lines);
-
-            foreach ($parsedLines as $parsedLine) {
-                echo PHP_EOL;
-                flush();
-                if (connection_aborted()) {
-                    return false;
-                }
-
-                $choices = $parsedLine['choices'] ?? null;
-                $delta = $choices[0]['delta'] ?? null;
-                $content = $delta['content'] ?? null;
-
-                if ($content) {
-                    $this->result .= $content;
-
-                    $json = [
-                        'message' => $this->result
-                    ];
-
-                    echo PHP_EOL;
-                    flush();
-                    if (connection_aborted()) {
-                        return false;
-                    }
-
-                    echo json_encode($json) . PHP_EOL;
-                }
-            }
-
-            echo PHP_EOL;
-            flush();
-            if (connection_aborted()) {
-                return false;
-            }
-
-            return strlen($data);
-        };
-
-        curl_setopt($ch, CURLOPT_WRITEFUNCTION, $callback);
-        curl_exec($ch);
-        return $this->result;
-    }
-
     public function getAllMessages($chat)
     {
         $messages = $chat->messages;
@@ -139,7 +49,7 @@ class MessageController extends Controller
 
             $formattedMessage['date'] = $date;
             $formattedMessage['time'] = $date->format('g:i');
-            $formattedMessage['text'] = $message->text;
+            $formattedMessage['text'] = $message->content;
             $formattedMessage['id'] = $message->id;
 
             $formattedMessages[] = $formattedMessage;
@@ -187,15 +97,17 @@ class MessageController extends Controller
             }
 
             $message = $chat->messages()->create([
-                'text' => $request->text,
+                'content' => $request->text,
                 'role' => 'user',
             ]);
 
+            $history = $this->getHistory($chat->messages()->get());
+
             $stream = new StreamsController;
-            $answer = $stream->stream($request->text, $chat);
+            $answer = $stream->stream($request->text, $history);
 
             $chatAnswer = $chat->messages()->create([
-                'text' => $answer,
+                'content' => $answer,
                 'role' => 'assistant',
             ]);
 
@@ -220,5 +132,15 @@ class MessageController extends Controller
     {
         Redis::del($request->id);
         return true;
+    }
+
+    public static function getHistory($messages)
+    {
+        $array = [];
+        foreach ($messages as $message) {
+            $array[] = ['role' => $message->role, 'content' => $message->content];
+        }
+
+        return $array;
     }
 }
