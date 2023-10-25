@@ -32,6 +32,12 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 			setMobileTitle('Новый чат');
 		} else if (path === '/Crr183gJkwKQwkC3jE9N') {
 			setMobileTitle('Админ панель');
+		} else if (path === '/Crr183gJkwKQwkC3jE9N/users') {
+			setMobileTitle('Админ панель');
+		} else if (path === '/Crr183gJkwKQwkC3jE9N/users') {
+			setMobileTitle('Клиенты');
+		} else if (path === '/Crr183gJkwKQwkC3jE9N/tokens') {
+			setMobileTitle('Токены');
 		} else if (chats && active) {
 			const chat = chats.find(chat => chat.id == active);
 			if (chat) {

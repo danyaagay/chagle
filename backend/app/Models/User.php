@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Permission\Traits\HasRoles;
+use App\Notifications\VerifyEmailQueued;
 
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -49,5 +50,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function chats(): HasMany
     {
         return $this->hasMany(Chat::class);
+    }
+
+    public function sendEmailVerificationNotification()
+    {
+      $this->notify(new VerifyEmailQueued);
     }
 }

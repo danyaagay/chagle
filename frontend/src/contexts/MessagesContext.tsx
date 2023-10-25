@@ -22,22 +22,22 @@ type MessagesContextProps = {
 
 const MessagesContext = createContext<MessagesContextProps>({
     messages: null,
-    dispatch: () => {},
+    dispatch: () => { },
     tempIdRef: { current: "" },
 });
 
 type MessagesProviderProps = {
-  children: ReactNode;
+    children: ReactNode;
 };
 
 type MessagesTempState = {
-    [id: string]: Message[];
+    [id: string]: Message[] | null;
 };
 
 function MessagesProvider(props: MessagesProviderProps) {
     const { chats } = useContext(ChatsContext);
-    const [ messages, dispatch ] = useReducer(messagesReducer, []);
-    const [ messagesTemp, setMessagesTemp ] = useState<MessagesTempState>({});
+    const [messages, dispatch] = useReducer(messagesReducer, null);
+    const [messagesTemp, setMessagesTemp] = useState<MessagesTempState>({});
     const tempIdRef = useRef('');
     const location = useLocation();
     const navigate = useNavigate();
@@ -52,7 +52,7 @@ function MessagesProvider(props: MessagesProviderProps) {
             const resp = await axios.get(`/messages/${id}`, { signal: controller.signal });
             if (resp.status === 200) {
                 if (id) {
-                    dispatch({type: 'set', messages: resp.data.messages});
+                    dispatch({ type: 'set', messages: resp.data.messages });
                     setMessagesTemp(prevMessages => ({
                         ...prevMessages,
                         [id]: resp.data.messages,
@@ -77,18 +77,18 @@ function MessagesProvider(props: MessagesProviderProps) {
             }
         }
     }, [messages]);
-        
+
     useEffect(() => {
         tempIdRef.current = '';
 
         if (id) {
             if (messagesTemp[id]) {
-                dispatch({type: 'set', messages: messagesTemp[id]});
+                dispatch({ type: 'set', messages: messagesTemp[id] });
                 if (opened) {
                     toggle();
                 }
             } else {
-                dispatch({type: 'set', messages: null});
+                dispatch({ type: 'set', messages: null });
                 if (opened) {
                     toggle();
                 }
@@ -96,7 +96,7 @@ function MessagesProvider(props: MessagesProviderProps) {
             }
         } else {
             controller.abort();
-            dispatch({type: 'set', messages: null});
+            dispatch({ type: 'set', messages: null });
             if (opened) {
                 toggle();
             }
@@ -114,62 +114,66 @@ function MessagesProvider(props: MessagesProviderProps) {
         }
     }, [chats]);
 
-  return (
-    <MessagesContext.Provider value={{ messages, dispatch, tempIdRef }}>
-      {props.children}
-    </MessagesContext.Provider>
-  );
+    return (
+        <MessagesContext.Provider value={{ messages, dispatch, tempIdRef }}>
+            {props.children}
+        </MessagesContext.Provider>
+    );
 }
 
 type Action =
-  | { type: 'set', messages:  Message[] | null }
-  | { type: 'add', message: { id: number, text: string, you: boolean } }
-  | { type: 'change', id: number, message: { id?: number; date?: string; text?: string; marker?: string; time?: string; you?: boolean; } }
-  | { type: 'delete', id: number };
+    | { type: 'set', messages: Message[] | null }
+    | { type: 'add', message: { id: number, text: string, you: boolean } }
+    | { type: 'change', id: number, message: { id?: number; date?: string; text?: string; marker?: string; time?: string; you?: boolean; } }
+    | { type: 'delete', id: number };
 
-function messagesReducer(messages: Message[], action: Action): Message[] {
-  switch (action.type) {
-    case 'set':
-        return action.messages || [];
-    case 'add':
-        const date = new Date();
-        const dateFormatted = date.toISOString();
+function messagesReducer(messages: Message[] | null, action: Action): Message[] | null {
+    if (messages === null) {
+		messages = [];
+	}
 
-        const timeString = dateFormatted.split('T')[1].slice(0, 5);
-        let [hours, minutes] = timeString.split(':');
-        hours = parseInt(hours).toString();
+    switch (action.type) {
+        case 'set':
+            return action.messages || [];
+        case 'add':
+            const date = new Date();
+            const dateFormatted = date.toISOString();
 
-        let marker;
-        
-        //if (messages && messages.length > 0) {
-             const lastMessageWithMarker = messages.filter(message => message.marker)[messages.filter(message => message.marker).length - 1];
-        
-             if (lastMessageWithMarker && lastMessageWithMarker.marker != 'Сегодня' || !lastMessageWithMarker) {
-                 marker = 'Сегодня';
-             }
-        //}
-        
-        return [...messages, {
-            id: action.message.id,
-            date: dateFormatted,
-            time: `${hours}:${minutes}`,
-            text: action.message.text,
-            you: action.message.you,
-            ...(marker ? { marker } : {})
-        }];      
-    case 'change':
-        return messages.map(message =>
-            message.id === action.id ? {
-                ...message,
-                ...action.message
-            } : message
-        );
-    case 'delete':
-        return messages.filter(message => message.id !== action.id);
-    default:
-        const { type } = action as never;
-        throw new Error('Unknown action: ' + type);
-  }
+            const timeString = dateFormatted.split('T')[1].slice(0, 5);
+            let [hours, minutes] = timeString.split(':');
+            hours = parseInt(hours).toString();
+
+            let marker;
+
+            //if (messages && messages.length > 0) {
+            const lastMessageWithMarker = messages.filter(message => message.marker)[messages.filter(message => message.marker).length - 1];
+
+            if (lastMessageWithMarker && lastMessageWithMarker.marker != 'Сегодня' || !lastMessageWithMarker) {
+                marker = 'Сегодня';
+            }
+            //}
+
+            return [...messages, {
+                id: action.message.id,
+                date: dateFormatted,
+                time: `${hours}:${minutes}`,
+                text: action.message.text,
+                you: action.message.you,
+                ...(marker ? { marker } : {})
+            }];
+        case 'change':
+            return messages.map(message =>
+                message.id === action.id ? {
+                    ...message,
+                    ...action.message
+                } : message
+            );
+        case 'delete':
+            return messages.filter(message => message.id !== action.id);
+        default:
+            const { type } = action as never;
+            throw new Error('Unknown action: ' + type);
+    }
 }
 
 export default MessagesContext;

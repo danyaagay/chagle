@@ -27,7 +27,7 @@ type ChatsProviderProps = {
 };
 
 function ChatsProvider(props: ChatsProviderProps) {
-	const [ chats, dispatchChats ] = useReducer(chatsReducer, []);
+	const [ chats, dispatchChats ] = useReducer(chatsReducer, null);
 	const [ active, setActive ] = useState<string | undefined>(undefined);
 	const location = useLocation();
 	const { id } = useParams();
@@ -53,7 +53,6 @@ function ChatsProvider(props: ChatsProviderProps) {
 		//}
 	}, []);
 
-
 	useEffect(() => {
 		setActive(id);
 	}, [location]);
@@ -71,7 +70,11 @@ type Action =
 	| { type: 'change', chat: Chat }
 	| { type: 'delete', id: string };
 
-function chatsReducer(chats: Chat[], action: Action): Chat[] {
+function chatsReducer(chats: Chat[] | null, action: Action): Chat[] | null {
+	if (chats === null) {
+		chats = [];
+	}
+
 	switch (action.type) {
 		case 'set':
 			return action.chats || [];

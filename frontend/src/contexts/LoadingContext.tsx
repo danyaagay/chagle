@@ -20,21 +20,23 @@ function LoadingProvider(props: LoadingProviderProps) {
 	const { chats } = useContext(ChatsContext);
 	const { mobileTitle } = useContext(MobileHeaderContext);
 	const { messages } = useContext(MessagesContext);
-	const [loading, setLoading] = useState<boolean>(true);
+	const [ loading, setLoading ] = useState<boolean>(true);
 	const { id } = useParams();
 
 	// Loading status
 	useEffect(() => {
 		const path = window.location.pathname;
+		const page = path.split('/')[1];
 
-		//if (path === '/settings') {
-		//	setMobileTitle('Настройки');
-		//}
-		console.log(chats, messages, mobileTitle);
+		console.log(chats, messages, mobileTitle, chats);
 
-		if (chats && chats.length > 0 && mobileTitle) {
-			if (id) {
-				if (messages && messages.length > 0) {
+		if (chats !== null && mobileTitle) {
+			if (page === 'chats') {
+				if (id) {
+					if (messages !== null) {
+						setLoading(false);
+					}
+				} else {
 					setLoading(false);
 				}
 			} else {
