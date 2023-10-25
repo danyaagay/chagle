@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import axios from '../axios';
 import { AxiosError } from 'axios';
@@ -6,18 +6,17 @@ import { useAuth } from '../contexts/AuthContext';
 import {
 	AppShell,
 } from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
 import { useMobileHeader } from '../contexts/MobileHeaderContext';
 import MobileHeader from '../components/MobileHeader';
 import Menu from '../components/Menu';
 import classes from '../css/ProtectedLayout.module.css';
+import { useLoading } from '../contexts/LoadingContext';
 
 
 export default function DefaultLayout() {
 	const { user, setUser } = useAuth();
 	const { opened } = useMobileHeader();
-
-	const mobileScreen = useMediaQuery('(max-width: 767px)');
+	const { loading } = useLoading();
 
 	useEffect(() => {
 		// Check if user is logged in or not from server
@@ -48,23 +47,27 @@ export default function DefaultLayout() {
 	}
 
 	return (
-		<AppShell
-			classNames={classes}
-			layout='alt'
-			navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
-			transitionDuration={0}
-		>
-			<AppShell.Header hiddenFrom="sm" p="md">
-				<MobileHeader />
-			</AppShell.Header>
+		<>
+			{!loading && (
+				<AppShell
+					classNames={classes}
+					layout='alt'
+					navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
+					transitionDuration={0}
+				>
+					<AppShell.Header hiddenFrom="sm" p="md">
+						<MobileHeader />
+					</AppShell.Header>
 
-			<AppShell.Navbar>
-				<Menu />
-			</AppShell.Navbar>
+					<AppShell.Navbar>
+						<Menu />
+					</AppShell.Navbar>
 
-			<AppShell.Main>
-				<Outlet />
-			</AppShell.Main>
-		</AppShell>
+					<AppShell.Main>
+						<Outlet />
+					</AppShell.Main>
+				</AppShell>
+			)}
+		</>
 	);
 }

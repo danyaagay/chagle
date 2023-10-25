@@ -9,9 +9,9 @@ const MobileHeaderContext = createContext<{
 	toggle: () => void;
 }>({
 	mobileTitle: false,
-	setMobileTitle: () => {},
+	setMobileTitle: () => { },
 	opened: false,
-	toggle: () => {},
+	toggle: () => { },
 });
 
 type MobileHeaderProviderProps = {
@@ -20,8 +20,8 @@ type MobileHeaderProviderProps = {
 
 function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 	const { chats, active } = useContext(ChatsContext);
-	const [ mobileTitle, setMobileTitle ] = useState<string | false>(false);
-	const [ opened, { toggle } ] = useDisclosure(false);
+	const [mobileTitle, setMobileTitle] = useState<string | false>(false);
+	const [opened, { toggle }] = useDisclosure(false);
 
 	// Set mobile title when loading page first time
 	useEffect(() => {

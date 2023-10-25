@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import { MessagesProvider } from '../contexts/MessagesContext';
 import MessagesList from '../components/MessagesList';
 import MessageInput from '../components/MessageInput';
 
@@ -139,17 +138,17 @@ export default function Chat() {
 	}, []);
 
 	return (
-		<MessagesProvider>
-			<div className='whole page-chats'>
-				<div className="chat tabs-tab active">
-					<MessagesList scrollRef={scrollRef} messagesEndRef={messagesEndRef} />
-					<div className='chat-input' ref={chatInputRef}>
-						<div className='chat-input-container'>
-							<MessageInput textareaRef={textareaRef} />
-						</div>
+
+		<div className='whole page-chats'>
+			<div className="chat tabs-tab active">
+				<MessagesList scrollRef={scrollRef} messagesEndRef={messagesEndRef} />
+				<div className='chat-input' ref={chatInputRef}>
+					<div className='chat-input-container'>
+						<MessageInput textareaRef={textareaRef} />
 					</div>
 				</div>
 			</div>
-		</MessagesProvider>
+		</div>
+
 	);
 }
