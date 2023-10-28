@@ -3,14 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import Chat from './Chat';
 import ChatsContext from '../contexts/ChatsContext';
 import MobileHeaderContext from '../contexts/MobileHeaderContext';
+import { ScrollArea } from '@mantine/core';
+import classes from '../css/ProtectedLayout.module.css';
+import { useMediaQuery } from '@mantine/hooks';
 
 const ChatsList = () => {
 	const { chats, active, setActive } = useContext(ChatsContext);
 	const { setMobileTitle } = useContext(MobileHeaderContext);
 	const navigate = useNavigate();
+	const mobileScreen = useMediaQuery('(max-width: 767px)');
   
 	return (
-	  <div className="items-list">
+		<ScrollArea className={classes.navbarMain} type={`${mobileScreen ? 'never' : 'always'}`}>
 			{chats && chats.map((chat: any) => (
 				<Chat
 					key={chat.id}
@@ -25,7 +29,7 @@ const ChatsList = () => {
 					}}
 				/>
 			))}
-	  </div>
+	  </ScrollArea>
 	);
 };
 

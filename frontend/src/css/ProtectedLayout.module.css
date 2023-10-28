@@ -9,6 +9,7 @@
 
 .navbarMain {
     flex: 1;
+    overflow: auto;
 }
 
 .burger {
@@ -39,6 +40,8 @@
     padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
     border-radius: var(--mantine-radius-sm);
     font-weight: 500;
+    cursor: pointer;
+    position: relative;
 
     @mixin hover {
         background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
@@ -72,6 +75,7 @@
     padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
     border-radius: var(--mantine-radius-sm);
     font-weight: 500;
+    position: relative;
 }
 
 .linkIcon {
@@ -84,6 +88,7 @@
 .linkActive {
     background-Color: var(--mantine-color-gray-0);
     color: #000000;
+    cursor: default;
 }
 
 .buttonBox {

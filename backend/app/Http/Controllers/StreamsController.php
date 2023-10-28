@@ -16,7 +16,7 @@ class StreamsController extends Controller
      */
     public function stream($question, $history = false)
     {
-        $debug = false;
+        $debug = true;
          
         ignore_user_abort(true);
 

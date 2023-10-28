@@ -75,9 +75,7 @@ export default function MobileHeader() {
                 Новый чат
             </Button>
 
-            <div className={classes.navbarMain}>
-                <ChatsList />
-            </div>
+            <ChatsList />
 
             <div className={classes.footer}>
                 <Menu width={200} shadow="md" position="left" offset={-80}>

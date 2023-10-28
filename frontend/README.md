@@ -1,27 +1,54 @@
-# React + TypeScript + Vite
+<!-- ABOUT THE PROJECT -->
+## About The Project
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The project is a chat with artificial intelligence
 
-Currently, two official plugins are available:
+### Built With
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+* [![React][React.js]][React-url]
+* [![Laravel][Laravel.com]][Laravel-url]
+* [![Mantine][Mantine.dev]][Mantine-url]
 
-## Expanding the ESLint configuration
+<!-- GETTING STARTED -->
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+This is an example of how you may give instructions on setting up your project locally.
+To get a local copy up and running follow these simple example steps.
 
-- Configure the top-level `parserOptions` property like this:
+### Prerequisites
 
-```js
-   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-   },
-```
+This is an example of how to list things you need to use the software and how to install them.
+* npm
+  ```sh
+  npm install npm@latest -g
+  ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+### Installation
+
+_Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
+
+1. Clone the repo
+   ```sh
+   git clone https://github.com/your_username_/Project-Name.git
+   ```
+2. Install NPM packages in frontend folder
+   ```sh
+   npm install
+   ```
+3. Migrate database in backend folder
+   ```sh
+   php artisan migrate
+   ```
+4. Start queue in background
+   ```sh
+   php artisan queue:work
+   ```
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[Laravel.com]: https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
+[Laravel-url]: https://laravel.com
+[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
+[React-url]: https://reactjs.org/
+[Mantine.dev]: https://img.shields.io/badge/Mantine-339af0?style=for-the-badge&logo=mantine&logoColor=white
+[Mantine-url]: https://mantine.dev/

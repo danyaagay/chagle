@@ -113,11 +113,6 @@ body {
     transform: translateZ(0);
 }
 
-.bubbles>.scrollable {
-    height: auto;
-    display: block;
-}
-
 .scrollable {
     width: 100%;
     height: 100%;
@@ -131,7 +126,7 @@ body {
 
 .bubbles-inner {
     width: 100%;
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     margin: 0 auto;
     min-height: 100%;
@@ -145,6 +140,11 @@ body {
 .bubbles-inner:after {
     content: " ";
     height: .125rem;
+}
+
+.bubbles>.scrollable {
+    height: auto;
+    display: block;
 }
 
 .bubbles-date-group {
