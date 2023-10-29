@@ -5,8 +5,7 @@ import {
     useMantineTheme,
     Button,
     NavLink,
-    Menu,
-    rem
+    Menu
 } from '@mantine/core';
 import {
     IconSettings,

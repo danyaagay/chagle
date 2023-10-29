@@ -1,16 +1,16 @@
 # базовый образ для фронтенда
-FROM node:14-alpine
+FROM node:18-alpine
 
 # копирование и установка зависимостей
 WORKDIR /var/www/frontend
 
 COPY frontend/package.json .
 
-RUN npm install
+RUN yarn install
 
 # сборка фронтенда
 COPY frontend .
-RUN npm run build
+RUN yarn build
 
 # запуск веб-сервера
-CMD npm run dev -- --host
+CMD yarn dev --host
