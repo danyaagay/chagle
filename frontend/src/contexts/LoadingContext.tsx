@@ -28,8 +28,6 @@ function LoadingProvider(props: LoadingProviderProps) {
 		const path = window.location.pathname;
 		const page = path.split('/')[1];
 
-		console.log(chats, messages, mobileTitle, chats);
-
 		if (chats !== null && mobileTitle) {
 			if (page === 'chats') {
 				if (id) {

@@ -4,6 +4,8 @@ import axios from '../axios';
 import { AxiosError } from 'axios';
 import ChatsContext from '../contexts/ChatsContext';
 import MobileHeaderContext from '../contexts/MobileHeaderContext';
+import dayjs from 'dayjs';
+import 'dayjs/locale/ru';
 
 type Message = {
     id: number;
@@ -121,8 +123,43 @@ function MessagesProvider(props: MessagesProviderProps) {
     );
 }
 
+const addMarker = (messages: Message[]) => {
+    let currentDate: any;
+
+    messages.forEach((message, index) => {
+        const today = dayjs();
+        const date = dayjs(message.date);
+        let formattedDate;
+      
+        if (!currentDate || !currentDate.isSame(date, 'day')) {
+          if (today.isSame(date, 'day')) {
+            formattedDate = 'Сегодня';
+          } else if (date.isSame(today.subtract(1, 'day'), 'day')) {
+            formattedDate = 'Вчера';
+          } else {
+            const now = dayjs();
+            if (date.year() !== now.year()) {
+              formattedDate = date.locale('ru').format('D MMMM YYYY');
+            } else {
+              formattedDate = date.locale('ru').format('D MMMM');
+            }
+          }
+        }
+
+        currentDate = date;
+
+        messages[index] = {
+            ...message,
+            ...(formattedDate ? { marker: formattedDate } : { marker: undefined })
+        }
+    });
+
+    return messages;
+};
+
 type Action =
     | { type: 'set', messages: Message[] | null }
+    | { type: 'addSet', messages: Message[] }
     | { type: 'add', message: { id: number, text: string, you: boolean } }
     | { type: 'change', id: number, message: { id?: number; date?: string; text?: string; marker?: string; time?: string; you?: boolean; } }
     | { type: 'delete', id: number };
@@ -134,7 +171,14 @@ function messagesReducer(messages: Message[] | null, action: Action): Message[] 
 
     switch (action.type) {
         case 'set':
-            return action.messages || [];
+            if (action.messages) {
+                return addMarker(action.messages);
+            } else {
+                return [];
+            }
+        case 'addSet':
+            let current = [...action.messages, ...messages];
+            return addMarker(current);
         case 'add':
             const date = new Date();
             const dateFormatted = date.toISOString();

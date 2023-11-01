@@ -11,10 +11,8 @@ class MessageController extends Controller
 {
     private $result;
 
-    public function getAllMessages($chat)
+    public function messageFormatting($messages)
     {
-        $messages = $chat->messages;
-
         $formattedMessages = [];
         $currentDate = null;
         foreach ($messages as $message) {
@@ -42,7 +40,7 @@ class MessageController extends Controller
                     }
                 }
 
-                $formattedMessage['marker'] = $formattedDate;
+                //$formattedMessage['marker'] = $formattedDate;
             }
 
             $currentDate = $date;
@@ -55,6 +53,8 @@ class MessageController extends Controller
             $formattedMessages[] = $formattedMessage;
         }
 
+        $formattedMessages = array_reverse($formattedMessages);
+
         return $formattedMessages;
     }
 
@@ -65,10 +65,15 @@ class MessageController extends Controller
         $chat = $user->chats()->where('id', $id)->first();
 
         if ($chat) {
-            $messages = $this->getAllMessages($chat);
+            $messages = $chat->messages()->orderBy('id', 'desc')->paginate(10);
+            $hasMore = $messages->hasMorePages();
+            //$messages = $chat->messages;
+            $messages = $this->messageFormatting($messages);
+         
 
             return response()->json([
                 'messages' => $messages,
+                'hasMore' => $hasMore
             ]);
         } else {
             return response()->json([
