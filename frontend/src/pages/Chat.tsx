@@ -4,8 +4,6 @@ import MessageInput from '../components/MessageInput';
 
 export default function Chat() {
 	const chatInputRef = useRef<HTMLInputElement>(null);
-	const scrollRef = useRef<HTMLInputElement>(null);
-	const messagesEndRef = useRef<HTMLInputElement>(null);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	useEffect(() => {
@@ -50,7 +48,7 @@ export default function Chat() {
 
 		<div className='whole page-chats'>
 			<div className="chat tabs-tab active">
-				<MessagesList messagesEndRef={messagesEndRef} />
+				<MessagesList />
 				<div className='chat-input' ref={chatInputRef}>
 					<div className='chat-input-container'>
 						<MessageInput textareaRef={textareaRef} />

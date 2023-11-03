@@ -1,4 +1,5 @@
 import { createContext, useEffect, useReducer, useState, ReactNode, useContext, useRef } from 'react';
+import useStateRef from 'react-usestateref'
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from '../axios';
 import { AxiosError } from 'axios';
@@ -19,86 +20,106 @@ type Message = {
 type MessagesContextProps = {
     messages: Message[] | null;
     dispatch: React.Dispatch<Action>;
-    tempIdRef: React.MutableRefObject<string>;
+    hasMoreRef: React.RefObject<boolean>;
+    loadMore: () => Promise<void>,
+    scrollRef: React.RefObject<HTMLInputElement>,
 };
 
 const MessagesContext = createContext<MessagesContextProps>({
     messages: null,
     dispatch: () => { },
-    tempIdRef: { current: "" },
+    hasMoreRef: { current: true },
+    loadMore: async () => {},
+    scrollRef: { current: null },
 });
 
 type MessagesProviderProps = {
     children: ReactNode;
 };
 
-type MessagesTempState = {
-    [id: string]: Message[] | null;
-};
-
 function MessagesProvider(props: MessagesProviderProps) {
     const { chats } = useContext(ChatsContext);
     const [messages, dispatch] = useReducer(messagesReducer, null);
-    const [messagesTemp, setMessagesTemp] = useState<MessagesTempState>({});
-    const tempIdRef = useRef('');
     const location = useLocation();
     const navigate = useNavigate();
     const { id } = useParams();
-
     const { opened, toggle } = useContext(MobileHeaderContext);
+
+
+    const [page, setPage, pageRef] = useStateRef(1);
+    const [hasMore, setHasMore, hasMoreRef] = useStateRef<boolean>(true);
+    const scrollRef = useRef<HTMLInputElement>(null);
 
     const controller = new AbortController();
 
-    const fetchData = async () => {
+    const loadMore = async () => {
+        console.log('fetching', page, pageRef.current, hasMore, hasMoreRef.current);
         try {
-            const resp = await axios.get(`/messages/${id}`, { signal: controller.signal });
+            const resp = await axios.get(`/messages/${id}?page=${pageRef.current}`, { signal: controller.signal });
             if (resp.status === 200) {
                 if (id) {
-                    dispatch({ type: 'set', messages: resp.data.messages });
-                    setMessagesTemp(prevMessages => ({
-                        ...prevMessages,
-                        [id]: resp.data.messages,
-                    }));
+                    if (pageRef.current === 1) {
+                        console.log('set');
+                        dispatch({ type: 'set', messages: resp.data.messages });
+                    } else {
+                        dispatch({ type: 'addSet', messages: resp.data.messages });
+                    }
+                    setPage(pageRef.current + 1);
+                    setHasMore(resp.data.hasMore);
+                    console.log('set temp', {
+                        messages: resp.data.messages,
+                        page: pageRef.current,
+                        hasMore: hasMoreRef.current
+                    });
                 }
             }
         } catch (error: unknown) {
             if (error instanceof AxiosError && error.response) {
-                navigate('/chat');
                 console.log(error);
+                navigate('/chat');
             }
         }
-    };
+    }
+
+    const loadMore1 = async () => {
+        console.log('fetching first', page, pageRef.current, hasMore, hasMoreRef.current);
+        try {
+            const resp = await axios.get(`/messages/${id}?page=${pageRef.current}`, { signal: controller.signal });
+            if (resp.status === 200) {
+                if (id) {
+                    console.log('set');
+                    dispatch({ type: 'set', messages: resp.data.messages });
+                    setPage(pageRef.current + 1);
+                    setHasMore(resp.data.hasMore);
+                    console.log('set temp', {
+                        messages: resp.data.messages,
+                        page: pageRef.current,
+                        hasMore: hasMoreRef.current
+                    });
+                }
+            }
+        } catch (error: unknown) {
+            if (error instanceof AxiosError && error.response) {
+                console.log(error);
+                navigate('/chat');
+            }
+        }
+    }
 
     useEffect(() => {
         if (id) {
-            if (messages != messagesTemp[id]) {
-                setMessagesTemp(prevMessages => ({
-                    ...prevMessages,
-                    [id]: messages,
-                }));
+            //dispatch({ type: 'set', messages: null });
+            //setPage(1);
+            //setHasMore(true);
+            if (opened) {
+                toggle();
             }
-        }
-    }, [messages]);
-
-    useEffect(() => {
-        tempIdRef.current = '';
-
-        if (id) {
-            if (messagesTemp[id]) {
-                dispatch({ type: 'set', messages: messagesTemp[id] });
-                if (opened) {
-                    toggle();
-                }
-            } else {
-                dispatch({ type: 'set', messages: null });
-                if (opened) {
-                    toggle();
-                }
-                fetchData();
-            }
+            //loadMore1();
         } else {
-            controller.abort();
-            dispatch({ type: 'set', messages: null });
+            //controller.abort();
+            //dispatch({ type: 'set', messages: null });
+            //setPage(1);
+            //setHasMore(true);
             if (opened) {
                 toggle();
             }
@@ -109,7 +130,9 @@ function MessagesProvider(props: MessagesProviderProps) {
         if (chats && chats.length > 0 && id) {
             const chatExists = chats.some(chat => chat.id == id);
             if (chatExists) {
-                fetchData();
+                //setPage(1);
+                //setHasMore(true);
+                //loadMore();
             } else {
                 navigate('/chat');
             }
@@ -117,7 +140,7 @@ function MessagesProvider(props: MessagesProviderProps) {
     }, [chats]);
 
     return (
-        <MessagesContext.Provider value={{ messages, dispatch, tempIdRef }}>
+        <MessagesContext.Provider value={{ messages, dispatch, hasMoreRef, loadMore, scrollRef }}>
             {props.children}
         </MessagesContext.Provider>
     );
@@ -130,20 +153,20 @@ const addMarker = (messages: Message[]) => {
         const today = dayjs();
         const date = dayjs(message.date);
         let formattedDate;
-      
+
         if (!currentDate || !currentDate.isSame(date, 'day')) {
-          if (today.isSame(date, 'day')) {
-            formattedDate = 'Сегодня';
-          } else if (date.isSame(today.subtract(1, 'day'), 'day')) {
-            formattedDate = 'Вчера';
-          } else {
-            const now = dayjs();
-            if (date.year() !== now.year()) {
-              formattedDate = date.locale('ru').format('D MMMM YYYY');
+            if (today.isSame(date, 'day')) {
+                formattedDate = 'Сегодня';
+            } else if (date.isSame(today.subtract(1, 'day'), 'day')) {
+                formattedDate = 'Вчера';
             } else {
-              formattedDate = date.locale('ru').format('D MMMM');
+                const now = dayjs();
+                if (date.year() !== now.year()) {
+                    formattedDate = date.locale('ru').format('D MMMM YYYY');
+                } else {
+                    formattedDate = date.locale('ru').format('D MMMM');
+                }
             }
-          }
         }
 
         currentDate = date;
@@ -166,8 +189,8 @@ type Action =
 
 function messagesReducer(messages: Message[] | null, action: Action): Message[] | null {
     if (messages === null) {
-		messages = [];
-	}
+        messages = [];
+    }
 
     switch (action.type) {
         case 'set':
@@ -189,13 +212,11 @@ function messagesReducer(messages: Message[] | null, action: Action): Message[] 
 
             let marker;
 
-            //if (messages && messages.length > 0) {
             const lastMessageWithMarker = messages.filter(message => message.marker)[messages.filter(message => message.marker).length - 1];
 
             if (lastMessageWithMarker && lastMessageWithMarker.marker != 'Сегодня' || !lastMessageWithMarker) {
                 marker = 'Сегодня';
             }
-            //}
 
             return [...messages, {
                 id: action.message.id,
