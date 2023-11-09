@@ -5,7 +5,7 @@ import MessagesContext from '../contexts/MessagesContext';
 import { Scrollbars } from 'react-custom-scrollbars';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
 
-const InfiniteBoxDesktop = ({ messagesEndRef }: { messagesEndRef: React.RefObject<HTMLInputElement> }) => {
+const InfiniteBoxDesktop2 = ({ messagesEndRef }: { messagesEndRef: React.RefObject<HTMLInputElement> }) => {
     const { messages, loadMore, hasMoreRef, scrollRef } = useContext(MessagesContext);
     const { id } = useParams();
 
@@ -14,22 +14,22 @@ const InfiniteBoxDesktop = ({ messagesEndRef }: { messagesEndRef: React.RefObjec
         loading,
         hasNextPage: hasMoreRef.current,
         onLoadMore: loadMore,
-        rootMargin: '800px 0px 0px 0px',
+        rootMargin: '200px 0px 0px 0px',
     });
 
     const scrollableRootRef = useRef<HTMLDivElement | null>(null);
     const lastScrollDistanceToBottomRef = useRef<number>();
 
-    useEffect(() => {
-            lastScrollDistanceToBottomRef.current = 0;
-    }, [messages, rootRef]);
+    //useEffect(() => {
+    //        lastScrollDistanceToBottomRef.current = 0;
+    //}, [messages, rootRef]);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         const scrollableRoot = scrollableRootRef.current;
         const lastScrollDistanceToBottom =
             lastScrollDistanceToBottomRef.current ?? 0;
         if (scrollableRoot) {
-            console.log(`${id} scroll:`, scrollableRoot.scrollTop, scrollableRoot.scrollHeight, lastScrollDistanceToBottom);
+            console.log('set scrolling');
             scrollableRoot.scrollTop =
                 scrollableRoot.scrollHeight - lastScrollDistanceToBottom;
         }
@@ -46,8 +46,8 @@ const InfiniteBoxDesktop = ({ messagesEndRef }: { messagesEndRef: React.RefObjec
     const handleRootScroll = useCallback(() => {
         const rootNode = scrollableRootRef.current;
         if (rootNode) {
-            //console.log('scrolling');
             const scrollDistanceToBottom = rootNode.scrollHeight - rootNode.scrollTop;
+            console.log(scrollDistanceToBottom);
             lastScrollDistanceToBottomRef.current = scrollDistanceToBottom;
         }
 
@@ -57,19 +57,9 @@ const InfiniteBoxDesktop = ({ messagesEndRef }: { messagesEndRef: React.RefObjec
         }
     }, []);
 
-    const testRef = useRef(null);
-    
-    const handleScrollbarsMount = (scrollbars) => {
-        testRef.current = scrollbars?.view;
-    }
-
-    useEffect(() => {
-        rootRefSetter(testRef.current);
-    }, [testRef.current]);
-
     return (
 
-        <Scrollbars autoHide ref={handleScrollbarsMount} onScroll={handleRootScroll}>
+        <div className='scrollable scrollable-y' ref={rootRefSetter} onScroll={handleRootScroll} style={{height: 300}}>
             <div className='bubbles-inner'>
                 {hasMoreRef.current && (
                     <div ref={infiniteRef}>
@@ -88,9 +78,9 @@ const InfiniteBoxDesktop = ({ messagesEndRef }: { messagesEndRef: React.RefObjec
 
                 <div ref={scrollRef} />
             </div>
-        </Scrollbars>
+        </div>
 
     );
 };
 
-export default InfiniteBoxDesktop;
+export default InfiniteBoxDesktop2;

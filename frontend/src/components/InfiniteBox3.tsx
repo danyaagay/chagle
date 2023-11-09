@@ -1,4 +1,4 @@
-import { useContext, useState, useLayoutEffect, useEffect, useRef } from 'react';
+import { useContext, useState, useLayoutEffect, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import Message from '../components/Message';
 import MessagesContext from '../contexts/MessagesContext';
@@ -8,36 +8,25 @@ const InfiniteBox3 = () => {
     const { messages, loadMore, hasMoreRef, scrollRef } = useContext(MessagesContext);
     const location = useLocation();
 
-    useEffect(() => {
+    const onInfiniteLoadCallback = useCallback(() => {
         loadMore();
-      }, []);
+    }, []);
+    
+      useEffect(() => {
+        onInfiniteLoadCallback();
+      }, [onInfiniteLoadCallback]);
 
-    const tempLocation = useRef();
-    useLayoutEffect(() => {
-        if (location != tempLocation.current){
-            scrollRef.current?.scrollIntoView();
-            tempLocation.current = location;
-        }
-    }, [messages]);
+
 
     return (
-        <div
-            id="scrollableDiv"
-            className='scrollable scrollable-y'
-            style={{
-                height: '100%',
-                overflow: 'auto',
-                display: 'flex',
-                flexDirection: 'column-reverse',
-            }}
-        >
-            {/*Put the scroll bar always on the bottom*/}
+
+
             <ReallySimpleInfiniteScroll
-                length={messages.length}
-                hasMore={hasMoreRef.current}
+                length={messages ? messages.length : 10}
+                hasMore={true}
                 scrollThreshold="200px"
-                scrollableTarget="scrollableDiv"
-                onInfiniteLoad={loadMore}
+                className='scrollable scrollable-y'
+                onInfiniteLoad={onInfiniteLoadCallback}
                 displayInverse={true}
             >
                 {messages && messages.map((message) => (
@@ -52,7 +41,7 @@ const InfiniteBox3 = () => {
                 <div ref={scrollRef} />
             </ReallySimpleInfiniteScroll>
             
-        </div>
+
     );
 };
 

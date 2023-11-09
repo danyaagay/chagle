@@ -17,7 +17,7 @@ import classes from '../css/MessageInput.module.css';
 export default function MessageInput({ textareaRef }: { textareaRef: React.RefObject<HTMLTextAreaElement> }) {
 	const [isLoading, setIsLoading] = useState(false);
 	const { dispatchChats, active, setActive } = useContext(ChatsContext);
-	const { dispatch, tempIdRef } = useContext(MessagesContext);
+	const { dispatch, tempIdRef, scrollRef } = useContext(MessagesContext);
 	//const [abortController, setAbortController] = useState(new AbortController() || null);
 	const mobileScreen = useMediaQuery('(max-width: 767px)');
 	const [ keyboardOpen, setKeyboardOpen ] = useState(false);

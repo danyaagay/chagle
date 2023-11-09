@@ -21,8 +21,9 @@ type MessagesContextProps = {
     messages: Message[] | null;
     dispatch: React.Dispatch<Action>;
     hasMoreRef: React.RefObject<boolean>;
-    loadMore: () => Promise<void>,
-    scrollRef: React.RefObject<HTMLInputElement>,
+    loadMore: () => Promise<void>;
+    scrollRef: React.RefObject<HTMLInputElement>;
+    tempIdRef: React.MutableRefObject<string>;
 };
 
 const MessagesContext = createContext<MessagesContextProps>({
@@ -31,6 +32,7 @@ const MessagesContext = createContext<MessagesContextProps>({
     hasMoreRef: { current: true },
     loadMore: async () => {},
     scrollRef: { current: null },
+    tempIdRef: { current: "" },
 });
 
 type MessagesProviderProps = {
@@ -40,86 +42,60 @@ type MessagesProviderProps = {
 function MessagesProvider(props: MessagesProviderProps) {
     const { chats } = useContext(ChatsContext);
     const [messages, dispatch] = useReducer(messagesReducer, null);
-    const location = useLocation();
-    const navigate = useNavigate();
-    const { id } = useParams();
-    const { opened, toggle } = useContext(MobileHeaderContext);
+    const tempIdRef = useRef('');
 
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { id } = useParams();
+
+    const { opened, toggle } = useContext(MobileHeaderContext);
 
     const [page, setPage, pageRef] = useStateRef(1);
     const [hasMore, setHasMore, hasMoreRef] = useStateRef<boolean>(true);
+
     const scrollRef = useRef<HTMLInputElement>(null);
 
     const controller = new AbortController();
 
-    const loadMore = async () => {
-        console.log('fetching', page, pageRef.current, hasMore, hasMoreRef.current);
+    const loadMore = async (first = false) => {
+        //console.log(`${id}:`, 'fetching', page, pageRef.current, hasMore, hasMoreRef.current, `first: ${first}`);
+
         try {
             const resp = await axios.get(`/messages/${id}?page=${pageRef.current}`, { signal: controller.signal });
             if (resp.status === 200) {
                 if (id) {
-                    if (pageRef.current === 1) {
-                        console.log('set');
+                    if (first) {
                         dispatch({ type: 'set', messages: resp.data.messages });
                     } else {
                         dispatch({ type: 'addSet', messages: resp.data.messages });
                     }
                     setPage(pageRef.current + 1);
                     setHasMore(resp.data.hasMore);
-                    console.log('set temp', {
-                        messages: resp.data.messages,
-                        page: pageRef.current,
-                        hasMore: hasMoreRef.current
-                    });
                 }
             }
         } catch (error: unknown) {
             if (error instanceof AxiosError && error.response) {
                 console.log(error);
-                navigate('/chat');
-            }
-        }
-    }
-
-    const loadMore1 = async () => {
-        console.log('fetching first', page, pageRef.current, hasMore, hasMoreRef.current);
-        try {
-            const resp = await axios.get(`/messages/${id}?page=${pageRef.current}`, { signal: controller.signal });
-            if (resp.status === 200) {
-                if (id) {
-                    console.log('set');
-                    dispatch({ type: 'set', messages: resp.data.messages });
-                    setPage(pageRef.current + 1);
-                    setHasMore(resp.data.hasMore);
-                    console.log('set temp', {
-                        messages: resp.data.messages,
-                        page: pageRef.current,
-                        hasMore: hasMoreRef.current
-                    });
-                }
-            }
-        } catch (error: unknown) {
-            if (error instanceof AxiosError && error.response) {
-                console.log(error);
-                navigate('/chat');
             }
         }
     }
 
     useEffect(() => {
+        tempIdRef.current = '';
+
         if (id) {
-            //dispatch({ type: 'set', messages: null });
-            //setPage(1);
-            //setHasMore(true);
+            dispatch({ type: 'set', messages: null });
+            setPage(1);
+            setHasMore(false);
             if (opened) {
                 toggle();
             }
-            //loadMore1();
+            loadMore(true);
         } else {
-            //controller.abort();
-            //dispatch({ type: 'set', messages: null });
-            //setPage(1);
-            //setHasMore(true);
+            controller.abort();
+            dispatch({ type: 'set', messages: null });
+            setPage(1);
+            setHasMore(false);
             if (opened) {
                 toggle();
             }
@@ -134,13 +110,14 @@ function MessagesProvider(props: MessagesProviderProps) {
                 //setHasMore(true);
                 //loadMore();
             } else {
+                controller.abort();
                 navigate('/chat');
             }
         }
     }, [chats]);
 
     return (
-        <MessagesContext.Provider value={{ messages, dispatch, hasMoreRef, loadMore, scrollRef }}>
+        <MessagesContext.Provider value={{ messages, dispatch, hasMoreRef, loadMore, scrollRef, tempIdRef }}>
             {props.children}
         </MessagesContext.Provider>
     );

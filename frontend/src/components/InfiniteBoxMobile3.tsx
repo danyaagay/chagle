@@ -4,45 +4,28 @@ import axios from '../axios';
 import { AxiosError } from 'axios';
 import Message from '../components/Message';
 import MessagesContext from '../contexts/MessagesContext';
-import InfiniteScroll from 'react-infinite-scroll-component';
+import InfiniteScroll from '../components/InfCopy';
 import useStateRef from 'react-usestateref'
 
-const InfiniteBoxMobile = () => {
-    const { messages, loadMore, hasMoreRef, scrollRef } = useContext(MessagesContext);
+const InfiniteBoxMobile3 = () => {
+    const { messages, loadMore, hasMoreRef } = useContext(MessagesContext);
 
     const location = useLocation();
+
+    const scrollRef = useRef<HTMLInputElement>(null);
 
     const tempLocation = useRef<any>();
     useLayoutEffect(() => {
         if (location != tempLocation.current){
-            scrollRef.current['scrollTop'] = 0;
+            scrollRef.current?.scrollIntoView();
             tempLocation.current = location;
         }
+        //scrollRef.current?.scrollIntoView();
     }, [messages]);
 
-    let stopScrolling = false;
-
-    const handleTouchMove = (e:any) => {
-        if (!stopScrolling) {
-            return;
-        }
-        e.preventDefault();
-    }
-
-    const onTouchStart = (event) => {
-        scrollRef.current.style.overflow = 'auto';
-        stopScrolling = false;
-    };
-
-    const onScroll = (event) => {
-        console.log(scrollRef.current['scrollTop']);
-        if (scrollRef.current['scrollTop'] === 0 || scrollRef.current['scrollTop'] === 1) {
-            scrollRef.current.style.overflow = 'visible';
-            stopScrolling = true;
-        }
-    };
-
-    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    useEffect(() => {
+        //scrollRef.current?.scrollIntoView();
+    }, [messages]);
 
     return (
         <div
@@ -54,11 +37,7 @@ const InfiniteBoxMobile = () => {
                 display: 'flex',
                 flexDirection: 'column-reverse',
             }}
-            autoFocus
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchStart}
-            ref={scrollRef}
-            onScroll={onScroll}
+            
         >
             <InfiniteScroll
                 dataLength={messages ? messages.length : 10}
@@ -85,4 +64,4 @@ const InfiniteBoxMobile = () => {
     );
 };
 
-export default InfiniteBoxMobile;
+export default InfiniteBoxMobile3;

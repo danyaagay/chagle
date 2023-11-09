@@ -1,3 +1,4 @@
+// Плохо работает на мобильных устройствах (прыгает)
 import { useContext, useState, useLayoutEffect, useEffect, useRef } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import Message from '../components/Message';
@@ -21,7 +22,7 @@ const InfiniteBoxMobile = () => {
 
                 <div className='bubbles-inner scrollable scrollable-y'>
                     <InfiniteScroll
-                        pageStart={1}
+                        pageStart={2}
                         loadMore={loadMore}
                         hasMore={hasMoreRef.current}
                         isReverse={true}
@@ -38,8 +39,9 @@ const InfiniteBoxMobile = () => {
                                 time={message.time}
                             />
                         ))}
+
+                        <div ref={scrollRef} />
                     </InfiniteScroll>
-                    <div ref={scrollRef} />
                 </div>
          
     );
