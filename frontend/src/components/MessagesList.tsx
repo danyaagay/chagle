@@ -15,14 +15,17 @@ import InfiniteBoxMobile2 from '../components/InfiniteBoxMobile2';
 import InfiniteBoxDesktop from '../components/InfiniteBoxDesktop';
 import InfiniteBoxDesktop2 from '../components/InfiniteBoxDesktop2';
 import InfiniteBox4 from '../components/InfiniteBox4';
+import InfiniteBox5 from '../components/InfiniteBox5';
+import InfiniteBox6 from '../components/InfiniteBox6';
 
 const MessageList = () => {
     const mobileScreen = useMediaQuery('(max-width: 767px)');
+    
 
     return (
         <div className="bubbles">
 
-                <InfiniteBoxMobile />
+                <InfiniteBox6 />
    
         </div>
     );

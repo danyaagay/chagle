@@ -142,14 +142,13 @@ const InfiniteBox4 = () => {
     const saveScroll = () => {
         const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
         
-        scrollSaver.current.scrollHeight = scrollHeight + 300;
+        scrollSaver.current.scrollHeight = scrollHeight;
         scrollSaver.current.scrollTop = scrollTop;
         scrollSaver.current.clientHeight = clientHeight;
         scrollSaver.current.scrollHeightMinusTop = scrollHeight - scrollTop;
     }
 
     const restoreScroll = () => {
-
         const scrollHeight = scrollSaver.current.scrollHeight;
     
         const newScrollTop = scrollHeight - scrollSaver.current.scrollHeightMinusTop;
@@ -165,7 +164,7 @@ const InfiniteBox4 = () => {
     const ignoreNextScrollEvent = () => {
         removeScrollListener();
         scrollRef.current.addEventListener('scroll', (e) => {
-          //cancelEvent(e);
+          cancelEvent(e);
           addScrollListener();
         }, {capture: true, passive: false, once: true});
     }
@@ -193,35 +192,27 @@ const InfiniteBox4 = () => {
         addScrollListener();
     }, []);
 
-   // onMouseMove = (e: MouseEvent) => {
-   //     cancelEvent(e);
-   // };
-   // 
-   // onMouseDown = (e: MouseEvent) => {
-   //     cancelEvent(e);
-   // };
-//
-   // const cancelEvent = (event?: Event) => {
-   //     event ||= window.event;
-   //     if(event) {
-   //       // 'input' event will have cancelable=false, but we still need to preventDefault
-   //       // if(!event.cancelable) {
-   //       //   return false;
-   //       // }
-   //   
-   //       // @ts-ignore
-   //       event = event.originalEvent || event;
-   //   
-   //       try {
-   //         if(event.stopPropagation) event.stopPropagation();
-   //         if(event.preventDefault) event.preventDefault();
-   //         event.returnValue = false;
-   //         event.cancelBubble = true;
-   //       } catch(err) {}
-   //     }
-   //   
-   //     return false;
-   // }
+    const cancelEvent = (event?: Event) => {
+        event ||= window.event;
+        if(event) {
+          // 'input' event will have cancelable=false, but we still need to preventDefault
+          // if(!event.cancelable) {
+          //   return false;
+          // }
+      
+          // @ts-ignore
+          event = event.originalEvent || event;
+      
+          try {
+            if(event.stopPropagation) event.stopPropagation();
+            if(event.preventDefault) event.preventDefault();
+            event.returnValue = false;
+            event.cancelBubble = true;
+          } catch(err) {}
+        }
+      
+        return false;
+    }
 
     return (
         <div
