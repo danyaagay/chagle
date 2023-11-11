@@ -1,10 +1,9 @@
 import { useContext, useState, useEffect, useRef, useLayoutEffect, useCallback } from 'react';
-import { useMediaQuery } from '@mantine/hooks';
+import { IS_MOBILE } from '../environment/userAgent';
+import { Scrollbars } from 'react-custom-scrollbars';
 import Message from './Message';
 
 const MessageList = () => {
-    //const mobileScreen = useMediaQuery('(max-width: 767px)');
-
     const scrollRef = useRef<any>();
     const [{ messages }, setState] =
         useState<any>({
@@ -117,7 +116,7 @@ const MessageList = () => {
         () => {
             new Promise<void>((resolve) =>
                 setTimeout(() => {
-                    setState((previousState) => ({
+                    setState((previousState: any) => ({
                         ...previousState,
                         messages: new Array(30)
                             .fill(1)
@@ -136,8 +135,10 @@ const MessageList = () => {
                     //scrollRef.current.scrollTop = scrollSaver.current.last + ;
                     //loading.current = false;
 
+                    console.log('content add');
+
                     resolve();
-                }, 1000)
+                }, (IS_MOBILE ? 1000 : 100))
             )
         },
         []
@@ -149,31 +150,55 @@ const MessageList = () => {
         }
     }, []);
 
+    const firstLoaded = useRef<any>(true);
+
     useLayoutEffect(() => {
-        //if (scrollRef.current.scrollHeight != scrollSaver.current.lastHeight) {
-        scrollRef.current.scrollTop = (scrollRef.current.scrollHeight - scrollSaver.current.lastHeight) + (scrollSaver.current.last > 0 ? scrollSaver.current.last : 0);
-        console.log('updated content add', scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
+        if (IS_MOBILE) {
+            scrollRef.current.scrollTop = (scrollRef.current.scrollHeight - scrollSaver.current.lastHeight) + (scrollSaver.current.last > 0 ? scrollSaver.current.last : 0);
+            
+            //console.log('updated content add', scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
+            
+            reflowScrollableElement();
+        }
+
         loading.current = false;
-        reflowScrollableElement();
-        //}
+
+        if (firstLoaded.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+
+        if (scrollRef.current.offsetHeight > scrollRef.current.scrollHeight) {
+            loading.current = true;
+            onLoadOldMessages();
+        } else {
+            firstLoaded.current = false;
+        }
     }, [messages]);
 
     const scrollSaver = useRef<any>({ last: 99999, lastHeight: 0 });
     const loading = useRef<any>();
     const handleScroll = () => {
         if (scrollRef.current) {
+            if (!IS_MOBILE) {
+                if (scrollRef.current.scrollTop === 0) {
+                    scrollRef.current.scrollTop = 2;
+                    console.log('current scroll fixed');
+                }
+            } else {
+                scrollSaver.current.last = scrollRef.current.scrollTop;
+                scrollSaver.current.lastHeight = scrollRef.current.scrollHeight;
+            }
 
-            //if (scrollRef.current.scrollTop === 0) {
-            //	scrollRef.current.scrollTop = 1;
-            //}
-            console.log(scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
-            if (scrollRef.current.scrollTop <= 300 && !loading.current && scrollRef.current.scrollTop < scrollSaver.current.last) {
+            //console.log(scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
+
+            //console.log(scrollRef.current.scrollTop / scrollRef.current.scrollHeight * 100);
+            //const scrollPrecent = scrollRef.current.scrollTop / scrollRef.current.scrollHeight * 100;
+
+            if (scrollRef.current.scrollTop <= 300 && !loading.current) {
                 loading.current = true;
-                console.log('load new messages', scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
+
+                //console.log('load new messages', scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
+                
                 onLoadOldMessages();
             }
-            scrollSaver.current.last = scrollRef.current.scrollTop;
-            scrollSaver.current.lastHeight = scrollRef.current.scrollHeight;
         }
     }
 
@@ -185,29 +210,49 @@ const MessageList = () => {
 
     return (
         <div className="bubbles">
-
-            <div
-                className='scrollable scrollable-y'
-                style={{
-                    height: '100%',
-                    overflow: 'auto',
-                }}
-                onScroll={handleScroll}
-                ref={scrollRef}
-            >
-                <div className='bubbles-inner'>
-                    {messages && messages.map((message) => (
-                        <Message
-                            key={message.id}
-                            text={message.message}
-                            marker={message.marker}
-                            you={message.authorId === 1 ? true : false}
-                            time={'false'}
-                        />
-                    ))}
+            {!IS_MOBILE ? (
+                <Scrollbars
+                    autoHide
+                    ref={(scrollbars: any) => { scrollRef.current = scrollbars?.view; }}
+                    onScroll={handleScroll}
+                >
+                    <div className='bubbles-inner'>
+                        {messages && messages.map((message: any) => (
+                            <Message
+                                key={message.id}
+                                text={message.message}
+                                marker={message.marker}
+                                you={message.authorId === 1 ? true : false}
+                                time={'false'}
+                            />
+                        ))}
+                    </div>
+                </Scrollbars>
+            ) : (
+                <div
+                    className='scrollable scrollable-y'
+                    style={{
+                        height: '100%',
+                        overflow: 'auto',
+                    }}
+                    onScroll={handleScroll}
+                    ref={scrollRef}
+                >
+                    <div className='bubbles-inner'>
+                        {messages && messages.map((message: any) => (
+                            <Message
+                                key={message.id}
+                                text={message.message}
+                                marker={message.marker}
+                                you={message.authorId === 1 ? true : false}
+                                time={'false'}
+                            />
+                        ))}
+                    </div>
                 </div>
-            </div>
-        </div>
+            )
+            }
+        </div >
     );
 };
 
