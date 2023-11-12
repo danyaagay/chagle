@@ -50,18 +50,20 @@ function MessagesProvider(props: MessagesProviderProps) {
 
     const { opened, toggle } = useContext(MobileHeaderContext);
 
-    const [page, setPage, pageRef] = useStateRef(1);
-    const [hasMore, setHasMore, hasMoreRef] = useStateRef<boolean>(true);
+    const idRef = useRef(id);
+    const pageRef = useRef(1);
+    const controllerRef = useRef<any>();
+    const hasMoreRef = useRef<boolean>(true);
+    //const [page, setPage, pageRef] = useStateRef(1);
+    //const [hasMore, setHasMore, hasMoreRef] = useStateRef<boolean>(true);
 
     const scrollRef = useRef<HTMLInputElement>(null);
 
-    const controller = new AbortController();
-
     const loadMore = async (first = false) => {
-        //console.log(`${id}:`, 'fetching', page, pageRef.current, hasMore, hasMoreRef.current, `first: ${first}`);
+        console.log(`${idRef.current}:`, 'fetching', pageRef.current, hasMoreRef.current, `first: ${first}`);
 
         try {
-            const resp = await axios.get(`/messages/${id}?page=${pageRef.current}`, { signal: controller.signal });
+            const resp = await axios.get(`/messages/${idRef.current}?page=${pageRef.current}`, { signal: controllerRef.current.signal });
             if (resp.status === 200) {
                 if (id) {
                     if (first) {
@@ -69,8 +71,8 @@ function MessagesProvider(props: MessagesProviderProps) {
                     } else {
                         dispatch({ type: 'addSet', messages: resp.data.messages });
                     }
-                    setPage(pageRef.current + 1);
-                    setHasMore(resp.data.hasMore);
+                    pageRef.current = pageRef.current + 1;
+                    hasMoreRef.current = resp.data.hasMore;
                 }
             }
         } catch (error: unknown) {
@@ -83,22 +85,33 @@ function MessagesProvider(props: MessagesProviderProps) {
     useEffect(() => {
         tempIdRef.current = '';
 
+        controllerRef.current = new AbortController();
+
         if (id) {
+            idRef.current = id;
             dispatch({ type: 'set', messages: null });
-            setPage(1);
-            setHasMore(false);
+            pageRef.current = 1;
+            hasMoreRef.current = false;
             if (opened) {
                 toggle();
             }
             loadMore(true);
         } else {
-            controller.abort();
+            controllerRef.current.abort();
             dispatch({ type: 'set', messages: null });
-            setPage(1);
-            setHasMore(false);
+            pageRef.current = 1;
+            hasMoreRef.current = false;
             if (opened) {
                 toggle();
             }
+        }
+
+        return () => {
+            controllerRef.current.abort();
+            dispatch({ type: 'set', messages: null });
+            pageRef.current = 1;
+            hasMoreRef.current = false;
+            console.log('disconect');
         }
     }, [location]);
 
@@ -110,7 +123,7 @@ function MessagesProvider(props: MessagesProviderProps) {
                 //setHasMore(true);
                 //loadMore();
             } else {
-                controller.abort();
+                controllerRef.current.abort();
                 navigate('/chat');
             }
         }
