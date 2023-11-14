@@ -61,15 +61,13 @@ function MessagesProvider(props: MessagesProviderProps) {
         try {
             const resp = await axios.get(`/messages/${idRef.current}?offset=${offsetRef.current}`, { signal: controllerRef.current.signal });
             if (resp.status === 200) {
-                if (id) {
-                    if (first) {
-                        dispatch({ type: 'set', messages: resp.data.messages });
-                    } else {
-                        dispatch({ type: 'addSet', messages: resp.data.messages });
-                    }
-                    offsetRef.current = offsetRef.current + 30;
-                    hasMoreRef.current = resp.data.hasMore;
+                if (first) {
+                    dispatch({ type: 'set', messages: resp.data.messages });
+                } else {
+                    dispatch({ type: 'addSet', messages: resp.data.messages });
                 }
+                offsetRef.current = offsetRef.current + 30;
+                hasMoreRef.current = resp.data.hasMore;
             }
         } catch (error: unknown) {
             if (error instanceof AxiosError && error.response) {

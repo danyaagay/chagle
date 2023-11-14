@@ -6,7 +6,6 @@ import {
 	IconX,
 	IconCheck
 } from '@tabler/icons-react';
-import { useMediaQuery } from '@mantine/hooks';
 import {
 	ActionIcon,
 	TextInput,
@@ -20,6 +19,7 @@ import MobileTitleContext from '../contexts/MobileHeaderContext';
 import ChatsContext from '../contexts/ChatsContext';
 import axios from '../axios';
 import { AxiosError } from 'axios';
+import { IS_MOBILE } from '../environment/userAgent';
 import classes from '../css/ProtectedLayout.module.css';
   
 interface ChatChatButtonProps {
@@ -41,7 +41,6 @@ export default function ChatChatButton({
 	const [ editable, editToggle ]  = useDisclosure(false);
 	const [ deleting, { open, close } ]  = useDisclosure(false);
 	const [ chatTitle, setChatTitle ] = useState(title);
-	const mobileScreen = useMediaQuery('(max-width: 767px)');
 	const navigate = useNavigate();
 	const { setMobileTitle } = useContext(MobileTitleContext);
 	const { dispatchChats } = useContext(ChatsContext);
@@ -121,7 +120,7 @@ export default function ChatChatButton({
 			}
 		}}
 		>
-			<a className={`${mobileScreen ? classes.linkMobile : classes.link} ${active ? classes.linkActive : ''}`}>
+			<a className={`${IS_MOBILE ? classes.linkMobile : classes.link} ${active ? classes.linkActive : ''}`}>
 				<IconMessageCircle2 className={classes.linkIcon} stroke={1.5} />
 				{ editable ? (
 					<TextInput
@@ -134,7 +133,7 @@ export default function ChatChatButton({
 					<span>{chatTitle}</span>
 				) }
 
-				{ !mobileScreen && hovered || active || editable ? (
+				{ !IS_MOBILE && hovered || active || editable ? (
 					<div className={classes.buttonBox}>
 						{ editable ? (
 							<>

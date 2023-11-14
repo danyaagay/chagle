@@ -1,5 +1,4 @@
 import { useContext, useState, useEffect, useRef } from 'react';
-import { useMediaQuery } from '@mantine/hooks';
 import { useLocation } from 'react-router-dom';
 import {
 	IconSend
@@ -13,6 +12,7 @@ import {
 import { AxiosError } from 'axios';
 import ChatsContext from '../contexts/ChatsContext';
 import MessagesContext from '../contexts/MessagesContext';
+import { IS_MOBILE } from '../environment/userAgent';
 import classes from '../css/MessageInput.module.css';
 
 export default function MessageInput({ textareaRef }: { textareaRef: React.RefObject<HTMLTextAreaElement> }) {
@@ -20,7 +20,6 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 	const { dispatchChats, active, setActive } = useContext(ChatsContext);
 	const { dispatch, tempRef, idRef } = useContext(MessagesContext);
 	const tempIdRef = useRef('');
-	const mobileScreen = useMediaQuery('(max-width: 767px)');
 	const [ keyboardOpen, setKeyboardOpen ] = useState(false);
 	const location = useLocation();
 
@@ -31,14 +30,14 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 			if (visualViewport && (visualViewport.height * visualViewport.scale) / screen.height < VIEWPORT_VS_CLIENT_HEIGHT_RATIO) {
 				setKeyboardOpen(true);
-				console.log('keyboard is shown');
+				//console.log('keyboard is shown');
 			} else {
 				setKeyboardOpen(false);
-				console.log('keyboard is hidden');
+				//console.log('keyboard is hidden');
 			}
 		};
 
-		if ('visualViewport' in window && window.visualViewport) {
+		if ('visualViewport' in window && window.visualViewport && IS_MOBILE) {
 			window.visualViewport.addEventListener('resize', handleResize);
 		}
 
@@ -61,7 +60,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 				textareaRef.current.value = '';
 
-				if (keyboardOpen || !mobileScreen) {
+				if (keyboardOpen || !IS_MOBILE) {
 					textareaRef.current.focus();
 				}
 
