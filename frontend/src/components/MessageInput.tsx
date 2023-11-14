@@ -1,5 +1,6 @@
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useRef } from 'react';
 import { useMediaQuery } from '@mantine/hooks';
+import { useLocation } from 'react-router-dom';
 import {
 	IconSend
 } from '@tabler/icons-react';
@@ -15,12 +16,13 @@ import MessagesContext from '../contexts/MessagesContext';
 import classes from '../css/MessageInput.module.css';
 
 export default function MessageInput({ textareaRef }: { textareaRef: React.RefObject<HTMLTextAreaElement> }) {
-	const [isLoading, setIsLoading] = useState(false);
+	const [ isLoading, setIsLoading ] = useState(false);
 	const { dispatchChats, active, setActive } = useContext(ChatsContext);
-	const { dispatch, tempIdRef, scrollRef } = useContext(MessagesContext);
-	//const [abortController, setAbortController] = useState(new AbortController() || null);
+	const { dispatch, tempRef, idRef } = useContext(MessagesContext);
+	const tempIdRef = useRef('');
 	const mobileScreen = useMediaQuery('(max-width: 767px)');
 	const [ keyboardOpen, setKeyboardOpen ] = useState(false);
+	const location = useLocation();
 
 	useEffect(() => {
 		const handleResize = () => {
@@ -39,7 +41,15 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 		if ('visualViewport' in window && window.visualViewport) {
 			window.visualViewport.addEventListener('resize', handleResize);
 		}
-	}, []);
+
+		//если в чате прогружается сообщение и человек переключил, закончить прогрузку и сбросить кеш
+		if (isLoading) {
+			delete tempRef.current[idRef.current];
+			handleStop();
+		}
+
+		tempIdRef.current = '';
+	}, [location]);
 
 	// Handle send message
 	const handleSend = async () => {
@@ -77,15 +87,6 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 				const url = 'http://192.168.0.116:8000/api/messages/' + (active ? active : '');
 
-				//const controller = new AbortController();
-				//setAbortController(controller);
-
-				//const eventSource = new EventSource('http://192.168.0.116:8000/api/stream');
-
-				//eventSource.onmessage = (e) => {
-				//	console.log(e.data);
-				//};
-
 				try {
 					const response = await fetch(url, {
 						method: "POST",
@@ -94,7 +95,6 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 							'Content-Type': 'application/json'
 						},
 						credentials: "include",
-						//signal: controller.signal,
 					});
 
 					if (!response.body) {
