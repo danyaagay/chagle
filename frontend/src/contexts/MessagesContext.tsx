@@ -1,5 +1,4 @@
-import { createContext, useEffect, useReducer, useState, ReactNode, useContext, useRef } from 'react';
-import useStateRef from 'react-usestateref'
+import { createContext, useEffect, useReducer, ReactNode, useContext, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from '../axios';
 import { AxiosError } from 'axios';
@@ -22,8 +21,8 @@ type MessagesContextProps = {
     dispatch: React.Dispatch<Action>;
     hasMoreRef: React.RefObject<boolean>;
     loadMore: () => Promise<void>;
-    scrollRef: React.RefObject<HTMLInputElement>;
-    tempIdRef: React.MutableRefObject<string>;
+    idRef: React.MutableRefObject<any>;
+    tempRef: React.MutableRefObject<any>,
 };
 
 const MessagesContext = createContext<MessagesContextProps>({
@@ -31,8 +30,8 @@ const MessagesContext = createContext<MessagesContextProps>({
     dispatch: () => { },
     hasMoreRef: { current: true },
     loadMore: async () => {},
-    scrollRef: { current: null },
-    tempIdRef: { current: "" },
+    idRef: { current: 0 },
+    tempRef: { current: {} },
 });
 
 type MessagesProviderProps = {
@@ -41,29 +40,26 @@ type MessagesProviderProps = {
 
 function MessagesProvider(props: MessagesProviderProps) {
     const { chats } = useContext(ChatsContext);
-    const [messages, dispatch] = useReducer(messagesReducer, null);
-    const tempIdRef = useRef('');
+    const [ messages, dispatch ] = useReducer(messagesReducer, null);
+    const tempRef = useRef<any>({});
 
     const navigate = useNavigate();
     const location = useLocation();
+
     const { id } = useParams();
+    const idRef = useRef<any>(id);
 
     const { opened, toggle } = useContext(MobileHeaderContext);
 
-    const idRef = useRef(id);
-    const pageRef = useRef(1);
+    const offsetRef = useRef<number>(0);
     const controllerRef = useRef<any>();
     const hasMoreRef = useRef<boolean>(true);
-    //const [page, setPage, pageRef] = useStateRef(1);
-    //const [hasMore, setHasMore, hasMoreRef] = useStateRef<boolean>(true);
-
-    const scrollRef = useRef<HTMLInputElement>(null);
 
     const loadMore = async (first = false) => {
-        console.log(`${idRef.current}:`, 'fetching', pageRef.current, hasMoreRef.current, `first: ${first}`);
+        console.log(`${idRef.current}:`, 'fetching', offsetRef.current, hasMoreRef.current, `first: ${first}`);
 
         try {
-            const resp = await axios.get(`/messages/${idRef.current}?page=${pageRef.current}`, { signal: controllerRef.current.signal });
+            const resp = await axios.get(`/messages/${idRef.current}?offset=${offsetRef.current}`, { signal: controllerRef.current.signal });
             if (resp.status === 200) {
                 if (id) {
                     if (first) {
@@ -71,7 +67,7 @@ function MessagesProvider(props: MessagesProviderProps) {
                     } else {
                         dispatch({ type: 'addSet', messages: resp.data.messages });
                     }
-                    pageRef.current = pageRef.current + 1;
+                    offsetRef.current = offsetRef.current + 10;
                     hasMoreRef.current = resp.data.hasMore;
                 }
             }
@@ -83,23 +79,39 @@ function MessagesProvider(props: MessagesProviderProps) {
     }
 
     useEffect(() => {
-        tempIdRef.current = '';
+        offsetRef.current = messages?.length ? messages?.length : 0;
 
+        if(tempRef && id && messages != tempRef.current[id]) {
+            tempRef.current[id] = {messages: messages, hasMore: hasMoreRef.current, offset: offsetRef.current};
+        }
+        console.log(tempRef.current);
+    }, [messages]);
+
+    useEffect(() => {
         controllerRef.current = new AbortController();
 
         if (id) {
             idRef.current = id;
-            dispatch({ type: 'set', messages: null });
-            pageRef.current = 1;
-            hasMoreRef.current = false;
-            if (opened) {
-                toggle();
+            if (tempRef.current[id]) {
+                dispatch({ type: 'set', messages: tempRef.current[id].messages });
+                offsetRef.current = tempRef.current[id].offset;
+                hasMoreRef.current = tempRef.current[id].hasMore;
+                if (opened) {
+                    toggle();
+                }
+            } else {
+                dispatch({ type: 'set', messages: null });
+                offsetRef.current = 0;
+                hasMoreRef.current = false;
+                if (opened) {
+                    toggle();
+                }
+                loadMore(true);
             }
-            loadMore(true);
         } else {
             controllerRef.current.abort();
             dispatch({ type: 'set', messages: null });
-            pageRef.current = 1;
+            offsetRef.current = 0;
             hasMoreRef.current = false;
             if (opened) {
                 toggle();
@@ -109,7 +121,7 @@ function MessagesProvider(props: MessagesProviderProps) {
         return () => {
             controllerRef.current.abort();
             dispatch({ type: 'set', messages: null });
-            pageRef.current = 1;
+            offsetRef.current = 0;
             hasMoreRef.current = false;
             console.log('disconect');
         }
@@ -130,11 +142,13 @@ function MessagesProvider(props: MessagesProviderProps) {
     }, [chats]);
 
     return (
-        <MessagesContext.Provider value={{ messages, dispatch, hasMoreRef, loadMore, scrollRef, tempIdRef }}>
+        <MessagesContext.Provider value={{ messages, dispatch, hasMoreRef, loadMore, tempRef, idRef }}>
             {props.children}
         </MessagesContext.Provider>
     );
 }
+
+//начало редуктора:
 
 const addMarker = (messages: Message[]) => {
     let currentDate: any;

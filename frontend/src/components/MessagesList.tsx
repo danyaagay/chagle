@@ -40,11 +40,11 @@ const MessageList = () => {
     }, [location]);
 
     useLayoutEffect(() => {
+
+        scrollRef.current.scrollTop = (scrollRef.current.scrollHeight - scrollSaver.current.lastHeight) + (scrollSaver.current.last > 0 ? scrollSaver.current.last : 0);
+
+        //console.log('updated content add', scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
         if (IS_MOBILE) {
-            scrollRef.current.scrollTop = (scrollRef.current.scrollHeight - scrollSaver.current.lastHeight) + (scrollSaver.current.last > 0 ? scrollSaver.current.last : 0);
-
-            //console.log('updated content add', scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
-
             reflowScrollableElement();
         }
 
@@ -63,15 +63,16 @@ const MessageList = () => {
 
     const handleScroll = () => {
         if (scrollRef.current) {
-            if (!IS_MOBILE) {
-                if (scrollRef.current.scrollTop === 0) {
-                    scrollRef.current.scrollTop = 2;
-                    console.log('current scroll fixed');
-                }
-            } else {
+            //if (!IS_MOBILE) {
+            //    if (scrollRef.current.scrollTop === 0) {
+            //        scrollRef.current.scrollTop = 2;
+            //        console.log('current scroll fixed');
+            //    }
+            //}
+            //else {
                 scrollSaver.current.last = scrollRef.current.scrollTop;
                 scrollSaver.current.lastHeight = scrollRef.current.scrollHeight;
-            }
+            //}
 
             //console.log(firstLoaded.current, scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
 

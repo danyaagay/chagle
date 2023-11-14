@@ -24,24 +24,24 @@ class MessageController extends Controller
 
             $date = Carbon::parse($message->created_at);
 
-            if (!$currentDate || !$date->isSameDay($currentDate)) {
-                $date = Carbon::parse($message->created_at);
-                $now = Carbon::now();
+            //if (!$currentDate || !$date->isSameDay($currentDate)) {
+            //    $date = Carbon::parse($message->created_at);
+            //    $now = Carbon::now();
 
-                if ($date->isToday()) {
-                    $formattedDate = 'Сегодня';
-                } elseif ($date->isYesterday()) {
-                    $formattedDate = 'Вчера';
-                } else {
-                    if ($date->year !== $now->year) {
-                        $formattedDate = $date->locale('ru')->isoFormat('D MMMM YYYY');
-                    } else {
-                        $formattedDate = $date->locale('ru')->isoFormat('D MMMM');
-                    }
-                }
+            //    if ($date->isToday()) {
+            //        $formattedDate = 'Сегодня';
+            //    } elseif ($date->isYesterday()) {
+            //        $formattedDate = 'Вчера';
+            //    } else {
+            //        if ($date->year !== $now->year) {
+            //            $formattedDate = $date->locale('ru')->isoFormat('D MMMM YYYY');
+            //        } else {
+            //            $formattedDate = $date->locale('ru')->isoFormat('D MMMM');
+            //        }
+            //    }
 
-                //$formattedMessage['marker'] = $formattedDate;
-            }
+            //    $formattedMessage['marker'] = $formattedDate;
+            //}
 
             $currentDate = $date;
 
@@ -65,8 +65,13 @@ class MessageController extends Controller
         $chat = $user->chats()->where('id', $id)->first();
 
         if ($chat) {
-            $messages = $chat->messages()->orderBy('id', 'desc')->paginate(10);
-            $hasMore = $messages->hasMorePages();
+            $messages = $chat->messages()->orderBy('id', 'desc')->skip($request->offset)->take(10)->get();
+            if ($chat->messages()->orderBy('id', 'desc')->count() > $request->offset + 10) {
+                $hasMore = true;
+            } else {
+                $hasMore = false;
+            }
+            //$hasMore = $messages->hasMorePages();
             //$messages = $chat->messages;
             $messages = $this->messageFormatting($messages);
          
