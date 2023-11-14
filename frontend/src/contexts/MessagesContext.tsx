@@ -67,7 +67,7 @@ function MessagesProvider(props: MessagesProviderProps) {
                     } else {
                         dispatch({ type: 'addSet', messages: resp.data.messages });
                     }
-                    offsetRef.current = offsetRef.current + 10;
+                    offsetRef.current = offsetRef.current + 30;
                     hasMoreRef.current = resp.data.hasMore;
                 }
             }

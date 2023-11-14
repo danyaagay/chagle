@@ -19,11 +19,7 @@ const MessageList = () => {
                 setTimeout(() => {
                     loadMore();
 
-                    //console.log('content add', scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
-                    //scrollRef.current.scrollTop = scrollSaver.current.last + ;
-                    //loading.current = false;
-
-                    console.log('content add');
+                    //console.log('content add');
 
                     resolve();
                 }, (IS_MOBILE ? 1000 : 100))
@@ -50,8 +46,6 @@ const MessageList = () => {
 
         loading.current = false;
 
-        //scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-
         if (messages?.length && scrollRef.current.offsetHeight > scrollRef.current.scrollHeight && hasMoreRef.current) {
             loading.current = true;
             loadMore();
@@ -63,16 +57,12 @@ const MessageList = () => {
 
     const handleScroll = () => {
         if (scrollRef.current) {
-            //if (!IS_MOBILE) {
-            //    if (scrollRef.current.scrollTop === 0) {
-            //        scrollRef.current.scrollTop = 2;
-            //        console.log('current scroll fixed');
-            //    }
-            //}
-            //else {
-                scrollSaver.current.last = scrollRef.current.scrollTop;
-                scrollSaver.current.lastHeight = scrollRef.current.scrollHeight;
-            //}
+            //формула работает и на компьютере чтобы при написании сообщения прокрутка отправлялась вниз если она была внизу
+            //без формулы scrollTop 0 нужно править на 1-2 пикселя для того чтобы
+            //при прогрузке старых смс сохранять позицию 
+            scrollSaver.current.last = scrollRef.current.scrollTop;
+            scrollSaver.current.lastHeight = scrollRef.current.scrollHeight;
+
 
             //console.log(firstLoaded.current, scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
 
@@ -82,7 +72,7 @@ const MessageList = () => {
             if (scrollRef.current.scrollTop <= 300 && !loading.current && hasMoreRef.current) {
                 loading.current = true;
 
-                console.log('load new messages', scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
+                //console.log('load new messages', scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
 
                 onLoadOldMessages();
             }
