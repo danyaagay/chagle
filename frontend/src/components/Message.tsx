@@ -1,7 +1,7 @@
 import {
 	Stack,
 } from '@mantine/core';
-
+import Markdown from 'react-markdown'
 import classes from '../css/Message.module.css';
 
 interface MessageProps {
@@ -18,7 +18,11 @@ export default function Message({ you, marker, time, text, ...others }: MessageP
 			<Stack className={classes.bubble} {...others}>
 				<div className={`${classes.bubbleWrapper} ${(you ? classes.you : '')}`}>
 					<div className={`${classes.bubbleContent} ${(you ? classes.bubbleContentYou : '')}`}>
-						{text}
+						{!you ? (
+							<Markdown>
+								{text}
+							</Markdown>
+						) : text}
 						<span className={classes.time}>{time}</span>
 					</div>
 				</div>

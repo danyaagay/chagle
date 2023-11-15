@@ -16,9 +16,11 @@ class StreamsController extends Controller
      */
     public function stream($question, $history = false)
     {
-        $debug = true;
+        $debug = false;
          
         ignore_user_abort(true);
+
+        $question = 'Provide your response in a markdown code block '.$question;
 
         if (!$history) {
             $history = [
@@ -68,7 +70,9 @@ class StreamsController extends Controller
 
             $answer .= $text;
 
-            echo 'data: {"message":"' . $text . '"}';
+            $json = json_encode(['message' => $text]);
+
+            echo 'data: ' . $json;
             echo "\n\n";
             ob_flush();
             flush();

@@ -21,7 +21,7 @@ import { IconPlus, IconTrash } from '@tabler/icons-react';
 interface RowData {
 	id: number;
 	token: string;
-	alive: string;
+	status: string;
 }
 
 interface ThProps {
@@ -203,14 +203,14 @@ export function TokensList() {
 							reversed={reverseSortDirection}
 							onSort={() => setSorting('token')}
 						>
-							Token
+							Токен
 						</Th>
 						<Th
-							sorted={sortBy === 'alive'}
+							sorted={sortBy === 'status'}
 							reversed={reverseSortDirection}
-							onSort={() => setSorting('alive')}
+							onSort={() => setSorting('status')}
 						>
-							Alive
+							Статус
 						</Th>
 						<Table.Th />
 					</Table.Tr>
@@ -221,13 +221,21 @@ export function TokensList() {
 							<Table.Td>{row.id}</Table.Td>
 							<Table.Td>{row.token}</Table.Td>
 							<Table.Td>
-								{row.alive ? (
+								{row.status == '1' && (
 									<Badge fullWidth variant="light">
 										Работает
 									</Badge>
-								) : (
-									<Badge color="gray" fullWidth variant="light">
-										Отключен
+								)}
+
+								{row.status == '2' && (
+									<Badge fullWidth variant="light" color="yellow">
+										Приостановлен
+									</Badge>
+								)}
+
+								{row.status == '3' && (
+									<Badge fullWidth variant="light" color="red">
+										Истек
 									</Badge>
 								)}
 							</Table.Td>

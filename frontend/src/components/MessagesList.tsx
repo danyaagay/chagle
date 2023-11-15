@@ -19,7 +19,7 @@ const MessageList = () => {
                 setTimeout(() => {
                     loadMore();
 
-                    console.log('content add');
+                    //console.log('content add');
 
                     resolve();
                 }, (IS_MOBILE ? 1000 : 100))
@@ -39,7 +39,7 @@ const MessageList = () => {
 
         scrollRef.current.scrollTop = (scrollRef.current.scrollHeight - scrollSaver.current.lastHeight) + (scrollSaver.current.last > 0 ? scrollSaver.current.last : 0);
 
-        console.log('updated content add', scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
+        //console.log('updated content add', scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
         if (IS_MOBILE) {
             reflowScrollableElement();
         }
@@ -72,7 +72,7 @@ const MessageList = () => {
             if (scrollRef.current.scrollTop <= 300 && !loading.current && hasMoreRef.current) {
                 loading.current = true;
 
-                console.log('load new messages', scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
+                //console.log('load new messages', scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
 
                 onLoadOldMessages();
             }

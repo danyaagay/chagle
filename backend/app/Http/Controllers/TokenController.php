@@ -26,7 +26,7 @@ class TokenController extends Controller
         if ($user->hasRole('super-admin')) {
             $token = Token::create([
                 'token' => $request->token,
-                'alive' => 1,
+                'status' => 1,
             ]);
             return response()->json($token);
         } else {
@@ -58,7 +58,7 @@ class TokenController extends Controller
 
     public static function getToken()
     {
-        $token = Token::where('alive', 1)->first();
+        $token = Token::where('status', 1)->first();
         
         //Limits work here
 
