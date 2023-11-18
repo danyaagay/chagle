@@ -101,6 +101,7 @@ const MessageList = () => {
                                 marker={message.marker}
                                 you={message.you}
                                 time={message.time}
+                                is_error={message.is_error}
                             />
                         ))}
                     </div>
@@ -123,6 +124,7 @@ const MessageList = () => {
                                 marker={message.marker}
                                 you={message.you}
                                 time={message.time}
+                                is_error={message.is_error}
                             />
                         ))}
                     </div>

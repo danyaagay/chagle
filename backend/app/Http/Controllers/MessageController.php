@@ -30,6 +30,7 @@ class MessageController extends Controller
             $formattedMessage['time'] = $date->format('g:i');
             $formattedMessage['text'] = $message->content;
             $formattedMessage['id'] = $message->id;
+            $formattedMessage['is_error'] = $message->error_code === NULL ? false : true;
 
             $formattedMessages[] = $formattedMessage;
         }
@@ -92,15 +93,23 @@ class MessageController extends Controller
                 'role' => 'user',
             ]);
 
-            $history = $this->getHistory($chat->messages()->get());
+            $history = $this->getHistory($chat->messages()->where('error_code', NULL)->get());
 
             $stream = new StreamsController;
             $answer = $stream->stream($request->text, $history);
 
-            $chatAnswer = $chat->messages()->create([
-                'content' => $answer,
-                'role' => 'assistant',
-            ]);
+            if ($answer['error']) {
+                $chatAnswer = $chat->messages()->create([
+                    'content' => $answer['answer'],
+                    'role' => 'assistant',
+                    'error_code' => $answer['error_code']
+                ]);
+            } else {
+                $chatAnswer = $chat->messages()->create([
+                    'content' => $answer['answer'],
+                    'role' => 'assistant',
+                ]);
+            }
 
             echo 'data: {"answerId":"' . $chatAnswer->id . '"}';
             echo "\n\n";

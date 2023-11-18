@@ -19,6 +19,7 @@ class Message extends Authenticatable
      */
     protected $fillable = [
         'role',
-        'content'
+        'content',
+        'error_code'
     ];
 }

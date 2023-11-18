@@ -130,7 +130,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 						for (const parsedLine of parsedLines) {
 							console.log(parsedLine);
-							const { message, answerId, messageId, chatId, tempId } = parsedLine;
+							const { message, answerId, messageId, chatId, tempId, error } = parsedLine;
 
 							console.log(answer, message);
 
@@ -143,6 +143,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 									type: 'change',
 									id: -2,
 									message: {
+										is_error: error ? error : false,
 										text: answer
 									}
 								});

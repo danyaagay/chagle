@@ -14,6 +14,7 @@ type Message = {
     marker?: string;
     time: string;
     you?: boolean;
+    is_error?: boolean;
 };
 
 type MessagesContextProps = {
@@ -186,7 +187,7 @@ type Action =
     | { type: 'set', messages: Message[] | null }
     | { type: 'addSet', messages: Message[] }
     | { type: 'add', message: { id: number, text: string, you: boolean } }
-    | { type: 'change', id: number, message: { id?: number; date?: string; text?: string; marker?: string; time?: string; you?: boolean; } }
+    | { type: 'change', id: number, message: { id?: number; date?: string; text?: string; marker?: string; time?: string; you?: boolean; is_error?: boolean; } }
     | { type: 'delete', id: number };
 
 function messagesReducer(messages: Message[] | null, action: Action): Message[] | null {
@@ -226,6 +227,7 @@ function messagesReducer(messages: Message[] | null, action: Action): Message[] 
                 time: `${hours}:${minutes}`,
                 text: action.message.text,
                 you: action.message.you,
+                is_error: false,
                 ...(marker ? { marker } : {})
             }];
         case 'change':
