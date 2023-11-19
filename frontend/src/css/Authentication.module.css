@@ -7,7 +7,7 @@
     min-height: 100%;
 
     @media (min-width:600px) {
-        padding: 100px !important;
+        padding: 100px;
     }
 }
 
@@ -19,12 +19,22 @@
     padding: 60px 20px;
 }
 
+.box {
+    width: 350px;
+
+    @media (max-width:600px) {
+        width: 100%;
+    }
+}
+
 .title {
-    font-size: 1.5rem !important;
+    font-weight: 500;
+    text-align: center;
+    font-size: 1.5rem;
     padding: 15px 0 0 0;
 
     @media (min-width:600px) {
-        font-size: 1.7rem !important;
+        font-size: 1.7rem;
     }
 }
 

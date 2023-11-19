@@ -2,5 +2,7 @@
     "CodeGPT.query.language": "Russian",
     "php.validate.run": "onSave",
     "php.suggest.basic": true,
-    "php.validate.executablePath": ""
+    "php.validate.executablePath": "",
+    "vitest.enable": true,
+    "vitest.commandLine": "yarn --cwd frontend test",
 }

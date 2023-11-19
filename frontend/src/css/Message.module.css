@@ -26,8 +26,8 @@
 }
 
 .bubbleContentYou {
-    border-bottom-right-radius: 6px !important;
-    border-bottom-left-radius: 12px !important;
+    border-bottom-right-radius: 6px;
+    border-bottom-left-radius: 12px;
     background-color: #e6fcf5;
     border: 0.0625rem solid #e6fcf5;
 }

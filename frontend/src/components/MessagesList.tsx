@@ -86,14 +86,14 @@ const MessageList = () => {
     }
 
     return (
-        <div className="bubbles">
+        <div className="messages">
             {!IS_MOBILE ? (
                 <Scrollbars
                     autoHide
                     ref={(scrollbars: any) => { scrollRef.current = scrollbars?.view; }}
                     onScroll={handleScroll}
                 >
-                    <div className='bubbles-inner'>
+                    <div className='messages-box'>
                         {messages && messages.map((message) => (
                             <Message
                                 key={message.id}
@@ -116,7 +116,7 @@ const MessageList = () => {
                     onScroll={handleScroll}
                     ref={scrollRef}
                 >
-                    <div className='bubbles-inner'>
+                    <div className='messages-box'>
                         {messages && messages.map((message) => (
                             <Message
                                 key={message.id}

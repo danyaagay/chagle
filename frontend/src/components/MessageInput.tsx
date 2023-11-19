@@ -229,6 +229,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 						variant="transparent"
 						size="lg"
 						className={classes.send}
+						id='send'
 					>
 						<IconSend stroke={1.5} className={classes.linkIcon} />
 					</ActionIcon>

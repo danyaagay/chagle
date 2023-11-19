@@ -1,4 +1,3 @@
-import { createBrowserRouter } from 'react-router-dom';
 import Admin from './pages/Admin';
 import AdminUsers from './pages/AdminUsers';
 import AdminTokens from './pages/AdminTokens';
@@ -10,7 +9,7 @@ import Verify from './pages/Verify';
 import GuestLayout from './layouts/GuestLayout';
 import ContextLayout from './layouts/ContextLayout';
 
-const router = createBrowserRouter([
+const routerConfig = [
 	{
 		path: '/',
 		element: <GuestLayout />,
@@ -63,6 +62,6 @@ const router = createBrowserRouter([
 		path: '/verify/:status?',
 		element: <Verify />,
 	},
-]);
+];
 
-export default router;
+export default routerConfig;

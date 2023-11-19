@@ -144,7 +144,7 @@ export default function () {
 	return (
 		<div className={classes.main}>
 			<div className={classes.container}>
-				<div className='w-[350px]'>
+				<div className={classes.box}>
 					<Text
 						variant="gradient"
 						gradient={{ from: 'indigo', to: '', deg: 45 }}
@@ -158,11 +158,11 @@ export default function () {
 						-+-
 					</Text>
 
-					<Text className={classes.title} ta="center" fw={500}>
+					<p className={classes.title}>
 						{type === 'signup' ?
 							'Регистрация в Луми' :
 							'Вход в Луми'}
-					</Text>
+					</p>
 
 					<form onSubmit={form.onSubmit(handleSubmit)}>
 						{type === 'signup' && (

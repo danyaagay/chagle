@@ -45,17 +45,13 @@ export default function Chat() {
 	}, []);
 
 	return (
-
-		<div className='whole page-chats'>
-			<div className="chat tabs-tab active">
+		<div className='container'>
 				<MessagesList />
 				<div className='chat-input' ref={chatInputRef}>
 					<div className='chat-input-container'>
 						<MessageInput textareaRef={textareaRef} />
 					</div>
 				</div>
-			</div>
 		</div>
-
 	);
 }
