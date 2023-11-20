@@ -57,7 +57,7 @@ function MessagesProvider(props: MessagesProviderProps) {
     const hasMoreRef = useRef<boolean>(true);
 
     const loadMore = async (first = false) => {
-        console.log(`${idRef.current}:`, 'fetching', offsetRef.current, hasMoreRef.current, `first: ${first}`);
+        //console.log(`${idRef.current}:`, 'fetching', offsetRef.current, hasMoreRef.current, `first: ${first}`);
 
         try {
             const resp = await axios.get(`/messages/${idRef.current}?offset=${offsetRef.current}`, { signal: controllerRef.current.signal });
@@ -83,7 +83,7 @@ function MessagesProvider(props: MessagesProviderProps) {
         if(tempRef && id && messages != tempRef.current[id]) {
             tempRef.current[id] = {messages: messages, hasMore: hasMoreRef.current, offset: offsetRef.current};
         }
-        console.log(tempRef.current);
+        //console.log(tempRef.current);
     }, [messages]);
 
     useEffect(() => {
@@ -122,7 +122,7 @@ function MessagesProvider(props: MessagesProviderProps) {
             dispatch({ type: 'set', messages: null });
             offsetRef.current = 0;
             hasMoreRef.current = false;
-            console.log('disconect');
+            //console.log('disconect');
         }
     }, [location]);
 

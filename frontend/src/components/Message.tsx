@@ -16,22 +16,24 @@ export default function Message({ you, marker, time, text, is_error, ...others }
 	return (
 		<>
 			{(marker ? <div className={classes.timeBox}><span className={classes.timeMarker}>{marker}</span></div> : null)}
-			<Stack className={classes.bubble} {...others}>
-				<div className={`${classes.bubbleWrapper} ${(you ? classes.you : '')}`}>
-					<div className={`${classes.bubbleContent} ${(you ? classes.bubbleContentYou : '')}`}>
-						{you && text}
+			<Stack className={classes.message} {...others}>
+				<div className={`${classes.messageWrapper} ${(you ? classes.you : '')}`}>
+					<div className={`${classes.messageContent} ${(you ? classes.messageContentYou : '')}`}>
+						<div className={classes.markdownBody}>
+							{you && text}
 
-						{!you && !is_error && (
-							<Markdown>
-								{text}
-							</Markdown>
-						)}
+							{!you && !is_error && (
+								<Markdown>
+									{text}
+								</Markdown>
+							)}
 
-						{!you && is_error && (
-							<p style={{color: 'red'}}>
-								{text}
-							</p>
-						)}
+							{!you && is_error && (
+								<p style={{color: 'red'}}>
+									{text}
+								</p>
+							)}
+						</div>
 						<span className={classes.time}>{time}</span>
 					</div>
 				</div>

@@ -16,7 +16,7 @@ class StreamsController extends Controller
      */
     public function stream($question, $history = false)
     {
-        $debug = false;
+        $debug = true;
          
         ignore_user_abort(true);
 
@@ -37,6 +37,7 @@ class StreamsController extends Controller
 
         if ($debug) {
             $stream = [
+                'h','e','l','l','o',' ','h','o','w',' ','a','re',' you','h','e','l','l','o',' ','h','o','w',' ','a','re',' you','h','e','l','l','o',' ','h','o','w',' ','a','re',' you','h','e','l','l','o',' ','h','o','w',' ','a','re',' you','h','e','l','l','o',' ','h','o','w',' ','a','re',' you',
                 'h','e','l','l','o',' ','h','o','w',' ','a','re',' you','h','e','l','l','o',' ','h','o','w',' ','a','re',' you','h','e','l','l','o',' ','h','o','w',' ','a','re',' you','h','e','l','l','o',' ','h','o','w',' ','a','re',' you','h','e','l','l','o',' ','h','o','w',' ','a','re',' you'
             ];
         } else {

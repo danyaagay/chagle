@@ -27,7 +27,7 @@ body {
     flex-direction: column;
 }
 
-.chat-input {
+.chatInput {
     display: flex;
     width: 100%;
     max-width: 100%;
@@ -38,7 +38,7 @@ body {
     transform: translate3d(0,0,0);
 }
 
-.chat-input-container {
+.chatInputContainer {
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -59,7 +59,7 @@ body {
     transform: translate3d(0,0,0);
 }
 
-.messages-box {
+.messagesBox {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -69,7 +69,7 @@ body {
     padding: 0 .8125rem;
     max-width: 728px;
     /*transition: transform var(--transition-standard-out);*/
-    transform: translateY(0);
+    /*transform: translateY(0);*/
 }
 
 .scrollable.scrollable-y {

@@ -1,19 +1,26 @@
-.bubble {
+.message {
     display: block;
     width: 100%;
 }
 
-.bubbleWrapper {
+.messageWrapper {
     display: flex;
 }
 
-.bubbleContent {
+.messageContent {
     position: relative;
     background-color: #ffffff;
     border: 0.0625rem solid #dee2e6;
     padding: 6px 45px 6px 10px;
     border-radius: 12px 12px 12px 6px;
     font-size: var(--mantine-font-size-nm);
+}
+
+.markdownBody>*:first-child {
+    margin-top: 0!important;
+}
+.markdownBody>*:last-child {
+    margin-bottom: 0!important;
 }
 
 .time {
@@ -25,7 +32,7 @@
     color: rgb(0 0 0 / 55%);
 }
 
-.bubbleContentYou {
+.messageContentYou {
     border-bottom-right-radius: 6px;
     border-bottom-left-radius: 12px;
     background-color: #e6fcf5;
