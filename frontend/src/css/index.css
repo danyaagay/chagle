@@ -3,10 +3,85 @@ body, html {
     width: 100%;
     margin: 0;
     padding: 0;
-    overflow: visible;
+    overflow: hidden;
 }
 
 .scrollable {
     overflow-y: auto;
     overflow-y: overlay;
+}
+
+.burgerButton {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    margin: 0;
+    width: 100%;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    border: none;
+    cursor: pointer;
+    overflow: hidden;
+    outline: none;
+}
+
+.burgerBox {
+    position: relative;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    @media (min-width: $mantine-breakpoint-sm) {
+        display: none;
+    }
+}
+
+.burger,.burger:before,.burger:after  {
+    width: 1.125rem;
+    height: 0.125rem;
+    background-color: var(--mantine-color-gray-6)
+}
+
+.burger  {
+    position: absolute;
+}
+
+.burger:before {
+    top: -0.3125rem;
+}
+
+.burger:after {
+    top: 0.3125rem;
+}
+
+.burger:before, .burger:after {
+    position: absolute;
+    left: 0;
+    content: "";
+}
+
+.burgerClose  {
+    width: 1.125rem;
+    height: 0.125rem;
+    position: absolute;
+}
+
+.burgerClose:before {
+    transform: rotate(-45deg);
+}
+
+.burgerClose:after {
+    transform: rotate(45deg);
+}
+
+.burgerClose:before, .burgerClose:after {
+    position: absolute;
+    left: 0;
+    content: "";
+    width: 1.125rem;
+    height: 0.125rem;
+    background-color: var(--mantine-color-gray-6);
 }

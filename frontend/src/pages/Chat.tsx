@@ -47,11 +47,7 @@ export default function Chat() {
 	return (
 		<div className='container'>
 				<MessagesList />
-				<div className='chatInput' ref={chatInputRef}>
-					<div className='chatInputContainer'>
-						<MessageInput textareaRef={textareaRef} />
-					</div>
-				</div>
+				<MessageInput textareaRef={textareaRef} />
 		</div>
 	);
 }

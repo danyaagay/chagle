@@ -44,14 +44,12 @@ export default function MobileHeader() {
 
     return (
         <>
-            <Burger
-                opened={opened}
-                onClick={toggle}
-                size="sm"
-                color={theme.colors.gray[6]}
-                mb='16px'
-                className={classes.burger}
-            />
+            <div className='burgerBox'>
+                <button onClick={toggle} className='burgerButton'></button>
+                <div
+                    className='burgerClose'
+                />
+            </div>
 
             <Button
                 component={Link}

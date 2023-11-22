@@ -123,14 +123,13 @@ export default function ChatChatButton({
 			<a className={`${IS_MOBILE ? classes.linkMobile : classes.link} ${active ? classes.linkActive : ''}`}>
 				<IconMessageCircle2 className={classes.linkIcon} stroke={1.5} />
 				{ editable ? (
-					<TextInput
-      					variant="unstyled"
+					<input
 						defaultValue={chatTitle}
-						size='sm'
 						ref={chatTitleRef}
+						className={classes.linkSpan}
     				/>
 				) : (
-					<span>{chatTitle}</span>
+					<span className={classes.linkSpan}>{chatTitle}</span>
 				) }
 
 				{ !IS_MOBILE && hovered || active || editable ? (

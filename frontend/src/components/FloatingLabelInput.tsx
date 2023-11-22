@@ -94,7 +94,7 @@ function FloatingLabelInput({
 // Рекомендации
 function PasswordRequirement({ meets, label }: { meets: boolean; label: string }) {
 	return (
-		<Text color={meets ? 'teal' : 'red'} mt={5} size="sm">
+		<Text color={meets ? 'teal' : 'red'} mt={5} size="sm" component="span">
 			<Center inline>
 				{meets ? <IconCheck size="0.9rem" stroke={1.5} /> : <IconX size="0.9rem" stroke={1.5} />}
 				<Box ml={7}>{label}</Box>

@@ -55,11 +55,11 @@ export default function DefaultLayout() {
 					navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
 					transitionDuration={0}
 				>
-					<AppShell.Header hiddenFrom="sm" p="md">
+					<AppShell.Header hiddenFrom="sm" p="sm">
 						<MobileHeader />
 					</AppShell.Header>
 
-					<AppShell.Navbar>
+					<AppShell.Navbar p="sm">
 						<Menu />
 					</AppShell.Navbar>
 

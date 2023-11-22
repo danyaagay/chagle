@@ -9,7 +9,6 @@ const MessageList = () => {
     const { messages, loadMore, hasMoreRef } = useContext(MessagesContext);
     const location = useLocation();
     const scrollRef = useRef<any>();
-    const scrollPc = useRef<any>();
     const firstLoaded = useRef<any>(true);
     const scrollSaver = useRef<any>({ last: 99999, lastHeight: 0 });
     const loading = useRef<any>();
@@ -38,16 +37,15 @@ const MessageList = () => {
 
     useLayoutEffect(() => {
         //fix when generating a message in several lines, the initial position of the scroll down is set incorrectly
-        if (scrollSaver.current.lastDown < 1) {
+        if (scrollSaver.current.lastDown < 1 && scrollSaver.current.lastDown >= 0) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
+        //console.log(scrollSaver.current.lastDown);
         scrollSaver.current.lastDown = scrollRef.current.scrollHeight - scrollRef.current.clientHeight - scrollRef.current.scrollTop;
     }, [messages]);
 
     useLayoutEffect(() => {
-        let formula = (scrollRef.current.scrollHeight - scrollSaver.current.lastHeight) + scrollSaver.current.last;
-        
-        scrollRef.current.scrollTop = formula;
+        scrollRef.current.scrollTop = (scrollRef.current.scrollHeight - scrollSaver.current.lastHeight) + (scrollSaver.current.last > 0 ? scrollSaver.current.last : 0);
 
         if (IS_MOBILE) {
             reflowScrollableElement();
@@ -60,7 +58,7 @@ const MessageList = () => {
             loadMore();
         } else if (messages?.length && firstLoaded.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-            console.log('donefirst', scrollRef.current.scrollTop);
+            //console.log('donefirst', scrollRef.current.scrollTop);
             firstLoaded.current = false;
         }
     }, [messages?.length]);
@@ -69,13 +67,12 @@ const MessageList = () => {
         if (scrollRef.current) {
             //формула работает и на компьютере чтобы при написании сообщения прокрутка отправлялась вниз если она была внизу
             //без формулы scrollTop 0 нужно править на 1-2 пикселя для того чтобы
-            //при прогрузке старых смс сохранять позицию 
+            //при прогрузке старых смс сохранять позицию
             scrollSaver.current.last = scrollRef.current.scrollTop;
             scrollSaver.current.lastHeight = scrollRef.current.scrollHeight;
             scrollSaver.current.lastDown = scrollRef.current.scrollHeight - scrollRef.current.clientHeight - scrollRef.current.scrollTop;
 
-
-            console.log('scroll save', scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
+            //console.log('scroll save', scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
 
             //console.log(scrollRef.current.scrollTop / scrollRef.current.scrollHeight * 100);
             //const scrollPrecent = scrollRef.current.scrollTop / scrollRef.current.scrollHeight * 100;

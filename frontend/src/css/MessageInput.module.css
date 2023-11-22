@@ -1,7 +1,10 @@
-.linkIcon {
+.linkIconSend {
+    transform: rotate(40deg);
+}
+
+.linkIcon, .linkIconSend {
     width: 28px;
     height: 28px;
-    transform: rotate(40deg);
     color: var(--mantine-color-gray-6);
 }
 
@@ -14,11 +17,11 @@
 }
 
 .input {
-    padding: 10px 5px !important;
+    padding: 13px 13px !important;
     scrollbar-width: none;
     -ms-overflow-style: none;
     &::-webkit-scrollbar {
         width: 0 !important;
     }
-    font-size: 1rem;
+    font-size: 1rem !important;
 }

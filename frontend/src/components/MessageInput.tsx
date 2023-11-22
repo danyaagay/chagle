@@ -1,7 +1,8 @@
 import { useContext, useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
-	IconSend
+	IconReload,
+	IconPlayerStop
 } from '@tabler/icons-react';
 import {
 	Textarea,
@@ -16,11 +17,11 @@ import { IS_MOBILE } from '../environment/userAgent';
 import classes from '../css/MessageInput.module.css';
 
 export default function MessageInput({ textareaRef }: { textareaRef: React.RefObject<HTMLTextAreaElement> }) {
-	const [ isLoading, setIsLoading ] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 	const { dispatchChats, active, setActive } = useContext(ChatsContext);
 	const { dispatch, tempRef, idRef } = useContext(MessagesContext);
 	const tempIdRef = useRef('');
-	const [ keyboardOpen, setKeyboardOpen ] = useState(false);
+	const [keyboardOpen, setKeyboardOpen] = useState(false);
 	const location = useLocation();
 
 	useEffect(() => {
@@ -207,12 +208,28 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 	};
 
 	return (
-		<>
-			<ActionIcon className={classes.link} onClick={handleStop}>
-				<span>Остановить</span>
-			</ActionIcon>
-			<Card shadow="0" padding="0" radius="lg" withBorder style={{ width: '100%' }}>
-				<Group justify="right" p="xs" style={{ padding: '5px 20px 5px 20px', alignItems: 'end' }}>
+		<div className='chatInput'>
+			<div className='chatInputContainer'>
+				{isLoading ? (
+					<ActionIcon
+						variant="transparent"
+						size="lg"
+						className={classes.send}
+						onClick={handleStop}
+					>
+						<IconPlayerStop stroke={1.5} className={classes.linkIcon} />
+					</ActionIcon>
+				) : (
+					<ActionIcon
+						variant="transparent"
+						size="lg"
+						className={classes.send}
+					>
+						<IconReload stroke={1.5} className={classes.linkIcon} />
+					</ActionIcon>
+				)}
+
+				<Card shadow="0" padding="0" radius="lg" withBorder style={{ width: '100%' }}>
 					<Textarea
 						ref={textareaRef}
 						placeholder="Сообщение"
@@ -223,17 +240,33 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 						classNames={{ input: classes.input, root: classes.root }}
 						variant="unstyled"
 					/>
-					<ActionIcon
-						onClick={handleSend}
-						variant="transparent"
-						size="lg"
-						className={classes.send}
-						id='send'
+				</Card>
+
+				<ActionIcon
+					onClick={handleSend}
+					variant="transparent"
+					size="lg"
+					className={classes.send}
+					id='send'
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width={24}
+						height={24}
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth={1.5}
+						strokeLinecap="round"
+						strokeLinejoin="round"
+						className={classes.linkIconSend}
 					>
-						<IconSend stroke={1.5} className={classes.linkIcon} />
-					</ActionIcon>
-				</Group>
-			</Card>
-		</>
+						<path d="M10 14l4 -4" />
+						<path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5" />
+					</svg>
+				</ActionIcon>
+
+			</div>
+		</div>
 	);
 }

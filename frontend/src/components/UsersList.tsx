@@ -15,6 +15,7 @@ import { IconSelector, IconChevronDown, IconChevronUp, IconSearch } from '@table
 import classes from '../css/TableSort.module.css';
 
 interface RowData {
+	id: number;
 	name: string;
 	email: string;
 }
@@ -152,7 +153,7 @@ export function UsersList() {
 				</Table.Thead>
 				<Table.Tbody>
 					{sortedData && sortedData.map((row) => (
-						<Table.Tr key={row.name}>
+						<Table.Tr key={row.id}>
 							<Table.Td>{row.name}</Table.Td>
 							<Table.Td>{row.email}</Table.Td>
 						</Table.Tr>

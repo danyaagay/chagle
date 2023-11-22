@@ -1,6 +1,5 @@
 import { useRef, useEffect } from 'react';
 import {
-    Text,
     Burger,
     useMantineTheme,
 } from '@mantine/core';
@@ -26,17 +25,14 @@ export default function MobileHeader() {
     }, []);
 
     return (
-        <>
-            <div className={classes.headerBox} ref={topbarRef}>
-                <Burger
-                    opened={opened}
-                    onClick={toggle}
-                    size="sm"
-                    color={theme.colors.gray[6]}
-                    mr="xl"
+        <div className={classes.headerBox} ref={topbarRef}>
+            <div className='burgerBox'>
+                <button onClick={toggle} className='burgerButton'></button>
+                <div
+                    className='burger'
                 />
-                <Text>{mobileTitle}</Text>
             </div>
-        </>
+            <span className={classes.text}>{mobileTitle}</span>
+        </div>
     );
 }
