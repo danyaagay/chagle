@@ -19,7 +19,7 @@ import classes from '../css/MessageInput.module.css';
 export default function MessageInput({ textareaRef }: { textareaRef: React.RefObject<HTMLTextAreaElement> }) {
 	const [isLoading, setIsLoading] = useState(false);
 	const { dispatchChats, active, setActive } = useContext(ChatsContext);
-	const { dispatch, tempRef, idRef } = useContext(MessagesContext);
+	const { dispatch, messages, tempRef, idRef } = useContext(MessagesContext);
 	const tempIdRef = useRef('');
 	const [keyboardOpen, setKeyboardOpen] = useState(false);
 	const location = useLocation();
@@ -78,7 +78,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 					type: 'add',
 					message: {
 						id: -2,
-						text: 'Печатает сообщение...',
+						text: '...',
 						you: false
 					}
 				});
@@ -195,6 +195,108 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 		}
 	};
 
+	const handleRegenerate = async () => {
+		if (!isLoading) {
+			try {
+				setIsLoading(true);
+
+				let messageRegeneratedId;
+				if (messages && messages.length > 0 && active) {
+					messageRegeneratedId = messages[messages?.length - 1].id;
+				} else {
+					return false;
+				}
+
+				dispatch({
+					type: 'change',
+					id: messageRegeneratedId,
+					message: {
+						text: '...'
+					}
+				});
+
+				const url = 'http://192.168.0.116:8000/api/messages/regenerate/' + active;
+
+				try {
+					const response = await fetch(url, {
+						method: "POST",
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						credentials: "include",
+					});
+
+					if (!response.body) {
+						console.error("ReadableStream not supported");
+						return;
+					}
+
+					// Read the response as a stream of data
+					const reader = response.body.getReader();
+					const decoder = new TextDecoder("utf-8");
+
+					let answer = '';
+
+					while (true) {
+						const { done, value } = await reader.read();
+						if (done) {
+							break;
+						}
+						// Massage and parse the chunk of data
+						const chunk = decoder.decode(value);
+
+						//console.log(chunk);
+
+						const lines = chunk.split("\n\n");
+
+						//console.log(lines);
+
+						const parsedLines = lines
+							.map((line) => line.replace(/^data: /, "").trim()) // Remove the "data: " prefix
+							.filter((line) => line !== "" && line !== "ping") // Remove empty lines and "[DONE]"
+							.map((line) => JSON.parse(line)); // Parse the JSON string
+
+						//console.log(parsedLines);
+
+						for (const parsedLine of parsedLines) {
+							//console.log(parsedLine);
+							const { message, tempId, error } = parsedLine;
+
+							//console.log(answer, message);
+
+							//console.log(answerId);
+							// Update the UI with the new content
+							if (message) {
+								answer += message;
+
+								console.log(messageRegeneratedId, answer);
+
+								dispatch({
+									type: 'change',
+									id: messageRegeneratedId,
+									message: {
+										is_error: error ? error : false,
+										text: answer
+									}
+								});
+							} else if (tempId) {
+								tempIdRef.current = tempId;
+							}
+						}
+					}
+				} catch (error) {
+					console.error(error);
+				}
+
+				setIsLoading(false);
+			} catch (error: unknown) {
+				if (error instanceof AxiosError && error.response) {
+					// Delete error
+				}
+			}
+		}
+	};
+
 	const handleStop = async () => {
 		await fetch('http://192.168.0.116:8000/api/messages-cancel', {
 			method: 'POST',
@@ -224,6 +326,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 						variant="transparent"
 						size="lg"
 						className={classes.send}
+						onClick={handleRegenerate}
 					>
 						<IconReload stroke={1.5} className={classes.linkIcon} />
 					</ActionIcon>

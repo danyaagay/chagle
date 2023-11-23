@@ -128,6 +128,51 @@ class MessageController extends Controller
         ]);
     }
 
+    public function regenerate(Request $request, $id)
+    {
+        $user = $request->user();
+
+        return response()->stream(function () use ($user, $request, $id) {
+
+            $chat = $user->chats()->find($id);
+
+            if (!$chat) {
+                return response()->json([
+                    'error' => 'Unknown error 1',
+                ]);
+            }
+
+            $lastMessages = $chat->messages()->orderBy('id', 'desc')->limit(2)->get();
+
+            if ($lastMessages[1]->role != 'user' || $lastMessages[0]->role != 'assistant') {
+                return response()->json([
+                    'error' => 'Unknown error 2',
+                ]);
+            }
+
+            $history = $this->getHistory($chat->messages()->where('error_code', NULL)->whereNot('id', $lastMessages[0]->id)->get());
+
+            $stream = new StreamsController;
+            $answer = $stream->stream($lastMessages[1]->text, $history);
+
+            if ($answer['error']) {
+                $chatAnswer = $lastMessages[0]->update([
+                    'content' => $answer['answer'],
+                    'error_code' => $answer['error_code']
+                ]);
+            } else {
+                $chatAnswer = $lastMessages[0]->update([
+                    'content' => $answer['answer'],
+                    'error_code' => NULL
+                ]);
+            }
+        }, 200, [
+            'Cache-Control' => 'no-cache',
+            'X-Accel-Buffering' => 'no',
+            'Content-Type' => 'text/event-stream',
+        ]);
+    }
+
     public function cancel(Request $request)
     {
         Redis::del($request->id);

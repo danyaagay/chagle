@@ -16,7 +16,7 @@ class StreamsController extends Controller
      */
     public function stream($question, $history = false)
     {
-        $debug = true;
+        $debug = false;
          
         ignore_user_abort(true);
 
@@ -45,7 +45,7 @@ class StreamsController extends Controller
             
             $client = OpenAI::factory()
             ->withApiKey($token)
-            ->withHttpClient(new \GuzzleHttp\Client(['verify'=>true,'proxy'=>'http://R3DX7x:L09c5U@186.65.114.226:9051']))
+            ->withHttpClient(new \GuzzleHttp\Client(['verify'=>false,'proxy'=>'http://user145254:y96c1e@146.19.137.214:6830']))
             ->make();
             
             $error = false;
@@ -65,9 +65,24 @@ class StreamsController extends Controller
                     $errorCode = $e->getErrorType();
                 }
             } catch (\OpenAI\Exceptions\TransporterException $e) {
+                var_dump( $e);
+
                 $error = true;
 
                 $errorCode = $e->getCode();
+
+                $text = "В данный момент невозможно обработать запрос. Ошибка: {$errorCode}";
+    
+                $json = json_encode(['message' => $text, 'error' => true]);
+    
+                echo 'data: ' . $json;
+                echo "\n\n";
+                ob_flush();
+                flush();
+
+                ob_end_flush();
+    
+                return ['error' => true, 'error_code' => $errorCode, 'answer' => $text];
             }
 
             if ($error) {
@@ -79,12 +94,10 @@ class StreamsController extends Controller
                 echo "\n\n";
                 ob_flush();
                 flush();
-    
-                $answer .= $text;
 
                 ob_end_flush();
     
-                return ['error' => true, 'error_code' => $errorCode, 'answer' => $answer];
+                return ['error' => true, 'error_code' => $errorCode, 'answer' => $text];
             }
         }
 
