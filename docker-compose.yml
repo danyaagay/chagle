@@ -58,11 +58,9 @@ services:
     ports:
       - '3306:3306'
     environment:
-      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: ''
       MYSQL_ROOT_HOST: '%'
-      MYSQL_DATABASE: app
-      MYSQL_USER: user
-      MYSQL_PASSWORD: secret
+      MYSQL_DATABASE: loomie
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
     networks:
       - app-network
@@ -74,7 +72,6 @@ services:
       - '8080:80'
     environment:
       PMA_HOST: mysql
-      MYSQL_ROOT_PASSWORD: secret
     networks:
       - app-network
 

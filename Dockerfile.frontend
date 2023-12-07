@@ -10,7 +10,6 @@ RUN yarn install
 
 # сборка фронтенда
 COPY frontend .
-RUN yarn build
 
 # запуск веб-сервера
 CMD yarn dev --host
