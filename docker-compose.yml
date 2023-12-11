@@ -5,7 +5,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
-    container_name: backend
     tty: true
     working_dir: /var/www/backend
     environment:
@@ -18,12 +17,11 @@ services:
       - mysql
       - redis
     networks:
-      - app-network
+      - app
 
   # Nginx Service
   nginx:
     image: nginx:alpine
-    container_name: nginx
     tty: true
     ports:
       - "8000:8000"
@@ -35,13 +33,13 @@ services:
       - mysql
       - redis
     networks:
-      - app-network
+      - app
 
+  # Node Service
   frontend:
     build:
       context: .
       dockerfile: Dockerfile.frontend
-    container_name: frontend
     ports:
       - '5173:5173'
     volumes:
@@ -50,11 +48,11 @@ services:
     depends_on:
       - nginx
     networks:
-      - app-network
+      - app
 
+  # MySQL Service
   mysql:
     image: mysql:8.0
-    container_name: mysql
     ports:
       - '3306:3306'
     environment:
@@ -63,35 +61,35 @@ services:
       MYSQL_DATABASE: loomie
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
     networks:
-      - app-network
+      - app
 
+  # PHPMyAdmin Service
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin
     ports:
       - '8080:80'
     environment:
       PMA_HOST: mysql
     networks:
-      - app-network
+      - app
 
+  # Redis Service
   redis:
     image: redis:6.2
-    container_name: redis
     ports:
       - '6379:6379'
     networks:
-      - app-network
+      - app
 
+  # Mailhog Service
   mailhog:
     image: mailhog/mailhog
-    container_name: mailhog
     ports:
       - '8025:8025'
       - '1025:1025'
     networks:
-      - app-network
+      - app
 
 networks:
-  app-network:
+  app:
     driver: bridge
