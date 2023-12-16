@@ -20,28 +20,28 @@ function LoadingProvider(props: LoadingProviderProps) {
 	const { chats } = useContext(ChatsContext);
 	const { mobileTitle } = useContext(MobileHeaderContext);
 	const { messages } = useContext(MessagesContext);
-	const [ loading, setLoading ] = useState<boolean>(true);
+	const [ loading, setLoading ] = useState<boolean>(false);
 	const { id } = useParams();
 
 	// Loading status
-	useEffect(() => {
-		const path = window.location.pathname;
-		const page = path.split('/')[1];
-
-		if (chats !== null && mobileTitle) {
-			if (page === 'chats') {
-				if (id) {
-					if (messages !== null) {
-						setLoading(false);
-					}
-				} else {
-					setLoading(false);
-				}
-			} else {
-				setLoading(false);
-			}
-		}
-	}, [chats, mobileTitle, messages]);
+	//useEffect(() => {
+	//	const path = window.location.pathname;
+	//	const page = path.split('/')[1];
+//
+	//	if (chats !== null && mobileTitle) {
+	//		if (page === 'chats') {
+	//			if (id) {
+	//				if (messages !== null) {
+	//					setLoading(false);
+	//				}
+	//			} else {
+	//				setLoading(false);
+	//			}
+	//		} else {
+	//			setLoading(false);
+	//		}
+	//	}
+	//}, [chats, mobileTitle, messages]);
 
 	return (
 		<LoadingContext.Provider value={{ loading, setLoading }}>

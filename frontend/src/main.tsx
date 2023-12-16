@@ -9,6 +9,12 @@ import './css/chat.css';
 import { MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { createBrowserRouter } from 'react-router-dom';
+import {
+	QueryClient,
+	QueryClientProvider
+} from '@tanstack/react-query'
+
+const queryClient = new QueryClient();
 
 // Main component
 let root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
@@ -26,8 +32,10 @@ root.render(
 				}}
 				classNamesPrefix='asdsda'
 			>
-				<Notifications />
-				<RouterProvider router={router} />
+				<QueryClientProvider client={queryClient}>
+					<Notifications />
+					<RouterProvider router={router} />
+				</QueryClientProvider>
 			</MantineProvider>
 		</AuthProvider>
 	</React.StrictMode>

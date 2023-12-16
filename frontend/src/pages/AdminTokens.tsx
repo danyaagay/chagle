@@ -1,5 +1,5 @@
 import { useAuth } from '../contexts/AuthContext';
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState } from 'react';
 import {  Navigate } from 'react-router-dom';
 import axios from '../axios';
 import {
@@ -12,8 +12,8 @@ import {
 } from '@mantine/core';
 import { IconArrowUpRight, IconArrowDownRight } from '@tabler/icons-react';
 import { TokensList } from '../components/TokensList';
-import MobileHeaderContext from '../contexts/MobileHeaderContext';
-
+//import MobileHeaderContext from '../contexts/MobileHeaderContext';
+import { useQuery } from '@tanstack/react-query';
 import classes from '../css/Admin.module.css';
 
 type Stat = {
@@ -24,34 +24,29 @@ type Stat = {
 
 export default function StatsGridIcons() {
 	const { user } = useAuth();
-	const [ data, setData] = useState<Stat[]>([]);
-	const { opened, toggle } = useContext(MobileHeaderContext);
+	//const [ data, setData] = useState<Stat[]>([]);
+	//const { opened, toggle } = useContext(MobileHeaderContext);
 
-	useEffect(() => {
-		if (data.length > 0 && opened) {
-			toggle();
-		}
-	}, [data]);
-
-	useEffect(() => {
-		(async () => {
-			try {
-				const resp = await axios.get('/summary/tokens', user);
-				if (resp.status === 200) {
-					setData(resp.data);
-				}
-			} catch (error: unknown) {
-				
-			}
-		})();
-	}, []);
+	//useEffect(() => {
+	//	if (data.length > 0 && opened) {
+	//		toggle();
+	//	}
+	//}, [data]);
 
 	// If user not super-admin, redirect to chat page
 	if (user.roles[0] != 'super-admin') {
 		return <Navigate to="/" />;
 	}
 
-	const stats = data.map((stat: Stat) => {
+	const { data } = useQuery({
+		queryKey: ['summary/tokens'],
+		queryFn: () =>
+			axios.get('/summary/tokens').then(
+				(res) => res.data,
+			),
+	});
+
+	const stats = data?.map((stat: Stat) => {
 		const DiffIcon = stat.diff && stat.diff > 0 ? IconArrowUpRight : IconArrowDownRight;
 
 		return (

@@ -1,8 +1,6 @@
 import { Link } from 'react-router-dom';
 import axios from '../axios';
 import {
-    Burger,
-    useMantineTheme,
     Button,
     NavLink,
     Menu
@@ -18,8 +16,7 @@ import { useMobileHeader } from '../contexts/MobileHeaderContext';
 import classes from '../css/ProtectedLayout.module.css';
 
 export default function MobileHeader() {
-    const { mobileTitle, setMobileTitle, opened, toggle } = useMobileHeader();
-    const theme = useMantineTheme();
+    const { mobileTitle, setMobileTitle, toggle } = useMobileHeader();
 
     // Logout user
     const handleLogout = async () => {
