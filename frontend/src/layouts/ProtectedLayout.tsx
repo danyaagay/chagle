@@ -48,26 +48,25 @@ export default function DefaultLayout() {
 
 	return (
 		<>
-			{!loading && (
-				<AppShell
-					classNames={classes}
-					layout='alt'
-					navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
-					transitionDuration={0}
-				>
-					<AppShell.Header hiddenFrom="sm" p="sm">
-						<MobileHeader />
-					</AppShell.Header>
+			<AppShell
+				style={{ visibility: !loading ? "visible" : "hidden" }}
+				classNames={classes}
+				layout='alt'
+				navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
+				transitionDuration={0}
+			>
+				<AppShell.Header hiddenFrom="sm" p="sm">
+					<MobileHeader />
+				</AppShell.Header>
 
-					<AppShell.Navbar p="sm">
-						<Menu />
-					</AppShell.Navbar>
+				<AppShell.Navbar p="sm">
+					<Menu />
+				</AppShell.Navbar>
 
-					<AppShell.Main>
-						<Outlet />
-					</AppShell.Main>
-				</AppShell>
-			)}
+				<AppShell.Main>
+					<Outlet />
+				</AppShell.Main>
+			</AppShell>
 		</>
 	);
 }

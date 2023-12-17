@@ -21,28 +21,28 @@ const MessageList = () => {
 
     const queryClient = useQueryClient();
 
-    const { data: tempData } = useQuery({ queryKey: ['messages', 'temp'] });
-    const { data: tempDataId } = useQuery({ queryKey: ['messages', 'temp' + id] });
+    const { data: tempData }: any = useQuery({ queryKey: ['messages', 'temp'] });
+    const { data: tempDataId }: any = useQuery({ queryKey: ['messages', 'temp' + id] });
 
     const {
         data: realData,
         fetchNextPage,
         hasNextPage,
-    } = useInfiniteQuery({
+    }: any = useInfiniteQuery({
         queryKey: ['messages', id],
         queryFn: async ({ pageParam }) => {
             const res = await axios.get(`/messages/${id}?offset=${pageParam}`);
             return res.data;
         },
         initialPageParam: 0,
-        getNextPageParam: (lastPage, allPages, lastPageParam) => {
+        getNextPageParam: (lastPage: any, allPages, lastPageParam) => {
             if (!lastPage.hasMore) {
                 return undefined;
             }
             return lastPageParam ? lastPageParam + 30 : tempDataId ? lastPage.messages.length + tempDataId?.pages[0].messages.length : lastPage.messages.length;
         },
         select: useCallback(
-            (data) => ({
+            (data: any) => ({
                 pages: [...data.pages].reverse(),
                 pageParams: [...data.pageParams].reverse(),
             }),
@@ -61,8 +61,8 @@ const MessageList = () => {
 
     const data = id ? realData : tempData;
 
-    const itemsA = data?.pages.flatMap(page => page.messages);
-    const itemsB = tempDataId?.pages.flatMap(page => page.messages);
+    const itemsA = data?.pages.flatMap((page: any) => page.messages);
+    const itemsB = tempDataId?.pages.flatMap((page: any) => page.messages);
 
     const allItems = itemsB ? itemsA.concat(itemsB) : itemsA;
 

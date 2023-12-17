@@ -71,7 +71,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 					textareaRef.current.focus();
 				}
 
-				queryClient.setQueryData(['messages', id ? 'temp'+id : 'temp'],
+				queryClient.setQueryData(['messages', id ? 'temp' + id : 'temp'],
 					(oldData: any) => {
 						const date = new Date();
 						const dateFormatted = date.toISOString();
@@ -192,7 +192,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 							if (message) {
 								answer += message;
 
-								queryClient.setQueryData(['messages', id ? 'temp'+id : 'temp'],
+								queryClient.setQueryData(['messages', id ? 'temp' + id : 'temp'],
 									(oldData: any) => {
 										if (oldData) {
 											return produce(oldData, (draft: any) => {
@@ -210,7 +210,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 							} else if (tempId) {
 								tempIdRef.current = tempId;
 							} else if (messageId) {
-								queryClient.setQueryData(['messages', id ? 'temp'+id : 'temp'],
+								queryClient.setQueryData(['messages', id ? 'temp' + id : 'temp'],
 									(oldData: any) => {
 										if (oldData) {
 											return produce(oldData, (draft: any) => {
@@ -226,7 +226,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 								);
 								//console.log('change message');
 							} else if (answerId) {
-								queryClient.setQueryData(['messages', id ? 'temp'+id : 'temp'],
+								queryClient.setQueryData(['messages', id ? 'temp' + id : 'temp'],
 									(oldData: any) => {
 										if (oldData) {
 											return produce(oldData, (draft: any) => {
@@ -264,114 +264,146 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 		}
 	};
 
-	//const { mutate: mutationSend } = useMutation({
-	//	mutationFn: handleSend,
-	//	onSuccess: () => {
-	//		queryClient.invalidateQueries({ queryKey: ['messages'] });
-	//	}
-	//});
+	const handleRegenerate = async () => {
+		if (!isLoading) {
+			try {
+				setIsLoading(true);
 
-	//const handleRegenerate = async () => {
-	//	if (!isLoading) {
-	//		try {
-	//			setIsLoading(true);
-	//
-	//			let messageRegeneratedId;
-	//			if (messages && messages.length > 0 && active) {
-	//				messageRegeneratedId = messages[messages?.length - 1].id;
-	//			} else {
-	//				return false;
-	//			}
-	//
-	//			dispatch({
-	//				type: 'change',
-	//				id: messageRegeneratedId,
-	//				message: {
-	//					text: '...'
-	//				}
-	//			});
-	//
-	//			const url = 'http://192.168.0.116:8000/api/messages/regenerate/' + active;
-	//
-	//			try {
-	//				const response = await fetch(url, {
-	//					method: "POST",
-	//					headers: {
-	//						'Content-Type': 'application/json'
-	//					},
-	//					credentials: "include",
-	//				});
-	//
-	//				if (!response.body) {
-	//					console.error("ReadableStream not supported");
-	//					return;
-	//				}
-	//
-	//				// Read the response as a stream of data
-	//				const reader = response.body.getReader();
-	//				const decoder = new TextDecoder("utf-8");
-	//
-	//				let answer = '';
-	//
-	//				while (true) {
-	//					const { done, value } = await reader.read();
-	//					if (done) {
-	//						break;
-	//					}
-	//					// Massage and parse the chunk of data
-	//					const chunk = decoder.decode(value);
-	//
-	//					//console.log(chunk);
-	//
-	//					const lines = chunk.split("\n\n");
-	//
-	//					//console.log(lines);
-	//
-	//					const parsedLines = lines
-	//						.map((line) => line.replace(/^data: /, "").trim()) // Remove the "data: " prefix
-	//						.filter((line) => line !== "" && line !== "ping") // Remove empty lines and "[DONE]"
-	//						.map((line) => JSON.parse(line)); // Parse the JSON string
-	//
-	//					//console.log(parsedLines);
-	//
-	//					for (const parsedLine of parsedLines) {
-	//						//console.log(parsedLine);
-	//						const { message, tempId, error } = parsedLine;
-	//
-	//						//console.log(answer, message);
-	//
-	//						//console.log(answerId);
-	//						// Update the UI with the new content
-	//						if (message) {
-	//							answer += message;
-	//
-	//							console.log(messageRegeneratedId, answer);
-	//
-	//							dispatch({
-	//								type: 'change',
-	//								id: messageRegeneratedId,
-	//								message: {
-	//									is_error: error ? error : false,
-	//									text: answer
-	//								}
-	//							});
-	//						} else if (tempId) {
-	//							tempIdRef.current = tempId;
-	//						}
-	//					}
-	//				}
-	//			} catch (error) {
-	//				console.error(error);
-	//			}
-	//
-	//			setIsLoading(false);
-	//		} catch (error: unknown) {
-	//			if (error instanceof AxiosError && error.response) {
-	//				// Delete error
-	//			}
-	//		}
-	//	}
-	//};
+				const hasTemp = queryClient.getQueryData(['messages', 'temp' + id]);
+
+				let oldMessage: any;
+
+				queryClient.setQueryData(['messages', hasTemp ? 'temp' + id : id],
+					(oldData: any) => {
+						if (oldData) {
+							oldMessage = oldData.pages[0].messages.slice(-1)[0];
+							return produce(oldData, (draft: any) => {
+								draft.pages[0].messages.pop();
+							});
+						}
+						return oldData;
+					}
+				);
+
+				queryClient.setQueryData(['messages', 'temp' + id],
+					(oldData: any) => {
+						if (oldData) {
+							return produce(oldData, (draft: any) => {
+								draft.pages[0].messages.push({
+									...oldMessage,
+									text: '...'
+								});
+							});
+						} else {
+							oldData = {
+								pages: [
+									{
+										messages: [
+											{
+												...oldMessage,
+												text: '...'
+											},
+										],
+										hasMore: false
+									}
+								],
+								pageParams: [
+									0
+								]
+							};
+						}
+						return oldData;
+					}
+				);
+
+				const url = 'http://192.168.0.116:8000/api/messages/regenerate/' + id;
+
+				try {
+					const response = await fetch(url, {
+						method: "POST",
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						credentials: "include",
+					});
+
+					if (!response.body) {
+						console.error("ReadableStream not supported");
+						return;
+					}
+
+					// Read the response as a stream of data
+					const reader = response.body.getReader();
+					const decoder = new TextDecoder("utf-8");
+
+					let answer = '';
+
+					while (true) {
+						const { done, value } = await reader.read();
+						if (done) {
+							break;
+						}
+						// Massage and parse the chunk of data
+						const chunk = decoder.decode(value);
+
+						//console.log(chunk);
+
+						const lines = chunk.split("\n\n");
+
+						//console.log(lines);
+
+						const parsedLines = lines
+							.map((line) => line.replace(/^data: /, "").trim()) // Remove the "data: " prefix
+							.filter((line) => line !== "" && line !== "ping") // Remove empty lines and "[DONE]"
+							.map((line) => JSON.parse(line)); // Parse the JSON string
+
+						//console.log(parsedLines);
+
+						for (const parsedLine of parsedLines) {
+							//console.log(parsedLine);
+							const { message, tempId, error } = parsedLine;
+
+							//console.log(answer, message);
+
+							//console.log(answerId);
+							// Update the UI with the new content
+							if (message) {
+								answer += message;
+
+								//console.log(messageRegeneratedId, answer);
+
+								queryClient.setQueryData(['messages', 'temp' + id],
+									(oldData: any) => {
+										if (oldData) {
+											return produce(oldData, (draft: any) => {
+												draft.pages[0].messages.forEach((message: any) => {
+													if (message.id === oldMessage.id) {
+														message.is_error = error ? error : false;
+														message.text = answer;
+													}
+												});
+											});
+										}
+										return oldData;
+									}
+								);
+							} else if (tempId) {
+								tempIdRef.current = tempId;
+							}
+						}
+					}
+				} catch (error) {
+					console.error(error);
+				}
+
+				setIsLoading(false);
+			} catch (error: unknown) {
+				if (error instanceof AxiosError && error.response) {
+					// Delete error
+				}
+			}
+		}
+	}
 
 	const handleStop = async () => {
 		await fetch('http://192.168.0.116:8000/api/messages-cancel', {
@@ -383,7 +415,6 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 			body: JSON.stringify({ id: tempIdRef.current })
 		});
 	};
-
 
 	//WORKED without inner
 	//queryClient.setQueryData(['messages', id],
@@ -400,7 +431,6 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 	//		}
 	//	}
 	//);
-
 
 	return (
 		<div className='chatInput'>
@@ -419,7 +449,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 						variant="transparent"
 						size="lg"
 						className={classes.send}
-					//onClick={handleRegenerate}
+						onClick={handleRegenerate}
 					>
 						<IconReload stroke={1.5} className={classes.linkIcon} />
 					</ActionIcon>

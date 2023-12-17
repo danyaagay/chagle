@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 
 const ChatsList = () => {
 	const { active, setActive } = useContext(ChatsContext);
-	const { setMobileTitle } = useContext(MobileHeaderContext);
+	const { setMobileTitle,  opened, toggle } = useContext(MobileHeaderContext);
 	const navigate = useNavigate();
 
 	const { data: chats } = useQuery({
@@ -32,6 +32,9 @@ const ChatsList = () => {
 						setActive(chat.id);
 						setMobileTitle(chat.title);
 						navigate('chat/'+chat.id);
+						if (opened) {
+							toggle();
+						}
 						//setOpened((o) => !o);
 					}}
 				/>
