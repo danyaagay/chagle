@@ -53,7 +53,7 @@ const MessageList = () => {
 
         loading.current = false;
 
-        if (messages?.length && scrollRef.current.offsetHeight > scrollRef.current.scrollHeight && hasMoreRef.current) {
+        if (messages?.length && scrollRef.current.offsetHeight == scrollRef.current.scrollHeight && hasMoreRef.current) {
             loading.current = true;
             loadMore();
         } else if (messages?.length && firstLoaded.current) {
