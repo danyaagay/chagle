@@ -1,32 +1,33 @@
-import { useRef, useLayoutEffect, useCallback, useEffect } from 'react';
+import { useRef, useLayoutEffect, useCallback, useEffect, useContext, useMemo } from 'react';
 import { IS_MOBILE } from '../environment/userAgent';
 import { Scrollbars } from 'react-custom-scrollbars';
 import Message from './Message';
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient, useQuery } from '@tanstack/react-query';
 import axios from '../axios';
 import { useParams } from 'react-router-dom';
-import React from "react";
+//import React from "react";
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 import { produce } from 'immer';
+//import ChatsContext from '../contexts/ChatsContext';
 
 const MessageList = () => {
     const scrollRef = useRef<any>();
     const firstLoaded = useRef<any>(true);
     const scrollSaver = useRef<any>({ last: 99999, lastHeight: 0 });
     const loading = useRef<any>();
+    //const { active, setActive } = useContext(ChatsContext);
     const { id } = useParams();
 
     const queryClient = useQueryClient();
 
+    const { data: tempData } = useQuery({ queryKey: ['messages', 'temp'] });
+    const { data: tempDataId } = useQuery({ queryKey: ['messages', 'temp' + id] });
+
     const {
-        data,
-        //error,
+        data: realData,
         fetchNextPage,
         hasNextPage,
-        //isFetching,
-        //isFetchingNextPage,
-        //status,
     } = useInfiniteQuery({
         queryKey: ['messages', id],
         queryFn: async ({ pageParam }) => {
@@ -38,26 +39,79 @@ const MessageList = () => {
             if (!lastPage.hasMore) {
                 return undefined;
             }
-            return lastPageParam ? lastPageParam + 30 : lastPage.messages.length;
+            return lastPageParam ? lastPageParam + 30 : tempDataId ? lastPage.messages.length + tempDataId?.pages[0].messages.length : lastPage.messages.length;
         },
-        select: (data) => ({
-            pages: [...data.pages].reverse(),
-            pageParams: [...data.pageParams].reverse(),
-        }),
+        select: useCallback(
+            (data) => ({
+                pages: [...data.pages].reverse(),
+                pageParams: [...data.pageParams].reverse(),
+            }),
+            []
+        ),
         enabled: !!id,
         staleTime: Infinity,
         gcTime: Infinity,
         refetchOnWindowFocus: false,
 
-        retryOnMount: false,
-        refetchOnMount: false,
-        refetchOnReconnect: false,
-        notifyOnChangeProps: ['data'],
-        refetchInterval: 0,
-        structuralSharing: false,
+        initialData: () => {
+            queryClient.removeQueries({ queryKey: ['messages', 'temp'] });
+            return tempData;
+        },
     });
 
-    const allItems = data?.pages.flatMap(page => page.messages);
+    const data = id ? realData : tempData;
+
+    const itemsA = data?.pages.flatMap(page => page.messages);
+    const itemsB = tempDataId?.pages.flatMap(page => page.messages);
+
+    const allItems = itemsB ? itemsA.concat(itemsB) : itemsA;
+
+    //useEffect(() => {
+    //    //console.log(tempDataId);
+    //    console.log(data);
+    //}, [data]);
+
+    //Датировка
+    useEffect(() => {
+        queryClient.setQueryData(['messages', id],
+            (oldData: any) => {
+                if (oldData) {
+                    return produce(oldData, (draft: any) => {
+                        console.log('Процесс датировки начат');
+                        let currentDate: any;
+
+                        draft.pages.forEach((page: any) => {
+                            page.messages.forEach((message: any) => {
+                                const today = dayjs();
+                                const date = dayjs(message.date);
+                                let formattedDate;
+
+                                if (!currentDate || !currentDate.isSame(date, 'day')) {
+                                    if (today.isSame(date, 'day')) {
+                                        formattedDate = 'Сегодня';
+                                    } else if (date.isSame(today.subtract(1, 'day'), 'day')) {
+                                        formattedDate = 'Вчера';
+                                    } else {
+                                        const now = dayjs();
+                                        if (date.year() !== now.year()) {
+                                            formattedDate = date.locale('ru').format('D MMMM YYYY');
+                                        } else {
+                                            formattedDate = date.locale('ru').format('D MMMM');
+                                        }
+                                    }
+                                }
+
+                                currentDate = date;
+
+                                message.marker = formattedDate ? formattedDate : undefined;
+                            });
+                        });
+                    });
+                }
+                return oldData;
+            }
+        );
+    }, [allItems?.length]);
 
     //Запаздание для анимаций ios?
     const onLoadOldMessages = useCallback(
@@ -75,50 +129,8 @@ const MessageList = () => {
         []
     );
 
-    //Датировка
-    useEffect(() => {
-        queryClient.setQueryData(['messages', id],
-            (oldData: any) => {
-                if (oldData) {
-                    return produce(oldData, (draft: any) => {
-                        console.log('Процесс датировки начат');
-                        let currentDate: any;
-                
-                        draft.pages.forEach((page: any) => {
-                            page.messages.forEach((message: any) => {
-                                const today = dayjs();
-                                const date = dayjs(message.date);
-                                let formattedDate;
-                
-                                if (!currentDate || !currentDate.isSame(date, 'day')) {
-                                    if (today.isSame(date, 'day')) {
-                                        formattedDate = 'Сегодня';
-                                    } else if (date.isSame(today.subtract(1, 'day'), 'day')) {
-                                        formattedDate = 'Вчера';
-                                    } else {
-                                        const now = dayjs();
-                                        if (date.year() !== now.year()) {
-                                            formattedDate = date.locale('ru').format('D MMMM YYYY');
-                                        } else {
-                                            formattedDate = date.locale('ru').format('D MMMM');
-                                        }
-                                    }
-                                }
-                
-                                currentDate = date;
-                
-                                message.marker = formattedDate ? formattedDate : undefined;
-                            });
-                        });
-                    });
-                }
-                return oldData;
-            }
-        );
-    }, [allItems?.length]);
-
     useLayoutEffect(() => {
-        console.log('new page');
+        //console.log('new page');
         return () => {
             firstLoaded.current = true;
             loading.current = true;
@@ -167,7 +179,7 @@ const MessageList = () => {
             //console.log(scrollRef.current.scrollTop / scrollRef.current.scrollHeight * 100);
             //const scrollPrecent = scrollRef.current.scrollTop / scrollRef.current.scrollHeight * 100;
 
-            console.log(loading.current)
+            //console.log(loading.current)
 
             if (scrollRef.current.scrollTop <= 300 && !loading.current && hasNextPage) {
                 loading.current = true;
@@ -194,19 +206,16 @@ const MessageList = () => {
                     onScroll={handleScroll}
                 >
                     <div className='messagesBox'>
-                        {data?.pages.map((page, i) => (
-                            <React.Fragment key={i}>
-                                {page.messages.map((message: any) => (
-                                    <Message
-                                        key={message.id}
-                                        text={message.text}
-                                        marker={message.marker}
-                                        you={message.you}
-                                        time={message.time}
-                                        is_error={message.is_error}
-                                    />
-                                ))}
-                            </React.Fragment>
+
+                        {allItems?.map((message: any) => (
+                            <Message
+                                key={message.id}
+                                text={message.text}
+                                marker={message.marker}
+                                you={message.you}
+                                time={message.time}
+                                is_error={message.is_error}
+                            />
                         ))}
                     </div>
                 </Scrollbars>
@@ -221,19 +230,16 @@ const MessageList = () => {
                     ref={scrollRef}
                 >
                     <div className='messagesBox'>
-                        {data?.pages.map((page, i) => (
-                            <React.Fragment key={i}>
-                                {page.messages.map((message: any) => (
-                                    <Message
-                                        key={message.id}
-                                        text={message.text}
-                                        marker={message.marker}
-                                        you={message.you}
-                                        time={message.time}
-                                        is_error={message.is_error}
-                                    />
-                                ))}
-                            </React.Fragment>
+
+                        {allItems?.map((message: any) => (
+                            <Message
+                                key={message.id}
+                                text={message.text}
+                                marker={message.marker}
+                                you={message.you}
+                                time={message.time}
+                                is_error={message.is_error}
+                            />
                         ))}
                     </div>
                 </div>

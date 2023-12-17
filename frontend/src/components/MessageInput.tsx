@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
 	IconReload,
 	IconPlayerStop
@@ -14,44 +14,45 @@ import { AxiosError } from 'axios';
 import ChatsContext from '../contexts/ChatsContext';
 import { IS_MOBILE } from '../environment/userAgent';
 import classes from '../css/MessageInput.module.css';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { produce } from 'immer';
 
 export default function MessageInput({ textareaRef }: { textareaRef: React.RefObject<HTMLTextAreaElement> }) {
 	const [isLoading, setIsLoading] = useState(false);
-	const { active, setActive } = useContext(ChatsContext);
+	const { setActive } = useContext(ChatsContext);
 	const tempIdRef = useRef('');
 	const [keyboardOpen, setKeyboardOpen] = useState(false);
 	const location = useLocation();
+	const navigate = useNavigate();
 	const { id } = useParams();
 
-	//useEffect(() => {
-	//	const handleResize = () => {
-	//		const VIEWPORT_VS_CLIENT_HEIGHT_RATIO = 0.75;
-	//		const { visualViewport, screen } = window;
-//
-	//		if (visualViewport && (visualViewport.height * visualViewport.scale) / screen.height < VIEWPORT_VS_CLIENT_HEIGHT_RATIO) {
-	//			setKeyboardOpen(true);
-	//			//console.log('keyboard is shown');
-	//		} else {
-	//			setKeyboardOpen(false);
-	//			//console.log('keyboard is hidden');
-	//		}
-	//	};
-//
-	//	if ('visualViewport' in window && window.visualViewport && IS_MOBILE) {
-	//		window.visualViewport.addEventListener('resize', handleResize);
-	//	}
-//
-	//	//если в чате прогружается сообщение и человек переключил, закончить прогрузку и сбросить кеш
-	//	if (isLoading) {
-	//		delete tempRef.current[idRef.current];
-	//		handleStop();
-	//	}
-//
-	//	tempIdRef.current = '';
-	//}, [location]);
+	useEffect(() => {
+		const handleResize = () => {
+			const VIEWPORT_VS_CLIENT_HEIGHT_RATIO = 0.75;
+			const { visualViewport, screen } = window;
+
+			if (visualViewport && (visualViewport.height * visualViewport.scale) / screen.height < VIEWPORT_VS_CLIENT_HEIGHT_RATIO) {
+				setKeyboardOpen(true);
+				//console.log('keyboard is shown');
+			} else {
+				setKeyboardOpen(false);
+				//console.log('keyboard is hidden');
+			}
+		};
+
+		if ('visualViewport' in window && window.visualViewport && IS_MOBILE) {
+			window.visualViewport.addEventListener('resize', handleResize);
+		}
+
+		//если в чате прогружается сообщение и человек переключил, закончить прогрузку и сбросить кеш
+		if (isLoading) {
+			//delete tempRef.current[idRef.current];
+			handleStop();
+		}
+
+		tempIdRef.current = '';
+	}, [location]);
 
 
 	const queryClient = useQueryClient();
@@ -70,18 +71,18 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 					textareaRef.current.focus();
 				}
 
-				queryClient.setQueryData(['messages', id],
+				queryClient.setQueryData(['messages', id ? 'temp'+id : 'temp'],
 					(oldData: any) => {
-						if (oldData) {
-							console.log(oldData);
-							return produce(oldData, (draft: any) => {
-								const date = new Date();
-								const dateFormatted = date.toISOString();
-					
-								const timeString = dateFormatted.split('T')[1].slice(0, 5);
-								let [hours, minutes] = timeString.split(':');
-								hours = parseInt(hours).toString();
+						const date = new Date();
+						const dateFormatted = date.toISOString();
 
+						const timeString = dateFormatted.split('T')[1].slice(0, 5);
+						let [hours, minutes] = timeString.split(':');
+						hours = parseInt(hours).toString();
+
+						if (oldData) {
+							//console.log(oldData);
+							return produce(oldData, (draft: any) => {
 								draft.pages[0].messages.push({
 									id: -1,
 									text: text,
@@ -100,6 +101,35 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 									time: `${hours}:${minutes}`,
 								});
 							});
+						} else {
+							oldData = {
+								pages: [
+									{
+										messages: [
+											{
+												id: -1,
+												text: text,
+												you: true,
+												date: dateFormatted,
+												is_error: false,
+												time: `${hours}:${minutes}`,
+											},
+											{
+												id: -2,
+												text: '...',
+												you: false,
+												date: dateFormatted,
+												is_error: false,
+												time: `${hours}:${minutes}`,
+											}
+										],
+										hasMore: false
+									}
+								],
+								pageParams: [
+									0
+								]
+							};
 						}
 						return oldData;
 					}
@@ -162,7 +192,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 							if (message) {
 								answer += message;
 
-								queryClient.setQueryData(['messages', id],
+								queryClient.setQueryData(['messages', id ? 'temp'+id : 'temp'],
 									(oldData: any) => {
 										if (oldData) {
 											return produce(oldData, (draft: any) => {
@@ -180,7 +210,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 							} else if (tempId) {
 								tempIdRef.current = tempId;
 							} else if (messageId) {
-								queryClient.setQueryData(['messages', id],
+								queryClient.setQueryData(['messages', id ? 'temp'+id : 'temp'],
 									(oldData: any) => {
 										if (oldData) {
 											return produce(oldData, (draft: any) => {
@@ -196,7 +226,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 								);
 								//console.log('change message');
 							} else if (answerId) {
-								queryClient.setQueryData(['messages', id],
+								queryClient.setQueryData(['messages', id ? 'temp'+id : 'temp'],
 									(oldData: any) => {
 										if (oldData) {
 											return produce(oldData, (draft: any) => {
@@ -216,7 +246,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 								if (tempIdRef.current) {
 									setActive(chatId);
-									window.history.replaceState(null, text, '/chat/' + chatId);
+									navigate('/chat/' + chatId);
 								}
 							}
 						}
@@ -245,14 +275,14 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 	//	if (!isLoading) {
 	//		try {
 	//			setIsLoading(true);
-//
+	//
 	//			let messageRegeneratedId;
 	//			if (messages && messages.length > 0 && active) {
 	//				messageRegeneratedId = messages[messages?.length - 1].id;
 	//			} else {
 	//				return false;
 	//			}
-//
+	//
 	//			dispatch({
 	//				type: 'change',
 	//				id: messageRegeneratedId,
@@ -260,9 +290,9 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 	//					text: '...'
 	//				}
 	//			});
-//
+	//
 	//			const url = 'http://192.168.0.116:8000/api/messages/regenerate/' + active;
-//
+	//
 	//			try {
 	//				const response = await fetch(url, {
 	//					method: "POST",
@@ -271,18 +301,18 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 	//					},
 	//					credentials: "include",
 	//				});
-//
+	//
 	//				if (!response.body) {
 	//					console.error("ReadableStream not supported");
 	//					return;
 	//				}
-//
+	//
 	//				// Read the response as a stream of data
 	//				const reader = response.body.getReader();
 	//				const decoder = new TextDecoder("utf-8");
-//
+	//
 	//				let answer = '';
-//
+	//
 	//				while (true) {
 	//					const { done, value } = await reader.read();
 	//					if (done) {
@@ -290,33 +320,33 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 	//					}
 	//					// Massage and parse the chunk of data
 	//					const chunk = decoder.decode(value);
-//
+	//
 	//					//console.log(chunk);
-//
+	//
 	//					const lines = chunk.split("\n\n");
-//
+	//
 	//					//console.log(lines);
-//
+	//
 	//					const parsedLines = lines
 	//						.map((line) => line.replace(/^data: /, "").trim()) // Remove the "data: " prefix
 	//						.filter((line) => line !== "" && line !== "ping") // Remove empty lines and "[DONE]"
 	//						.map((line) => JSON.parse(line)); // Parse the JSON string
-//
+	//
 	//					//console.log(parsedLines);
-//
+	//
 	//					for (const parsedLine of parsedLines) {
 	//						//console.log(parsedLine);
 	//						const { message, tempId, error } = parsedLine;
-//
+	//
 	//						//console.log(answer, message);
-//
+	//
 	//						//console.log(answerId);
 	//						// Update the UI with the new content
 	//						if (message) {
 	//							answer += message;
-//
+	//
 	//							console.log(messageRegeneratedId, answer);
-//
+	//
 	//							dispatch({
 	//								type: 'change',
 	//								id: messageRegeneratedId,
@@ -333,7 +363,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 	//			} catch (error) {
 	//				console.error(error);
 	//			}
-//
+	//
 	//			setIsLoading(false);
 	//		} catch (error: unknown) {
 	//			if (error instanceof AxiosError && error.response) {
@@ -355,21 +385,21 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 	};
 
 
-		//WORKED without inner
-		//queryClient.setQueryData(['messages', id],
-		//	(data) => {
-		//		return {
-		//			...data,
-		//			pages: data.pages.map((page) => ({
-		//				...page,
-		//				messages: page.messages.map((message) =>
-		//					message.id === 72
-		//						? { ...message, text: 'new name' }
-		//						: message)
-		//			})),
-		//		}
-		//	}
-		//);
+	//WORKED without inner
+	//queryClient.setQueryData(['messages', id],
+	//	(data) => {
+	//		return {
+	//			...data,
+	//			pages: data.pages.map((page) => ({
+	//				...page,
+	//				messages: page.messages.map((message) =>
+	//					message.id === 72
+	//						? { ...message, text: 'new name' }
+	//						: message)
+	//			})),
+	//		}
+	//	}
+	//);
 
 
 	return (
@@ -389,7 +419,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 						variant="transparent"
 						size="lg"
 						className={classes.send}
-						//onClick={handleRegenerate}
+					//onClick={handleRegenerate}
 					>
 						<IconReload stroke={1.5} className={classes.linkIcon} />
 					</ActionIcon>

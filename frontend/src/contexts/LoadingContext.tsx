@@ -2,7 +2,6 @@ import { createContext, useState, useContext, useEffect, ReactNode } from 'react
 import { useParams } from 'react-router-dom';
 import ChatsContext from '../contexts/ChatsContext';
 import MobileHeaderContext from '../contexts/MobileHeaderContext';
-import MessagesContext from '../contexts/MessagesContext';
 
 const LoadingContext = createContext<{
 	loading: boolean;
@@ -19,7 +18,6 @@ type LoadingProviderProps = {
 function LoadingProvider(props: LoadingProviderProps) {
 	const { chats } = useContext(ChatsContext);
 	const { mobileTitle } = useContext(MobileHeaderContext);
-	const { messages } = useContext(MessagesContext);
 	const [ loading, setLoading ] = useState<boolean>(false);
 	const { id } = useParams();
 
