@@ -36,9 +36,9 @@ function LoadingProvider(props: LoadingProviderProps) {
 		if (pendingChats && mobileTitle) {
 			if (page === 'chats') {
 				if (id) {
-					//if (pendingMessages) {
+					if (pendingMessages) {
 						setLoading(false);
-					//}
+					}
 				} else {
 					setLoading(false);
 				}
