@@ -1,7 +1,7 @@
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import ChatsContext from '../contexts/ChatsContext';
 import { useDisclosure } from '@mantine/hooks';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 const MobileHeaderContext = createContext<{
 	mobileTitle: string | false;
@@ -24,7 +24,15 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 	const [mobileTitle, setMobileTitle] = useState<string | false>(false);
 	const [opened, { toggle }] = useDisclosure(false);
 
-	const { data: chats } = useQuery({ queryKey: ['chats'] });
+	const queryClient = useQueryClient();
+
+	//const chats = queryClient.getQueryData(['chats']);
+	const { data: chats } = useQuery({
+		queryKey: ['chats'],
+		staleTime: Infinity,
+		gcTime: Infinity,
+		refetchOnWindowFocus: false,
+	});
 
 	// Set mobile title when loading page first time
 	useEffect(() => {

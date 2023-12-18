@@ -242,7 +242,10 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 								);
 								//console.log('change answer');
 							} else if (chatId) {
-								queryClient.invalidateQueries({ queryKey: ['chats'] });
+								queryClient.setQueryData(['chats'], (oldData: any) => [...oldData, {
+									title: text,
+									id: chatId
+								}]);
 
 								if (tempIdRef.current) {
 									setActive(chatId);

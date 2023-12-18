@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 
 const ChatsList = () => {
 	const { active, setActive } = useContext(ChatsContext);
-	const { setMobileTitle,  opened, toggle } = useContext(MobileHeaderContext);
+	const { setMobileTitle, opened, toggle } = useContext(MobileHeaderContext);
 	const navigate = useNavigate();
 
 	const { data: chats } = useQuery({
@@ -18,8 +18,11 @@ const ChatsList = () => {
 			axios.get('/chats').then(
 				(res) => res.data.chats,
 			),
+		staleTime: Infinity,
+		gcTime: Infinity,
+		refetchOnWindowFocus: false,
 	});
-  
+
 	return (
 		<Scrollbars autoHide>
 			{chats?.map((chat: any) => (
@@ -31,7 +34,7 @@ const ChatsList = () => {
 					onClick={() => {
 						setActive(chat.id);
 						setMobileTitle(chat.title);
-						navigate('chat/'+chat.id);
+						navigate('chat/' + chat.id);
 						if (opened) {
 							toggle();
 						}
@@ -39,7 +42,7 @@ const ChatsList = () => {
 					}}
 				/>
 			))}
-	  </Scrollbars>
+		</Scrollbars>
 	);
 };
 

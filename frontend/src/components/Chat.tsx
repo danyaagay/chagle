@@ -48,19 +48,46 @@ export default function ChatChatButton({
 		mutationFn: (data: any) => {
 			return axios.delete('/chats/' + data.id);
 		},
+		onMutate: async (data) => {
+			await queryClient.cancelQueries({ queryKey: ['chats'] });
+
+			const previousChat = queryClient.getQueryData(['chats']);
+
+			queryClient.setQueryData(['chats'], (oldChats: any) => {
+				const updatedChats = oldChats.filter((chat: any) => chat.id !== data.id);
+				return updatedChats;
+			});
+
+			return { previousChat };
+		},
 		onSuccess: () => {
 			if (active) {
 				setMobileTitle('Новый чат');
 				navigate('chat');
 			}
-
-			queryClient.invalidateQueries({ queryKey: ['chats'] });
 		},
 	});
 
 	const { mutate: mutationEdit } = useMutation({
 		mutationFn: (data: any) => {
 			return axios.patch('/chats/' + data.id, { title: data.title });
+		},
+		onMutate: async (data) => {
+			await queryClient.cancelQueries({ queryKey: ['chats'] });
+
+			const previousChat = queryClient.getQueryData(['chats']);
+
+			queryClient.setQueryData(['chats'], (oldChats: any) => {
+				const updatedChats = oldChats.map((chat: any) => {
+					if (chat.id === data.id) {
+						return { ...chat, title: data.title };
+					}
+					return chat;
+				});
+				return updatedChats;
+			});
+
+			return { previousChat };
 		},
 		onSuccess: () => {
 			if (chatTitleRef.current) {
@@ -71,8 +98,6 @@ export default function ChatChatButton({
 			}
 
 			editToggle.toggle();
-
-			queryClient.invalidateQueries({ queryKey: ['chats'] });
 		},
 	});
 
