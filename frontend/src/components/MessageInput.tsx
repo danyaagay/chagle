@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
 	IconReload,
 	IconPlayerStop
@@ -12,17 +12,20 @@ import {
 } from '@mantine/core';
 import { AxiosError } from 'axios';
 import ChatsContext from '../contexts/ChatsContext';
-import MessagesContext from '../contexts/MessagesContext';
 import { IS_MOBILE } from '../environment/userAgent';
 import classes from '../css/MessageInput.module.css';
+import { useQueryClient } from '@tanstack/react-query';
+import { useParams } from 'react-router-dom';
+import { produce } from 'immer';
 
 export default function MessageInput({ textareaRef }: { textareaRef: React.RefObject<HTMLTextAreaElement> }) {
 	const [isLoading, setIsLoading] = useState(false);
-	const { dispatchChats, active, setActive } = useContext(ChatsContext);
-	const { dispatch, messages, tempRef, idRef } = useContext(MessagesContext);
+	const { setActive } = useContext(ChatsContext);
 	const tempIdRef = useRef('');
 	const [keyboardOpen, setKeyboardOpen] = useState(false);
 	const location = useLocation();
+	const navigate = useNavigate();
+	const { id } = useParams();
 
 	useEffect(() => {
 		const handleResize = () => {
@@ -44,12 +47,15 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 		//если в чате прогружается сообщение и человек переключил, закончить прогрузку и сбросить кеш
 		if (isLoading) {
-			delete tempRef.current[idRef.current];
+			//delete tempRef.current[idRef.current];
 			handleStop();
 		}
 
 		tempIdRef.current = '';
 	}, [location]);
+
+
+	const queryClient = useQueryClient();
 
 	// Handle send message
 	const handleSend = async () => {
@@ -65,27 +71,73 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 					textareaRef.current.focus();
 				}
 
-				dispatch({
-					type: 'add',
-					message: {
-						id: -1,
-						text: text,
-						you: true,
-					}
-				});
+				queryClient.setQueryData(['messages', id ? 'temp' + id : 'temp'],
+					(oldData: any) => {
+						const date = new Date();
+						const dateFormatted = date.toISOString();
 
-				dispatch({
-					type: 'add',
-					message: {
-						id: -2,
-						text: '...',
-						you: false
+						const timeString = dateFormatted.split('T')[1].slice(0, 5);
+						let [hours, minutes] = timeString.split(':');
+						hours = parseInt(hours).toString();
+
+						if (oldData) {
+							//console.log(oldData);
+							return produce(oldData, (draft: any) => {
+								draft.pages[0].messages.push({
+									id: -1,
+									text: text,
+									you: true,
+									date: dateFormatted,
+									is_error: false,
+									time: `${hours}:${minutes}`,
+								});
+
+								draft.pages[0].messages.push({
+									id: -2,
+									text: '...',
+									you: false,
+									date: dateFormatted,
+									is_error: false,
+									time: `${hours}:${minutes}`,
+								});
+							});
+						} else {
+							oldData = {
+								pages: [
+									{
+										messages: [
+											{
+												id: -1,
+												text: text,
+												you: true,
+												date: dateFormatted,
+												is_error: false,
+												time: `${hours}:${minutes}`,
+											},
+											{
+												id: -2,
+												text: '...',
+												you: false,
+												date: dateFormatted,
+												is_error: false,
+												time: `${hours}:${minutes}`,
+											}
+										],
+										hasMore: false
+									}
+								],
+								pageParams: [
+									0
+								]
+							};
+						}
+						return oldData;
 					}
-				});
+				);
 
 				const requestBody = { text };
 
-				const url = 'http://192.168.0.116:8000/api/messages/' + (active ? active : '');
+				const url = 'http://192.168.0.116:8000/api/messages/' + (id ? id : '');
 
 				try {
 					const response = await fetch(url, {
@@ -140,44 +192,64 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 							if (message) {
 								answer += message;
 
-								dispatch({
-									type: 'change',
-									id: -2,
-									message: {
-										is_error: error ? error : false,
-										text: answer
+								queryClient.setQueryData(['messages', id ? 'temp' + id : 'temp'],
+									(oldData: any) => {
+										if (oldData) {
+											return produce(oldData, (draft: any) => {
+												draft.pages[0].messages.forEach((message: any) => {
+													if (message.id === -2) {
+														message.is_error = error ? error : false;
+														message.text = answer;
+													}
+												});
+											});
+										}
+										return oldData;
 									}
-								});
+								);
 							} else if (tempId) {
 								tempIdRef.current = tempId;
 							} else if (messageId) {
-								dispatch({
-									type: 'change',
-									id: -2,
-									message: {
-										id: messageId,
+								queryClient.setQueryData(['messages', id ? 'temp' + id : 'temp'],
+									(oldData: any) => {
+										if (oldData) {
+											return produce(oldData, (draft: any) => {
+												draft.pages[0].messages.forEach((message: any) => {
+													if (message.id === -1) {
+														message.id = messageId;
+													}
+												});
+											});
+										}
+										return oldData;
 									}
-								});
+								);
 								//console.log('change message');
 							} else if (answerId) {
-								dispatch({
-									type: 'change',
-									id: -1,
-									message: {
-										id: answerId,
+								queryClient.setQueryData(['messages', id ? 'temp' + id : 'temp'],
+									(oldData: any) => {
+										if (oldData) {
+											return produce(oldData, (draft: any) => {
+												draft.pages[0].messages.forEach((message: any) => {
+													if (message.id === -2) {
+														message.id = answerId;
+													}
+												});
+											});
+										}
+										return oldData;
 									}
-								});
+								);
 								//console.log('change answer');
 							} else if (chatId) {
-								dispatchChats({
-									type: 'add',
+								queryClient.setQueryData(['chats'], (oldData: any) => [...oldData, {
 									title: text,
 									id: chatId
-								});
+								}]);
 
 								if (tempIdRef.current) {
 									setActive(chatId);
-									window.history.replaceState(null, text, '/chat/' + chatId);
+									navigate('/chat/' + chatId);
 								}
 							}
 						}
@@ -200,22 +272,54 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 			try {
 				setIsLoading(true);
 
-				let messageRegeneratedId;
-				if (messages && messages.length > 0 && active) {
-					messageRegeneratedId = messages[messages?.length - 1].id;
-				} else {
-					return false;
-				}
+				const hasTemp = queryClient.getQueryData(['messages', 'temp' + id]);
 
-				dispatch({
-					type: 'change',
-					id: messageRegeneratedId,
-					message: {
-						text: '...'
+				let oldMessage: any;
+
+				queryClient.setQueryData(['messages', hasTemp ? 'temp' + id : id],
+					(oldData: any) => {
+						if (oldData) {
+							oldMessage = oldData.pages[0].messages.slice(-1)[0];
+							return produce(oldData, (draft: any) => {
+								draft.pages[0].messages.pop();
+							});
+						}
+						return oldData;
 					}
-				});
+				);
 
-				const url = 'http://192.168.0.116:8000/api/messages/regenerate/' + active;
+				queryClient.setQueryData(['messages', 'temp' + id],
+					(oldData: any) => {
+						if (oldData) {
+							return produce(oldData, (draft: any) => {
+								draft.pages[0].messages.push({
+									...oldMessage,
+									text: '...'
+								});
+							});
+						} else {
+							oldData = {
+								pages: [
+									{
+										messages: [
+											{
+												...oldMessage,
+												text: '...'
+											},
+										],
+										hasMore: false
+									}
+								],
+								pageParams: [
+									0
+								]
+							};
+						}
+						return oldData;
+					}
+				);
+
+				const url = 'http://192.168.0.116:8000/api/messages/regenerate/' + id;
 
 				try {
 					const response = await fetch(url, {
@@ -269,16 +373,23 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 							if (message) {
 								answer += message;
 
-								console.log(messageRegeneratedId, answer);
+								//console.log(messageRegeneratedId, answer);
 
-								dispatch({
-									type: 'change',
-									id: messageRegeneratedId,
-									message: {
-										is_error: error ? error : false,
-										text: answer
+								queryClient.setQueryData(['messages', 'temp' + id],
+									(oldData: any) => {
+										if (oldData) {
+											return produce(oldData, (draft: any) => {
+												draft.pages[0].messages.forEach((message: any) => {
+													if (message.id === oldMessage.id) {
+														message.is_error = error ? error : false;
+														message.text = answer;
+													}
+												});
+											});
+										}
+										return oldData;
 									}
-								});
+								);
 							} else if (tempId) {
 								tempIdRef.current = tempId;
 							}
@@ -295,7 +406,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 				}
 			}
 		}
-	};
+	}
 
 	const handleStop = async () => {
 		await fetch('http://192.168.0.116:8000/api/messages-cancel', {
@@ -306,8 +417,23 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 			credentials: "include",
 			body: JSON.stringify({ id: tempIdRef.current })
 		});
-		//abortController.abort();
 	};
+
+	//WORKED without inner
+	//queryClient.setQueryData(['messages', id],
+	//	(data) => {
+	//		return {
+	//			...data,
+	//			pages: data.pages.map((page) => ({
+	//				...page,
+	//				messages: page.messages.map((message) =>
+	//					message.id === 72
+	//						? { ...message, text: 'new name' }
+	//						: message)
+	//			})),
+	//		}
+	//	}
+	//);
 
 	return (
 		<div className='chatInput'>

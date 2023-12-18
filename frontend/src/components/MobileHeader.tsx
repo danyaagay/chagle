@@ -1,16 +1,10 @@
 import { useRef, useEffect } from 'react';
-import {
-    Burger,
-    useMantineTheme,
-} from '@mantine/core';
 import { useMobileHeader } from '../contexts/MobileHeaderContext';
 import classes from '../css/MobileHeader.module.css';
 
 export default function MobileHeader() {
     const topbarRef = useRef<HTMLInputElement>(null);
-    const { mobileTitle, opened, toggle } = useMobileHeader();
-
-    const theme = useMantineTheme();
+    const { mobileTitle, toggle } = useMobileHeader();
 
     useEffect(() => {
         // Disable scroll mobile

@@ -1,5 +1,4 @@
-import { useAuth } from '../contexts/AuthContext';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
 	Table,
 	ScrollArea,
@@ -13,6 +12,7 @@ import {
 import axios from '../axios';
 import { IconSelector, IconChevronDown, IconChevronUp, IconSearch } from '@tabler/icons-react';
 import classes from '../css/TableSort.module.css';
+import { useQuery } from '@tanstack/react-query';
 
 interface RowData {
 	id: number;
@@ -89,26 +89,20 @@ function sortData(
 }
 
 export function UsersList() {
-	const { user } = useAuth();
 	const [search, setSearch] = useState('');
-	const [data, setData] = useState<RowData[]>([]);
+	//const [data, setData] = useState<RowData[]>([]);
 	const [sortedData, setSortedData] = useState<RowData[]>([]);
 	const [sortBy, setSortBy] = useState<keyof RowData | null>(null);
 	const [reverseSortDirection, setReverseSortDirection] = useState(false);
-
-	useEffect(() => {
-		(async () => {
-			try {
-				const resp = await axios.get('/users', user);
-				if (resp.status === 200) {
-					setData(resp.data);
-					setSortedData(resp.data);
-				}
-			} catch (error: unknown) {
-				console.error("Error retrieving users:", error);
-			}
-		})();
-	}, []);
+	
+	const { data } = useQuery({
+		queryKey: ['users'],
+		queryFn: async () => {
+			const res = await axios.get('/users');
+			setSortedData(res.data);
+			return res.data;
+		}
+	});
 
 	const setSorting = (field: keyof RowData) => {
 		const reversed = field === sortBy ? !reverseSortDirection : false;
@@ -152,7 +146,7 @@ export function UsersList() {
 					</Table.Tr>
 				</Table.Thead>
 				<Table.Tbody>
-					{sortedData && sortedData.map((row) => (
+					{sortedData?.map((row) => (
 						<Table.Tr key={row.id}>
 							<Table.Td>{row.name}</Table.Td>
 							<Table.Td>{row.email}</Table.Td>

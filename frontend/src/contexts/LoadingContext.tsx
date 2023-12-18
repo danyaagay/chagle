@@ -1,8 +1,7 @@
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
-import ChatsContext from '../contexts/ChatsContext';
 import MobileHeaderContext from '../contexts/MobileHeaderContext';
-import MessagesContext from '../contexts/MessagesContext';
+import { useIsFetching } from '@tanstack/react-query';
 
 const LoadingContext = createContext<{
 	loading: boolean;
@@ -17,21 +16,23 @@ type LoadingProviderProps = {
 };
 
 function LoadingProvider(props: LoadingProviderProps) {
-	const { chats } = useContext(ChatsContext);
+	//const { chats } = useContext(ChatsContext);
 	const { mobileTitle } = useContext(MobileHeaderContext);
-	const { messages } = useContext(MessagesContext);
 	const [ loading, setLoading ] = useState<boolean>(true);
 	const { id } = useParams();
+
+	const pendingChats = useIsFetching({ queryKey: ['chats'] });
+	const pendingMessages = useIsFetching({ queryKey: ['messages', id] });
 
 	// Loading status
 	useEffect(() => {
 		const path = window.location.pathname;
 		const page = path.split('/')[1];
 
-		if (chats !== null && mobileTitle) {
+		if (pendingChats === 0 && mobileTitle) {
 			if (page === 'chats') {
 				if (id) {
-					if (messages !== null) {
+					if (pendingMessages === 0) {
 						setLoading(false);
 					}
 				} else {
@@ -41,7 +42,7 @@ function LoadingProvider(props: LoadingProviderProps) {
 				setLoading(false);
 			}
 		}
-	}, [chats, mobileTitle, messages]);
+	}, [pendingChats, pendingMessages, mobileTitle]);
 
 	return (
 		<LoadingContext.Provider value={{ loading, setLoading }}>

@@ -1,23 +1,108 @@
-import { useContext, useRef, useLayoutEffect, useEffect, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
-import MessagesContext from '../contexts/MessagesContext';
+import { useRef, useLayoutEffect, useCallback, useEffect } from 'react';
 import { IS_MOBILE } from '../environment/userAgent';
 import { Scrollbars } from 'react-custom-scrollbars';
 import Message from './Message';
+import { useInfiniteQuery, useQueryClient, useQuery } from '@tanstack/react-query';
+import axios from '../axios';
+import { useParams } from 'react-router-dom';
+import dayjs from 'dayjs';
+import 'dayjs/locale/ru';
+import { produce } from 'immer';
 
 const MessageList = () => {
-    const { messages, loadMore, hasMoreRef } = useContext(MessagesContext);
-    const location = useLocation();
     const scrollRef = useRef<any>();
     const firstLoaded = useRef<any>(true);
     const scrollSaver = useRef<any>({ last: 99999, lastHeight: 0 });
     const loading = useRef<any>();
+    const { id } = useParams();
 
+    const queryClient = useQueryClient();
+
+    const { data: tempData }: any = useQuery({ queryKey: ['messages', 'temp'] });
+    const { data: tempDataId }: any = useQuery({ queryKey: ['messages', 'temp' + id] });
+
+    const {
+        data: realData,
+        fetchNextPage,
+        hasNextPage,
+    }: any = useInfiniteQuery({
+        queryKey: ['messages', id],
+        queryFn: async ({ pageParam }) => {
+            const res = await axios.get(`/messages/${id}?offset=${pageParam}`);
+            return res.data;
+        },
+        initialPageParam: 0,
+        getNextPageParam: (lastPage: any, allPages, lastPageParam) => {
+            if (!lastPage.hasMore) {
+                return undefined;
+            }
+            return lastPageParam ? lastPageParam + 30 : tempDataId ? lastPage.messages.length + tempDataId?.pages[0].messages.length : lastPage.messages.length;
+        },
+        select: useCallback(
+            (data: any) => ({
+                pages: dateStamping([...data.pages].reverse()),
+                pageParams: [...data.pageParams].reverse(),
+            }),
+            []
+        ),
+        enabled: !!id,
+        staleTime: Infinity,
+        gcTime: Infinity,
+        refetchOnWindowFocus: false,
+
+        initialData: () => {
+            queryClient.removeQueries({ queryKey: ['messages', 'temp'] });
+            return tempData;
+        },
+    });
+
+    const data = id ? realData : tempData;
+
+    const itemsA = data?.pages.flatMap((page: any) => page.messages);
+    const itemsB = tempDataId?.pages.flatMap((page: any) => page.messages);
+
+    const allItems = itemsB ? itemsA.concat(itemsB) : itemsA;
+
+    //Датировка
+    const dateStamping = (pages: any[]): any[] => {
+        return produce(pages, (draft: any[]) => {
+            let currentDate: dayjs.Dayjs;
+    
+            draft.forEach((page: any) => {
+                page.messages.forEach((message: any) => {
+                    const today = dayjs();
+                    const date = dayjs(message.date);
+                    let formattedDate: string | undefined;
+    
+                    if (!currentDate || !currentDate.isSame(date, 'day')) {
+                        if (today.isSame(date, 'day')) {
+                            formattedDate = 'Сегодня';
+                        } else if (date.isSame(today.subtract(1, 'day'), 'day')) {
+                            formattedDate = 'Вчера';
+                        } else {
+                            const now = dayjs();
+                            if (date.year() !== now.year()) {
+                                formattedDate = date.locale('ru').format('D MMMM YYYY');
+                            } else {
+                                formattedDate = date.locale('ru').format('D MMMM');
+                            }
+                        }
+                    }
+    
+                    currentDate = date;
+    
+                    message.marker = formattedDate;
+                });
+            });
+        });
+    };
+
+    //Запаздание для анимаций ios?
     const onLoadOldMessages = useCallback(
         () => {
             new Promise<void>((resolve) =>
                 setTimeout(() => {
-                    loadMore();
+                    fetchNextPage();
 
                     //console.log('content add');
 
@@ -28,21 +113,22 @@ const MessageList = () => {
         []
     );
 
-    useEffect(() => {
+    useLayoutEffect(() => {
+        //console.log('new page');
         return () => {
             firstLoaded.current = true;
             loading.current = true;
         }
-    }, [location]);
+    }, [id]);
 
     useLayoutEffect(() => {
-        //fix when generating a message in several lines, the initial position of the scroll down is set incorrectly
+        //исправление при формировании сообщения в несколько строк некорректно задавалось начальное положение прокрутки вниз
         if (scrollSaver.current.lastDown < 1 && scrollSaver.current.lastDown >= 0) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
         //console.log(scrollSaver.current.lastDown);
         scrollSaver.current.lastDown = scrollRef.current.scrollHeight - scrollRef.current.clientHeight - scrollRef.current.scrollTop;
-    }, [messages]);
+    }, [allItems]);
 
     useLayoutEffect(() => {
         scrollRef.current.scrollTop = (scrollRef.current.scrollHeight - scrollSaver.current.lastHeight) + (scrollSaver.current.last > 0 ? scrollSaver.current.last : 0);
@@ -53,15 +139,15 @@ const MessageList = () => {
 
         loading.current = false;
 
-        if (messages?.length && scrollRef.current.offsetHeight == scrollRef.current.scrollHeight && hasMoreRef.current) {
+        if (allItems?.length && scrollRef.current.offsetHeight == scrollRef.current.scrollHeight && hasNextPage) {
             loading.current = true;
-            loadMore();
-        } else if (messages?.length && firstLoaded.current) {
+            fetchNextPage();
+        } else if (allItems?.length && firstLoaded.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
             //console.log('donefirst', scrollRef.current.scrollTop);
             firstLoaded.current = false;
         }
-    }, [messages?.length]);
+    }, [allItems?.length]);
 
     const handleScroll = () => {
         if (scrollRef.current) {
@@ -77,7 +163,9 @@ const MessageList = () => {
             //console.log(scrollRef.current.scrollTop / scrollRef.current.scrollHeight * 100);
             //const scrollPrecent = scrollRef.current.scrollTop / scrollRef.current.scrollHeight * 100;
 
-            if (scrollRef.current.scrollTop <= 300 && !loading.current && hasMoreRef.current) {
+            //console.log(loading.current)
+
+            if (scrollRef.current.scrollTop <= 300 && !loading.current && hasNextPage) {
                 loading.current = true;
 
                 //console.log('load new messages', scrollRef.current.scrollTop, scrollRef.current.scrollHeight, scrollRef.current.scrollHeight - scrollRef.current.scrollTop);
@@ -102,7 +190,8 @@ const MessageList = () => {
                     onScroll={handleScroll}
                 >
                     <div className='messagesBox'>
-                        {messages && messages.map((message) => (
+
+                        {allItems?.map((message: any) => (
                             <Message
                                 key={message.id}
                                 text={message.text}
@@ -125,7 +214,8 @@ const MessageList = () => {
                     ref={scrollRef}
                 >
                     <div className='messagesBox'>
-                        {messages && messages.map((message) => (
+
+                        {allItems?.map((message: any) => (
                             <Message
                                 key={message.id}
                                 text={message.text}

@@ -1,5 +1,4 @@
-import { useAuth } from '../contexts/AuthContext';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
 	Table,
 	ScrollArea,
@@ -17,6 +16,7 @@ import axios from '../axios';
 import { IconSelector, IconChevronDown, IconChevronUp, IconSearch } from '@tabler/icons-react';
 import classes from '../css/TableSort.module.css';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface RowData {
 	id: number;
@@ -93,28 +93,22 @@ function sortData(
 }
 
 export function TokensList() {
-	const { user } = useAuth();
 	const [search, setSearch] = useState('');
-	const [data, setData] = useState<RowData[]>([]);
+	//const [data, setData] = useState<RowData[]>([]);
 	const [sortedData, setSortedData] = useState<RowData[]>([]);
 	const [sortBy, setSortBy] = useState<keyof RowData | null>(null);
 	const [reverseSortDirection, setReverseSortDirection] = useState(false);
 
 	const [token, setToken] = useState('');
 
-	useEffect(() => {
-		(async () => {
-			try {
-				const resp = await axios.get('/tokens', user);
-				if (resp.status === 200) {
-					setData(resp.data);
-					setSortedData(resp.data);
-				}
-			} catch (error: unknown) {
-				console.error("Error retrieving tokens:", error);
-			}
-		})();
-	}, []);
+	const { data } = useQuery({
+		queryKey: ['tokens'],
+		queryFn: async () => {
+			const res = await axios.get('/tokens');
+			setSortedData(res.data);
+			return res.data;
+		}
+	});
 
 	const setSorting = (field: keyof RowData) => {
 		const reversed = field === sortBy ? !reverseSortDirection : false;
@@ -129,40 +123,35 @@ export function TokensList() {
 		setSortedData(sortData(data, { sortBy, reversed: reverseSortDirection, search: value }));
 	};
 
-	const handleTokenAdd = async () => {
-		try {
-			const resp = await axios.post(`/tokens`, { token: token });
-			console.log(resp);
-			if (resp.status === 200) {
-				setData((prevTokens) => [...prevTokens, resp.data]);
-				setSortedData((prevTokens) => [...prevTokens, resp.data]);
-			}
-		} catch (error: unknown) {
 
-		}
-		setToken('');
-	};
+	const queryClient = useQueryClient();
 
-	const handleTokenRemove = async (id: number) => {
-		try {
-			const resp = await axios.delete(`/tokens/${id}`);
-			console.log(resp);
-			if (resp.status === 200) {
-				setData((prevTokens) =>
-					prevTokens.filter((token) => token.id !== id)
-			  	);
-				setSortedData((prevTokens) =>
-				  prevTokens.filter((token) => token.id !== id)
-				);
-			}
-		} catch (error: unknown) {
+	const { mutate: mutationAdd } = useMutation({
+		mutationFn: () => {
+			return axios.post(`/tokens`, { token: token });
+		},
+		onSuccess: () => {
+			//setSortedData((prevTokens) => [...prevTokens, resp.data]);
+			setToken('');
 
-		}
-	};
+			queryClient.invalidateQueries({ queryKey: ['tokens'] });
+			queryClient.invalidateQueries({ queryKey: ['summary/tokens'] });
+		},
+	});
 
-	const handleTokenChange = (event: any) => {
-		setToken(event.target.value);
-	};
+	const { mutate: mutationRemove } = useMutation({
+		mutationFn: (id: number) => {
+			return axios.delete(`/tokens/${id}`);
+		},
+		onSuccess: () => {
+			//setSortedData((prevTokens) =>
+			//	prevTokens.filter((token) => token.id !== id)
+			//);
+
+			queryClient.invalidateQueries({ queryKey: ['tokens'] });
+			queryClient.invalidateQueries({ queryKey: ['summary/tokens'] });
+		},
+	});
 
 	return (
 		<ScrollArea>
@@ -180,9 +169,9 @@ export function TokensList() {
 							placeholder="Токен"
 							rightSectionPointerEvents="all"
 							value={token}
-							onChange={handleTokenChange}
+							onChange={(e) => setToken(e.target.value)}
 						/>
-						<ActionIcon variant="filled" size="lg" w={36} h={36} onClick={handleTokenAdd}>
+						<ActionIcon variant="filled" size="lg" w={36} h={36} onClick={() => mutationAdd()}>
 							<IconPlus style={{ width: '60%', height: '60%' }} stroke={1.5} />
 						</ActionIcon>
 					</Group>
@@ -241,7 +230,7 @@ export function TokensList() {
 							</Table.Td>
 							<Table.Td>
 								<Group gap={0} justify="flex-end">
-									<ActionIcon variant="subtle" color="red" onClick={() => { handleTokenRemove(row.id); }}>
+									<ActionIcon variant="subtle" color="red" onClick={() => mutationRemove(row.id)}>
 										<IconTrash style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
 									</ActionIcon>
 								</Group>
