@@ -1,7 +1,7 @@
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
 import MobileHeaderContext from '../contexts/MobileHeaderContext';
-import { useQueryClient, useIsFetching } from '@tanstack/react-query';
+import { useIsFetching } from '@tanstack/react-query';
 
 const LoadingContext = createContext<{
 	loading: boolean;
@@ -21,11 +21,8 @@ function LoadingProvider(props: LoadingProviderProps) {
 	const [ loading, setLoading ] = useState<boolean>(true);
 	const { id } = useParams();
 
-	const queryClient = useQueryClient();
-
 	const pendingChats = useIsFetching({ queryKey: ['chats'] });
 	const pendingMessages = useIsFetching({ queryKey: ['messages', id] });
-
 
 	// Loading status
 	useEffect(() => {
@@ -45,9 +42,6 @@ function LoadingProvider(props: LoadingProviderProps) {
 				setLoading(false);
 			}
 		}
-		console.log('chats', pendingChats);
-		console.log('messages', pendingMessages);
-		console.log(loading, id, mobileTitle);
 	}, [pendingChats, pendingMessages, mobileTitle]);
 
 	return (

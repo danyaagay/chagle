@@ -24,9 +24,6 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 	const [mobileTitle, setMobileTitle] = useState<string | false>(false);
 	const [opened, { toggle }] = useDisclosure(false);
 
-	const queryClient = useQueryClient();
-
-	//const chats = queryClient.getQueryData(['chats']);
 	const { data: chats } = useQuery({
 		queryKey: ['chats'],
 		staleTime: Infinity,

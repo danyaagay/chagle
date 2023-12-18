@@ -14,7 +14,7 @@ import { AxiosError } from 'axios';
 import ChatsContext from '../contexts/ChatsContext';
 import { IS_MOBILE } from '../environment/userAgent';
 import classes from '../css/MessageInput.module.css';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { produce } from 'immer';
 
