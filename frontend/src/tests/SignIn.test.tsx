@@ -148,7 +148,7 @@ test('allows the user to create new chat send message successfully', async () =>
 	await user.click(screen.getByRole('textbox'));
 
 	await user.keyboard('Привет');
-
+	// @ts-ignore
 	await user.click(result.container.querySelector('#send'));
 
 	await waitFor(() => expect(screen.getByText(/привет11/i)).toBeInTheDocument(), { timeout: 15000 });

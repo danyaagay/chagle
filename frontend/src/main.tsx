@@ -19,7 +19,7 @@ const queryClient = new QueryClient();
 // Main component
 let root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
-const router = createBrowserRouter(routerConfig);
+const router = createBrowserRouter(routerConfig, { basename: import.meta.env.MODE == 'development' ? "/" : "/loomie.ru" });
 
 root.render(
 	<React.StrictMode>

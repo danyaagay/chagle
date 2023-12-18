@@ -6,7 +6,6 @@ import {
 } from '@tabler/icons-react';
 import {
 	Textarea,
-	Group,
 	ActionIcon,
 	Card,
 } from '@mantine/core';

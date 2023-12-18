@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect, useCallback, useEffect } from 'react';
+import { useRef, useLayoutEffect, useCallback } from 'react';
 import { IS_MOBILE } from '../environment/userAgent';
 import { Scrollbars } from 'react-custom-scrollbars';
 import Message from './Message';
@@ -32,7 +32,7 @@ const MessageList = () => {
             return res.data;
         },
         initialPageParam: 0,
-        getNextPageParam: (lastPage: any, allPages, lastPageParam) => {
+        getNextPageParam: (lastPage: any, _allPages, lastPageParam) => {
             if (!lastPage.hasMore) {
                 return undefined;
             }

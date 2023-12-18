@@ -3,7 +3,6 @@ import MessagesList from '../components/MessagesList';
 import MessageInput from '../components/MessageInput';
 
 export default function Chat() {
-	const chatInputRef = useRef<HTMLInputElement>(null);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	useEffect(() => {

@@ -1,7 +1,7 @@
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import ChatsContext from '../contexts/ChatsContext';
 import { useDisclosure } from '@mantine/hooks';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
 const MobileHeaderContext = createContext<{
 	mobileTitle: string | false;
@@ -46,7 +46,7 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 			setMobileTitle('Клиенты');
 		} else if (path === '/Crr183gJkwKQwkC3jE9N/tokens') {
 			setMobileTitle('Токены');
-		} else if (chats && active) {
+		} else if (Array.isArray(chats) && active) {
 			const chat = chats.find((chat: any) => chat.id == active);
 			if (chat) {
 				setMobileTitle(chat.title);
