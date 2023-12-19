@@ -136,7 +136,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 				const requestBody = { text };
 
-				const url = 'http://192.168.0.116:8000/api/messages/' + (id ? id : '');
+				const url = import.meta.env.MODE == 'development' ? "http://192.168.0.116:8000/api/messages/" : "https://api.chagle.ru/messages/" + (id ? id : '');
 
 				try {
 					const response = await fetch(url, {
