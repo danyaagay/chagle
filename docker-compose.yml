@@ -58,7 +58,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ''
       MYSQL_ROOT_HOST: '%'
-      MYSQL_DATABASE: loomie
+      MYSQL_DATABASE: chagle
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
     networks:
       - app
