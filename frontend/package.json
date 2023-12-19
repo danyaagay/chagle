@@ -2,11 +2,11 @@
   "name": "frontend",
   "private": true,
   "version": "0.0.0",
-  "homepage": "http://192.168.0.103:7777/loomie.ru",
+  "homepage": "http://chagle.ru",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build --base=/loomie.ru/",
+    "build": "tsc && vite build",
     "test": "vitest",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
