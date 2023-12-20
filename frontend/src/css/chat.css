@@ -13,9 +13,9 @@ html.is-ios {
 }
 
 body {
-    -webkit-user-select: none;
+    /*-webkit-user-select: none;
     -moz-user-select: none;
-    user-select: none;
+    user-select: none;*/
 }
 
 .container {

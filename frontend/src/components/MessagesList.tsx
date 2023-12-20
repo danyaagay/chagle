@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect, useCallback } from 'react';
+import { useRef, useLayoutEffect, useCallback, useEffect,useContext } from 'react';
 import { IS_MOBILE } from '../environment/userAgent';
 import { Scrollbars } from 'react-custom-scrollbars';
 import Message from './Message';
@@ -8,6 +8,8 @@ import { useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 import { produce } from 'immer';
+//import ChatsContext from '../contexts/ChatsContext';
+//import { useLocation } from 'react-router-dom';
 
 const MessageList = () => {
     const scrollRef = useRef<any>();
@@ -15,6 +17,8 @@ const MessageList = () => {
     const scrollSaver = useRef<any>({ last: 99999, lastHeight: 0 });
     const loading = useRef<any>();
     const { id } = useParams();
+    //const { active } = useContext(ChatsContext);
+    //const location = useLocation();
 
     const queryClient = useQueryClient();
 

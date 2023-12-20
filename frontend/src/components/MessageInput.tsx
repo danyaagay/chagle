@@ -136,7 +136,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 				const requestBody = { text };
 
-				const url = import.meta.env.MODE == 'development' ? "http://192.168.0.116:8000/api/messages/" : "https://api.chagle.ru/messages/" + (id ? id : '');
+				const url = import.meta.env.MODE == 'development' ? "http://192.168.0.116:8000/api/messages/" + (id ? id : '') : "https://api.chagle.ru/messages/" + (id ? id : '');
 
 				try {
 					const response = await fetch(url, {
@@ -318,7 +318,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 					}
 				);
 
-				const url = 'http://192.168.0.116:8000/api/messages/regenerate/' + id;
+				const url = import.meta.env.MODE == 'development' ? "http://192.168.0.116:8000/api/messages/regenerate/" + id : "https://api.chagle.ru/messages/regenerate/" + id;
 
 				try {
 					const response = await fetch(url, {
@@ -408,7 +408,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 	}
 
 	const handleStop = async () => {
-		await fetch('http://192.168.0.116:8000/api/messages-cancel', {
+		await fetch(import.meta.env.MODE == 'development' ? "http://192.168.0.116:8000/api/messages-cancel" : "https://api.chagle.ru/messages-cancel", {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -446,7 +446,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 					>
 						<IconPlayerStop stroke={1.5} className={classes.linkIcon} />
 					</ActionIcon>
-				) : (
+				) : id && (
 					<ActionIcon
 						variant="transparent"
 						size="lg"
