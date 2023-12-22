@@ -5,6 +5,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createBrowserRouter } from 'react-router-dom'
 import { RouterProvider } from "react-router-dom";
+// @ts-ignore
 import routerConfig from '../router';
 import { faker } from '@faker-js/faker';
 import { http, HttpResponse } from 'msw'

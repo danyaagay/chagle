@@ -32,6 +32,7 @@ export default function Message({ you, marker, time, text, is_error, ...others }
 											const { children, className, node, ...rest } = props
 											const match = /language-(\w+)/.exec(className || '')
 											return match ? (
+												// @ts-ignore
 												<SyntaxHighlighter
 													{...rest}
 													PreTag="div"
