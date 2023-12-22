@@ -33,6 +33,7 @@ const ChatsList = () => {
 					active={active == chat.id ? true : false}
 					onClick={() => {
 						setMobileTitle(chat.title);
+						document.title = chat.title;
 						setActive(chat.id);
 						navigate('chat/' + chat.id);
 						if (opened) {

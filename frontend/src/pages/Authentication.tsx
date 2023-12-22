@@ -36,7 +36,7 @@ export default function () {
 		document.title = defaultType === 'signup'
 			? 'Регистрация'
 			: 'Вход';
-	}, []);
+	}, [location]);
 
 	const handleSubmit = async () => {
 		setIsLoading(true);
@@ -160,8 +160,8 @@ export default function () {
 
 					<p className={classes.title}>
 						{type === 'signup' ?
-							'Регистрация в Луми' :
-							'Вход в Луми'}
+							'Регистрация' :
+							'Вход'}
 					</p>
 
 					<form onSubmit={form.onSubmit(handleSubmit)}>

@@ -16,7 +16,7 @@ import { useMobileHeader } from '../contexts/MobileHeaderContext';
 import classes from '../css/ProtectedLayout.module.css';
 
 export default function MobileHeader() {
-    const { mobileTitle, setMobileTitle, toggle, opened } = useMobileHeader();
+    const { setMobileTitle, toggle, opened } = useMobileHeader();
 
     // Logout user
     const handleLogout = async () => {
@@ -32,10 +32,10 @@ export default function MobileHeader() {
     };
 
     const adminClick = () => {
-        if ('Админ панель' === mobileTitle) {
+        setMobileTitle('Админ панель');
+        document.title = 'Админ панель';
+        if (opened) {
             toggle();
-        } else {
-            setMobileTitle('Админ панель');
         }
     };
 
@@ -60,6 +60,7 @@ export default function MobileHeader() {
                 fw={500}
                 onClick={() => {
                     setMobileTitle('Новый чат');
+                    document.title = 'Новый чат';
                     if (opened) {
                         toggle();
                     }
@@ -100,6 +101,7 @@ export default function MobileHeader() {
                     className={classes.link}
                     onClick={() => {
                         setMobileTitle('Настройки');
+                        document.title = 'Настройки';
                         if (opened) {
                             toggle();
                         }

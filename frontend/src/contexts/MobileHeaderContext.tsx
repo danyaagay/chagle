@@ -21,7 +21,7 @@ type MobileHeaderProviderProps = {
 };
 
 function MobileHeaderProvider(props: MobileHeaderProviderProps) {
-	const { active, setActive } = useContext(ChatsContext);
+	const { setActive } = useContext(ChatsContext);
 	const [mobileTitle, setMobileTitle] = useState<string | false>(false);
 	const [opened, { toggle }] = useDisclosure(false);
 	const { id } = useParams();
@@ -38,20 +38,27 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 		const path = window.location.pathname;
 		if (path === '/settings') {
 			setMobileTitle('Настройки');
+			document.title = 'Настройки';
 		} else if (path === '/chat') {
 			setMobileTitle('Новый чат');
+			document.title = 'Новый чат';
 		} else if (path === '/Crr183gJkwKQwkC3jE9N') {
 			setMobileTitle('Админ панель');
+			document.title = 'Админ панель';
 		} else if (path === '/Crr183gJkwKQwkC3jE9N/users') {
 			setMobileTitle('Админ панель');
+			document.title = 'Админ панель';
 		} else if (path === '/Crr183gJkwKQwkC3jE9N/users') {
 			setMobileTitle('Клиенты');
+			document.title = 'Админ панель';
 		} else if (path === '/Crr183gJkwKQwkC3jE9N/tokens') {
 			setMobileTitle('Токены');
+			document.title = 'Токены';
 		} else if (Array.isArray(chats) && id) {
 			const chat = chats.find((chat: any) => chat.id == id);
 			if (chat) {
 				setMobileTitle(chat.title);
+				document.title = chat.title;
 				setActive(id);
 			}
 		}
