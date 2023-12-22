@@ -43,50 +43,6 @@ const dateStamping = (pages: any[]): any[] => {
     });
 };
 
-const messageDetailQuery = (id: any, queryClient: any, tempDataId: any = null) => ({
-    queryKey: ['messages', id],
-    queryFn: async ({ pageParam }: any) => {
-        const res = await axios.get(`/messages/${id}?offset=${pageParam}`);
-        return res.data;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage: any, _allPages: any, lastPageParam: any) => {
-        if (!lastPage.hasMore) {
-            return undefined;
-        }
-        return lastPageParam ? lastPageParam + 30 : tempDataId ? lastPage.messages.length + tempDataId?.pages[0].messages.length : lastPage.messages.length;
-    },
-    select: (data: any) => ({
-        pages: dateStamping([...data.pages].reverse()),
-        pageParams: [...data.pageParams].reverse(),
-    }),
-    enabled: !!id,
-    staleTime: Infinity,
-    gcTime: Infinity,
-    refetchOnWindowFocus: false,
-
-    initialData: () => {
-        const temp = queryClient.getQueryData(['messages', 'temp']);
-        queryClient.removeQueries({ queryKey: ['messages', 'temp'] });
-        return temp;
-    }
-});
-
-export const loader =
-    (queryClient: any) =>
-        async ({ params }: any) => {
-            if (params.id) {
-                const query = messageDetailQuery(params.id, queryClient);
-                console.log(query);
-                return (
-                    queryClient.getQueryData(query.queryKey) ??
-                    (await queryClient.fetchInfiniteQuery(query))
-                )
-            } else {
-                return (true);
-            }
-        };
-
 const MessageList = () => {
     const scrollRef = useRef<any>();
     const firstLoaded = useRef<any>(true);
@@ -103,7 +59,33 @@ const MessageList = () => {
         data: realData,
         fetchNextPage,
         hasNextPage,
-    }: any = useInfiniteQuery(messageDetailQuery(id, queryClient, tempDataId));
+    }: any = useInfiniteQuery({
+        queryKey: ['messages', id],
+        queryFn: async ({ pageParam }: any) => {
+            const res = await axios.get(`/messages/${id}?offset=${pageParam}`);
+            return res.data;
+        },
+        initialPageParam: 0,
+        getNextPageParam: (lastPage: any, _allPages: any, lastPageParam: any) => {
+            if (!lastPage.hasMore) {
+                return undefined;
+            }
+            return lastPageParam ? lastPageParam + 30 : tempDataId ? lastPage.messages.length + tempDataId?.pages[0].messages.length : lastPage.messages.length;
+        },
+        select: (data: any) => ({
+            pages: dateStamping([...data.pages].reverse()),
+            pageParams: [...data.pageParams].reverse(),
+        }),
+        enabled: !!id,
+        staleTime: Infinity,
+        gcTime: Infinity,
+        refetchOnWindowFocus: false,
+    
+        initialData: () => {
+            queryClient.removeQueries({ queryKey: ['messages', 'temp'] });
+            return tempData;
+        }
+    });
 
     const data = id ? realData : tempData;
 
