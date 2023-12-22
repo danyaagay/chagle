@@ -8,11 +8,8 @@ import ResetPassword from './pages/ResetPassword';
 import Verify from './pages/Verify';
 import GuestLayout from './layouts/GuestLayout';
 import ContextLayout from './layouts/ContextLayout';
-import {
-	loader as messagesLoader,
-	//action as contactAction,
-} from './components/MessagesList';
 
+//Импорты роутера
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
@@ -63,7 +60,6 @@ const router = createBrowserRouter([
 			{
 				path: '/chat/:id?',
 				element: <Chat />,
-				loader: messagesLoader(queryClient),
 			},
 			{
 				path: '/settings',
