@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect, useCallback, useEffect,useContext } from 'react';
+import { useRef, useLayoutEffect, useCallback } from 'react';
 import { IS_MOBILE } from '../environment/userAgent';
 import { Scrollbars } from 'react-custom-scrollbars';
 import Message from './Message';
@@ -8,8 +8,84 @@ import { useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 import { produce } from 'immer';
-//import ChatsContext from '../contexts/ChatsContext';
-//import { useLocation } from 'react-router-dom';
+
+//Датировка
+const dateStamping = (pages: any[]): any[] => {
+    return produce(pages, (draft: any[]) => {
+        let currentDate: dayjs.Dayjs;
+
+        draft.forEach((page: any) => {
+            page.messages.forEach((message: any) => {
+                const today = dayjs();
+                const date = dayjs(message.date);
+                let formattedDate: string | undefined;
+
+                if (!currentDate || !currentDate.isSame(date, 'day')) {
+                    if (today.isSame(date, 'day')) {
+                        formattedDate = 'Сегодня';
+                    } else if (date.isSame(today.subtract(1, 'day'), 'day')) {
+                        formattedDate = 'Вчера';
+                    } else {
+                        const now = dayjs();
+                        if (date.year() !== now.year()) {
+                            formattedDate = date.locale('ru').format('D MMMM YYYY');
+                        } else {
+                            formattedDate = date.locale('ru').format('D MMMM');
+                        }
+                    }
+                }
+
+                currentDate = date;
+
+                message.marker = formattedDate;
+            });
+        });
+    });
+};
+
+const messageDetailQuery = (id: any, queryClient: any, tempDataId: any = null) => ({
+    queryKey: ['messages', id],
+    queryFn: async ({ pageParam }: any) => {
+        const res = await axios.get(`/messages/${id}?offset=${pageParam}`);
+        return res.data;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage: any, _allPages: any, lastPageParam: any) => {
+        if (!lastPage.hasMore) {
+            return undefined;
+        }
+        return lastPageParam ? lastPageParam + 30 : tempDataId ? lastPage.messages.length + tempDataId?.pages[0].messages.length : lastPage.messages.length;
+    },
+    select: (data: any) => ({
+        pages: dateStamping([...data.pages].reverse()),
+        pageParams: [...data.pageParams].reverse(),
+    }),
+    enabled: !!id,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+
+    initialData: () => {
+        const temp = queryClient.getQueryData(['messages', 'temp']);
+        queryClient.removeQueries({ queryKey: ['messages', 'temp'] });
+        return temp;
+    },
+});
+
+export const loader =
+    (queryClient: any) =>
+        async ({ params }: any) => {
+            if (params.id) {
+                const query = messageDetailQuery(params.id, queryClient);
+                console.log(query);
+                return (
+                    queryClient.getQueryData(query.queryKey) ??
+                    (await queryClient.fetchInfiniteQuery(query))
+                )
+            } else {
+                return (true);
+            }
+        };
 
 const MessageList = () => {
     const scrollRef = useRef<any>();
@@ -17,8 +93,6 @@ const MessageList = () => {
     const scrollSaver = useRef<any>({ last: 99999, lastHeight: 0 });
     const loading = useRef<any>();
     const { id } = useParams();
-    //const { active } = useContext(ChatsContext);
-    //const location = useLocation();
 
     const queryClient = useQueryClient();
 
@@ -29,77 +103,16 @@ const MessageList = () => {
         data: realData,
         fetchNextPage,
         hasNextPage,
-    }: any = useInfiniteQuery({
-        queryKey: ['messages', id],
-        queryFn: async ({ pageParam }) => {
-            const res = await axios.get(`/messages/${id}?offset=${pageParam}`);
-            return res.data;
-        },
-        initialPageParam: 0,
-        getNextPageParam: (lastPage: any, _allPages, lastPageParam) => {
-            if (!lastPage.hasMore) {
-                return undefined;
-            }
-            return lastPageParam ? lastPageParam + 30 : tempDataId ? lastPage.messages.length + tempDataId?.pages[0].messages.length : lastPage.messages.length;
-        },
-        select: useCallback(
-            (data: any) => ({
-                pages: dateStamping([...data.pages].reverse()),
-                pageParams: [...data.pageParams].reverse(),
-            }),
-            []
-        ),
-        enabled: !!id,
-        staleTime: Infinity,
-        gcTime: Infinity,
-        refetchOnWindowFocus: false,
-
-        initialData: () => {
-            queryClient.removeQueries({ queryKey: ['messages', 'temp'] });
-            return tempData;
-        },
-    });
+    }: any = useInfiniteQuery(messageDetailQuery(id, queryClient, tempDataId));
 
     const data = id ? realData : tempData;
 
-    const itemsA = data?.pages.flatMap((page: any) => page.messages);
+    //console.log(realData);
+
+    const itemsA = data?.pages?.flatMap((page: any) => page.messages);
     const itemsB = tempDataId?.pages.flatMap((page: any) => page.messages);
 
     const allItems = itemsB ? itemsA.concat(itemsB) : itemsA;
-
-    //Датировка
-    const dateStamping = (pages: any[]): any[] => {
-        return produce(pages, (draft: any[]) => {
-            let currentDate: dayjs.Dayjs;
-    
-            draft.forEach((page: any) => {
-                page.messages.forEach((message: any) => {
-                    const today = dayjs();
-                    const date = dayjs(message.date);
-                    let formattedDate: string | undefined;
-    
-                    if (!currentDate || !currentDate.isSame(date, 'day')) {
-                        if (today.isSame(date, 'day')) {
-                            formattedDate = 'Сегодня';
-                        } else if (date.isSame(today.subtract(1, 'day'), 'day')) {
-                            formattedDate = 'Вчера';
-                        } else {
-                            const now = dayjs();
-                            if (date.year() !== now.year()) {
-                                formattedDate = date.locale('ru').format('D MMMM YYYY');
-                            } else {
-                                formattedDate = date.locale('ru').format('D MMMM');
-                            }
-                        }
-                    }
-    
-                    currentDate = date;
-    
-                    message.marker = formattedDate;
-                });
-            });
-        });
-    };
 
     //Запаздание для анимаций ios?
     const onLoadOldMessages = useCallback(
