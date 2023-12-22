@@ -12,18 +12,10 @@
     position: relative;
     background-color: #ffffff;
     border: 0.0625rem solid #dee2e6;
-    padding: 6px 45px 6px 10px;
+    padding: 6px 10px 6px 10px;
     border-radius: 12px 12px 12px 6px;
     font-size: var(--mantine-font-size-nm);
     word-break: break-word;
-    white-space: pre-wrap;
-}
-
-.markdownBody>*:first-child {
-    margin-top: 0!important;
-}
-.markdownBody>*:last-child {
-    margin-bottom: 0!important;
 }
 
 .time {
@@ -54,4 +46,38 @@
     margin: 5px auto;
     font-size: var(--mantine-font-size-md);
     color: rgb(134, 142, 150);
+}
+
+
+.markdownBody>*:first-child {
+    margin-top: 0!important;
+}
+.markdownBody>*:last-child {
+    margin-bottom: 0!important;
+}
+.markdownBody p,ul,ol {
+    margin-top: 0;
+}
+.markdownBody h1, .markdownBody h2, .markdownBody h3, .markdownBody h4, .markdownBody h5, .markdownBody h6 {
+    margin-top: 24px;
+    margin-bottom: 16px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+.markdownBody h1 {
+    margin: 0.67em 0;
+    font-weight: 600;
+    padding-bottom: 0.3em;
+    font-size: 2em;
+    border-bottom: 1px solid hsl(210,18%,87%);
+}
+.markdownBody h2 {
+    font-weight: 600;
+    padding-bottom: 0.3em;
+    font-size: 1.5em;
+    border-bottom: 1px solid hsl(210,18%,87%);
+}
+.markdownBody h3 {
+    font-weight: 600;
+    font-size: 1.25em;
 }

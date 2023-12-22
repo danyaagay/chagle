@@ -3,6 +3,8 @@ import {
 } from '@mantine/core';
 import Markdown from 'react-markdown'
 import classes from '../css/Message.module.css';
+import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
+import {oneLight} from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface MessageProps {
 	text: string;
@@ -23,18 +25,37 @@ export default function Message({ you, marker, time, text, is_error, ...others }
 							{you && text}
 
 							{!you && !is_error && (
-								<Markdown>
-									{text}
-								</Markdown>
+								<Markdown
+									children={text}
+									components={{
+										code(props) {
+											const { children, className, node, ...rest } = props
+											const match = /language-(\w+)/.exec(className || '')
+											return match ? (
+												<SyntaxHighlighter
+													{...rest}
+													PreTag="div"
+													children={String(children).replace(/\n$/, '')}
+													language={match[1]}
+													style={oneLight}
+													wrapLongLines
+												/>
+											) : (
+												<code {...rest} className={className}>
+													{children}
+												</code>
+											)
+										}
+									}}
+								/>
 							)}
 
 							{!you && is_error && (
-								<p style={{color: 'red'}}>
+								<p style={{ color: 'red' }}>
 									{text}
 								</p>
 							)}
 						</div>
-						<span className={classes.time}>{time}</span>
 					</div>
 				</div>
 			</Stack>

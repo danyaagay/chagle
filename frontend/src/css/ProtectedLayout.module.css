@@ -53,23 +53,6 @@
     @mixin hover {
         background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
         color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
-
-        .linkIcon {
-            color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
-        }
-    }
-
-    &[data-active] {
-
-        &,
-        &:hover {
-            background-color: var(--mantine-color-blue-light);
-            color: var(--mantine-color-blue-light-color);
-
-            .linkIcon {
-                color: var(--mantine-color-blue-light-color);
-            }
-        }
     }
 }
 

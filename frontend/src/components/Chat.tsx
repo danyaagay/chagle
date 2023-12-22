@@ -136,7 +136,7 @@ export default function ChatChatButton({
 						<span className={classes.linkSpan}>{chatTitle}</span>
 					)}
 
-					{!IS_MOBILE && hovered || active || editable ? (
+					{!IS_MOBILE && hovered || editable ? (
 						<div className={classes.buttonBox}>
 							{editable ? (
 								<>
