@@ -1,4 +1,4 @@
-import { createContext, useEffect, ReactNode, useState } from 'react';
+import { createContext, ReactNode, useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 
 type ChatsContextProps = {

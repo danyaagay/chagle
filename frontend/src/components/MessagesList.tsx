@@ -69,7 +69,7 @@ const messageDetailQuery = (id: any, queryClient: any, tempDataId: any = null) =
         const temp = queryClient.getQueryData(['messages', 'temp']);
         queryClient.removeQueries({ queryKey: ['messages', 'temp'] });
         return temp;
-    },
+    }
 });
 
 export const loader =

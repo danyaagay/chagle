@@ -2,6 +2,7 @@ import { createContext, useState, useContext, useEffect, ReactNode } from 'react
 import ChatsContext from '../contexts/ChatsContext';
 import { useDisclosure } from '@mantine/hooks';
 import { useQuery } from '@tanstack/react-query';
+import { useParams } from 'react-router-dom';
 
 const MobileHeaderContext = createContext<{
 	mobileTitle: string | false;
@@ -20,9 +21,10 @@ type MobileHeaderProviderProps = {
 };
 
 function MobileHeaderProvider(props: MobileHeaderProviderProps) {
-	const { active } = useContext(ChatsContext);
+	const { active, setActive } = useContext(ChatsContext);
 	const [mobileTitle, setMobileTitle] = useState<string | false>(false);
 	const [opened, { toggle }] = useDisclosure(false);
+	const { id } = useParams();
 
 	const { data: chats } = useQuery({
 		queryKey: ['chats'],
@@ -46,10 +48,11 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 			setMobileTitle('Клиенты');
 		} else if (path === '/Crr183gJkwKQwkC3jE9N/tokens') {
 			setMobileTitle('Токены');
-		} else if (Array.isArray(chats) && active) {
-			const chat = chats.find((chat: any) => chat.id == active);
+		} else if (Array.isArray(chats) && id) {
+			const chat = chats.find((chat: any) => chat.id == id);
 			if (chat) {
 				setMobileTitle(chat.title);
+				setActive(id);
 			}
 		}
 	}, [chats]);
