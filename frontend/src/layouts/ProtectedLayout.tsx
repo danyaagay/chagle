@@ -59,7 +59,7 @@ export default function DefaultLayout() {
 					<MobileHeader />
 				</AppShell.Header>
 
-				<AppShell.Navbar p="sm">
+				<AppShell.Navbar p="sm" style={{ height: "100%" }}>
 					<Menu />
 				</AppShell.Navbar>
 
