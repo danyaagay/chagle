@@ -1,29 +1,12 @@
 import { useEffect, useRef } from 'react';
 import MessagesList from '../components/MessagesList';
 import MessageInput from '../components/MessageInput';
+import { IS_IOS } from '../environment/userAgent';
 
 export default function Chat() {
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	useEffect(() => {
-		// iOS detect
-		function isiOS(): boolean {
-			return [
-				'iPad Simulator',
-				'iPhone Simulator',
-				'iPod Simulator',
-				'iPad',
-				'iPhone',
-				'iPod'
-			].includes(navigator.platform)
-				// iPad on iOS 13 detection
-				|| (navigator.userAgent.includes("Mac") && "ontouchend" in document)
-		}
-
-		if (isiOS()) {
-			document.documentElement.classList.add('is-ios');
-		}
-
 		// Fix height
 		const w = (window.visualViewport || window) as Window & typeof window.visualViewport;
 		let setViewportVH = false; // HasFocus = false
@@ -40,13 +23,20 @@ export default function Chat() {
 			document.documentElement.style.setProperty('--vh', `${vh}px`);
 		};
 
+		if (IS_IOS) {
+			document.documentElement.classList.add('is-ios');
+			//window.visualViewport!.addEventListener('resize', setVH);
+		} else {
+			window.addEventListener('resize', setVH);
+		}
+
 		setVH();
 	}, []);
 
 	return (
 		<div className='container'>
-				<MessagesList />
-				<MessageInput textareaRef={textareaRef} />
+			<MessagesList />
+			<MessageInput textareaRef={textareaRef} />
 		</div>
 	);
 }

@@ -1,5 +1,5 @@
-import { useRef, useLayoutEffect, useCallback } from 'react';
-import { IS_MOBILE } from '../environment/userAgent';
+import { useRef, useLayoutEffect, useCallback, useEffect } from 'react';
+import { IS_MOBILE, IS_ANDROID } from '../environment/userAgent';
 import { Scrollbars } from 'react-custom-scrollbars';
 import Message from './Message';
 import { useInfiniteQuery, useQueryClient, useQuery } from '@tanstack/react-query';
@@ -54,6 +54,18 @@ const MessageList = () => {
 
     const { data: tempData }: any = useQuery({ queryKey: ['messages', 'temp'] });
     const { data: tempDataId }: any = useQuery({ queryKey: ['messages', 'temp' + id] });
+
+    //Android fix messages down on window resize
+    useEffect(() => {
+        if (IS_ANDROID) {
+            window.addEventListener('resize', () => {
+                if (scrollSaver.current.lastDown < 1) {
+                    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+                }
+                console.log('resize', scrollSaver.current.lastDown);
+            });
+        }
+    }, [])
 
     const {
         data: realData,
@@ -121,8 +133,9 @@ const MessageList = () => {
     }, [id]);
 
     useLayoutEffect(() => {
-        //исправление при формировании сообщения в несколько строк некорректно задавалось начальное положение прокрутки вниз
-        if (scrollSaver.current.lastDown < 1 && scrollSaver.current.lastDown >= 0) {
+        //Исправление при формировании сообщения в несколько строк некорректно задавалось начальное положение прокрутки вниз
+        //Android иногда сбивал прокрутку по этому scrollSaver.current.lastDown >= 0 для него убрано
+        if (!IS_ANDROID && scrollSaver.current.lastDown < 1 && scrollSaver.current.lastDown >= 0 || IS_ANDROID && scrollSaver.current.lastDown < 1) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
         //console.log(scrollSaver.current.lastDown);
@@ -143,7 +156,7 @@ const MessageList = () => {
             fetchNextPage();
         } else if (allItems?.length && firstLoaded.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-            //console.log('donefirst', scrollRef.current.scrollTop);
+            console.log('donefirst', scrollRef.current.scrollTop);
             firstLoaded.current = false;
         }
     }, [allItems?.length]);

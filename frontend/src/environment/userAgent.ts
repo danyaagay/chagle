@@ -29,3 +29,14 @@ export const IS_FIREFOX = navigator.userAgent.toLowerCase().indexOf('firefox') >
 export const IS_MOBILE_SAFARI = IS_SAFARI && IS_APPLE_MOBILE;
 
 export const IS_MOBILE = (navigator.maxTouchPoints === undefined || navigator.maxTouchPoints > 0) && navigator.userAgent.search(/iOS|iPhone OS|Android|BlackBerry|BB10|Series ?[64]0|J2ME|MIDP|opera mini|opera mobi|mobi.+Gecko|Windows Phone/i) != -1;
+
+export const IS_IOS = [
+  'iPad Simulator',
+  'iPhone Simulator',
+  'iPod Simulator',
+  'iPad',
+  'iPhone',
+  'iPod'
+].includes(navigator.platform)
+  // iPad on iOS 13 detection
+  || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
