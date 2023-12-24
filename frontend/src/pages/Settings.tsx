@@ -1,11 +1,9 @@
-import { useEffect, useState, useContext } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import axios from '../axios';
 import { AxiosError } from 'axios';
 import {
 	TextInput,
-	PasswordInput,
-	Text,
 	Button,
 	Stack,
 	Container,
@@ -17,77 +15,15 @@ import { notifications } from '@mantine/notifications';
 import FloatingLabelInput from '../components/FloatingLabelInput';
 import { useForm } from '@mantine/form';
 import classes from '../css/Settings.module.css';
-import MobileHeaderContext from '../contexts/MobileHeaderContext';
 export interface FormValues {
 	email: string;
 	name: string;
-	password: string;
-	password_confirmation: string;
 }
-
 
 export default function Settings() {
 	const { setUser, user } = useAuth();
 	const [ isLoading, setIsLoading ] = useState(false);
-	const { opened, toggle } = useContext(MobileHeaderContext);
-
-	useEffect(() => {
-		if (opened) {
-			toggle();
-		}
-	}, []);
 	
-/*
-	useEffect(() => {
-		if (!location.pathname.includes('/settings')) {
-			return;
-		}
-
-		if (opened) {
-			toggle();
-		}
-
-		// iOS detect
-		function isiOS(): boolean {
-			return [
-				'iPad Simulator',
-				'iPhone Simulator',
-				'iPod Simulator',
-				'iPad',
-				'iPhone',
-				'iPod'
-			].includes(navigator.platform)
-				// iPad on iOS 13 detection
-				|| (navigator.userAgent.includes("Mac") && "ontouchend" in document)
-		}
-
-		if (isiOS()) {
-			document.documentElement.classList.add('is-ios');
-		}
-
-		// Fix height
-		const w = (window.visualViewport || window) as Window & typeof window.visualViewport;
-		let setViewportVH = false; // HasFocus = false
-		let lastVH: number | undefined;
-		const setVH = (): void => {
-			let vh = (setViewportVH ? w.height || w.innerHeight : window.innerHeight) * 0.01;
-			vh = +vh.toFixed(2);
-			if (lastVH === vh) {
-				return;
-			}
-
-			lastVH = vh;
-
-			document.documentElement.style.setProperty('--vh', `${vh}px`);
-		};
-		setVH();
-
-		return () => {
-			document.documentElement.style.removeProperty('--vh');
-			// cleaning up the listeners here
-		}
-	}, [location.pathname]);
-*/
 	const handleSubmit = async () => {
 		const dirtyValues: Partial<FormValues> = {};
 
@@ -127,11 +63,6 @@ export default function Settings() {
 					} else {
 						form.clearFieldError('email');
 					}
-					if (error.response.data.errors.password) {
-						form.setFieldError('password', error.response.data.errors.password[0]);
-					} else {
-						form.clearFieldError('password');
-					}
 				}
 			}
 		}
@@ -141,16 +72,12 @@ export default function Settings() {
 		initialValues: {
 			email: user.email,
 			name: user.name,
-			password: '',
-			password_confirmation: '',
 		},
 
 		validate: (values) => {
 			return {
 				name: (values.name && values.name.length < 2 ? 'Имя должно состоять как минимум из 2 букв' : null),
 				email: (values.email && /^\S+@\S+$/.test(values.email) ? null : 'Неверный адрес электронной почты.'),
-				password: (values.password && values.password.length <= 6 ? 'Пароль должен содержать минимум 6 символов.' : null),
-				password_confirmation: (values.password && values.password_confirmation !== values.password ? 'Пароли не совпадают' : null),
 			};
 		},
 	});
@@ -160,9 +87,6 @@ export default function Settings() {
 			<Container className={classes.container} px={8}>
 				<form onSubmit={form.onSubmit(handleSubmit)} className={classes.form}>
 					<Stack gap="md" pt={16}>
-						<Text fz="md" fw={500}>
-							Основная информация
-						</Text>
 						<FloatingLabelInput
 							autoComplete='name'
 							label={'Имя'}
@@ -182,29 +106,7 @@ export default function Settings() {
 							error={form.errors.email}
 						/>
 					</Stack>
-					<Stack mt="2rem" gap="md">
-						<Text fz="md" fw={500}>
-							Смена пароля
-						</Text>
-						<FloatingLabelInput
-							label={'Пароль'}
-							field='password'
-							InputType={PasswordInput}
-							needStrength
-							value={form.values.password}
-							onChange={(value) => form.setFieldValue('password', value)}
-							error={form.errors.password}
-						/>
-						<FloatingLabelInput
-							label={'Повторите пароль'}
-							field='password_confirmation'
-							InputType={PasswordInput}
-							value={form.values.password_confirmation}
-							onChange={(value) => form.setFieldValue('password_confirmation', value)}
-							error={form.errors.password_confirmation}
-						/>
-					</Stack>
-					<Button loading={isLoading} type="submit" mt="2rem" mb="2rem" size="md" radius="md" fw={500}>
+					<Button loading={isLoading} type="submit" mt="1rem" mb="2rem" size="md" radius="md" fw={500}>
 						Сохранить
 					</Button>
 				</form>

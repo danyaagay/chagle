@@ -2,21 +2,60 @@ import { Link } from 'react-router-dom';
 import axios from '../axios';
 import {
     Button,
-    NavLink,
     Menu
 } from '@mantine/core';
 import {
     IconSettings,
     IconLogout,
     IconPlus,
-    IconHome2,
 } from '@tabler/icons-react';
 import ChatsList from './ChatsList';
 import { useMobileHeader } from '../contexts/MobileHeaderContext';
 import classes from '../css/ProtectedLayout.module.css';
+import { useAuth } from '../contexts/AuthContext';
+
+import { forwardRef } from 'react';
+import { IconChevronRight } from '@tabler/icons-react';
+import { Group, Avatar, Text, UnstyledButton, rem } from '@mantine/core';
+
+interface UserButtonProps extends React.ComponentPropsWithoutRef<'button'> {
+    image: string;
+    name: string;
+    email: string;
+    icon?: React.ReactNode;
+}
+
+const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
+    ({ image, name, email, icon, ...others }: UserButtonProps, ref) => (
+        <UnstyledButton
+            ref={ref}
+            style={{
+                width: '100%',
+                color: 'var(--mantine-color-text)',
+                borderRadius: 'var(--mantine-radius-sm)',
+            }}
+            {...others}
+        >
+            <Group>
+                <Avatar src={image} radius="xl" />
+
+                <div style={{ flex: 1 }}>
+                    <Text size="sm" fw={500}>
+                        {name}
+                    </Text>
+
+                    <Text c="dimmed" size="xs">
+                        {email}
+                    </Text>
+                </div>
+            </Group>
+        </UnstyledButton>
+    )
+);
 
 export default function MobileHeader() {
     const { setMobileTitle, toggle, opened } = useMobileHeader();
+    const { user } = useAuth();
 
     // Logout user
     const handleLogout = async () => {
@@ -72,13 +111,15 @@ export default function MobileHeader() {
             <ChatsList />
 
             <div className={classes.footer}>
-                <Menu width={200} shadow="md" position="left" offset={-80}>
+                <Menu width={275}>
                     <Menu.Target>
-                        <NavLink
-                            className={classes.link}
-                            label="Админ панель"
-                            leftSection={<IconHome2 className={classes.linkIcon} stroke={1.5} />}
-                        />
+                        <Button
+                            variant="default"
+                            fullWidth
+                            mb='16px'
+                        >
+                            Админ панель
+                        </Button>
                     </Menu.Target>
 
                     <Menu.Dropdown>
@@ -94,30 +135,38 @@ export default function MobileHeader() {
                     </Menu.Dropdown>
                 </Menu>
 
-                <NavLink
-                    component={Link}
-                    to='settings'
-                    label="Настройки"
-                    className={classes.link}
-                    onClick={() => {
-                        setMobileTitle('Настройки');
-                        document.title = 'Настройки';
-                        if (opened) {
-                            toggle();
-                        }
-                    }}
-
-                    leftSection={<IconSettings className={classes.linkIcon} stroke={1.5} />}
-                />
-
-                <NavLink
-                    component={Link}
-                    to='settings'
-                    label="Выйти"
-                    className={classes.link}
-                    onClick={() => handleLogout()}
-                    leftSection={<IconLogout className={classes.linkIcon} stroke={1.5} />}
-                />
+                <Menu width={275}>
+                    <Menu.Target>
+                        <UserButton
+                            image="#"
+                            name={user.name}
+                            email={user.email}
+                        />
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                        <Menu.Item
+                            component={Link}
+                            to='settings'
+                            onClick={() => {
+                                setMobileTitle('Настройки');
+                                document.title = 'Настройки';
+                                if (opened) {
+                                    toggle();
+                                }
+                            }}
+                            leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
+                        >
+                            Настройки
+                        </Menu.Item>
+                        <Menu.Item
+                            color='red'
+                            onClick={() => handleLogout()}
+                            leftSection={<IconLogout style={{ width: rem(14), height: rem(14) }} />}
+                        >
+                            Выйти
+                        </Menu.Item>
+                    </Menu.Dropdown>
+                </Menu>
             </div>
         </>
     );
