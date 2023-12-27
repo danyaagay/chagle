@@ -216,9 +216,12 @@ class MessageController extends Controller
 
     public static function getHistory($messages)
     {
+        $i = 0;
         $array = [];
         foreach ($messages as $message) {
+            if ($i > 16) break;
             $array[] = ['role' => $message->role, 'content' => $message->content];
+            $i++;
         }
 
         return $array;

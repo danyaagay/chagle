@@ -106,7 +106,7 @@ export default function Settings() {
 							error={form.errors.email}
 						/>
 					</Stack>
-					<Button loading={isLoading} type="submit" mt="1rem" mb="2rem" size="md" radius="md" fw={500}>
+					<Button loading={isLoading} type="submit" mt="1rem" mb="2rem" size="md" radius="md">
 						Сохранить
 					</Button>
 				</form>
