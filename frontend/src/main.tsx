@@ -3,6 +3,7 @@ import AdminUsers from './pages/AdminUsers';
 import AdminTokens from './pages/AdminTokens';
 import Chat from './pages/Chat';
 import Settings from './pages/Settings';
+import Billing from './pages/Billing';
 import Authentication from './pages/Authentication';
 import ResetPassword from './pages/ResetPassword';
 import Verify from './pages/Verify';
@@ -76,7 +77,11 @@ const router = createBrowserRouter([
 			{
 				path: '/Crr183gJkwKQwkC3jE9N',
 				element: <Admin />,
-			}
+			},
+			{
+				path: '/billing',
+				element: <Billing />,
+			},
 		],
 	},
 	{

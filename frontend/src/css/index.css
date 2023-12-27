@@ -33,6 +33,7 @@ body, html {
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-left: auto;
 
     @media (min-width: $mantine-breakpoint-sm) {
         display: none;

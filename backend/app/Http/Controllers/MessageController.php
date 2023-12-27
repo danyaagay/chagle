@@ -74,6 +74,20 @@ class MessageController extends Controller
         $user = $request->user();
 
         return response()->stream(function () use ($user, $request, $id) {
+            if ($user->balance <= 0) {
+                $text = "Пополните баланс";
+        
+                $json = json_encode(['message' => $text, 'error' => true]);
+    
+                echo 'data: ' . $json;
+                echo "\n\n";
+                flush();
+    
+                ob_end_flush();
+
+                return false;
+            }
+
             if ($id) {
                 $chat = $user->chats()->find($id);
             } else {
@@ -109,6 +123,10 @@ class MessageController extends Controller
                     'content' => $answer['answer'],
                     'role' => 'assistant',
                 ]);
+
+                $newBalance = $this->calculate($history, $user->balance, $request->text, $answer['answer']);
+                $user->balance = $newBalance;
+                $user->save();
             }
 
             echo 'data: {"answerId":"' . $chatAnswer->id . '"}';
@@ -133,7 +151,20 @@ class MessageController extends Controller
         $user = $request->user();
 
         return response()->stream(function () use ($user, $request, $id) {
+            if ($user->balance <= 0) {
+                $text = "Пополните баланс";
+        
+                $json = json_encode(['message' => $text, 'error' => true]);
+    
+                echo 'data: ' . $json;
+                echo "\n\n";
+                flush();
+    
+                ob_end_flush();
 
+                return false;
+            }
+            
             $chat = $user->chats()->find($id);
 
             if (!$chat) {
@@ -165,6 +196,10 @@ class MessageController extends Controller
                     'content' => $answer['answer'],
                     'error_code' => NULL
                 ]);
+                
+                $newBalance = $this->calculate($history, $user->balance, $request->text, $answer['answer']);
+                $user->balance = $newBalance;
+                $user->save();
             }
         }, 200, [
             'Cache-Control' => 'no-cache',
@@ -187,5 +222,37 @@ class MessageController extends Controller
         }
 
         return $array;
+    }
+
+    public static function calculate($history, $balance, $question, $answer)
+    {
+        if (!$history) {
+            $history = [
+                ['role' => 'user', 'content' => $question]
+            ];
+        }
+
+        $text = '';
+
+        foreach($history as $history) {
+            $text .= $history['content'];
+        }
+
+        $text .= $answer;
+
+        $text = str_replace(" ", "", $text);
+      
+        // Считаем количество токенов
+        $tokenCount = ceil(mb_strlen($text) / 2);
+      
+        // Рассчитываем стоимость
+        $pricePerTokens = 0.2;
+        $pricePerToken = $pricePerTokens / 1000;
+        $cost = $tokenCount * $pricePerToken;
+      
+        // Вычитаем стоимость из баланса
+        $balance -= $cost;
+
+        return $balance;
     }
 }

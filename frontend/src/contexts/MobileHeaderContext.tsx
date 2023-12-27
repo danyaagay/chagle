@@ -3,6 +3,7 @@ import ChatsContext from '../contexts/ChatsContext';
 import { useDisclosure } from '@mantine/hooks';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const MobileHeaderContext = createContext<{
 	mobileTitle: string | false;
@@ -25,6 +26,7 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 	const [mobileTitle, setMobileTitle] = useState<string | false>(false);
 	const [opened, { toggle }] = useDisclosure(false);
 	const { id } = useParams();
+	const navigate = useNavigate();
 
 	const { data: chats } = useQuery({
 		queryKey: ['chats'],
@@ -54,12 +56,19 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 		} else if (path === '/Crr183gJkwKQwkC3jE9N/tokens') {
 			setMobileTitle('Токены');
 			document.title = 'Токены';
+		} else if (path === '/billing') {
+			setMobileTitle('Оплата');
+			document.title = 'Оплата';
 		} else if (Array.isArray(chats) && id) {
 			const chat = chats.find((chat: any) => chat.id == id);
 			if (chat) {
 				setMobileTitle(chat.title);
 				document.title = chat.title;
 				setActive(id);
+			} else {
+				setMobileTitle('Новый чат');
+				document.title = 'Новый чат';
+				navigate('/chat');
 			}
 		}
 	}, [chats]);

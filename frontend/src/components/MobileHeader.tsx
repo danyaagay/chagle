@@ -20,13 +20,13 @@ export default function MobileHeader() {
 
     return (
         <div className={classes.headerBox} ref={topbarRef}>
+            <span className={classes.text}>{mobileTitle}</span>
             <div className='burgerBox'>
                 <button onClick={toggle} className='burgerButton'></button>
                 <div
                     className='burger'
                 />
             </div>
-            <span className={classes.text}>{mobileTitle}</span>
         </div>
     );
 }
