@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(180deg, #1c7fd634, #1c7fd61c, #ffffff, #ffffff, #ffffff);
+    filter: blur(10px);
+    z-index: -1;
+}
+
+.burgerButton {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    margin: 0;
+    width: 100%;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    border: none;
+    cursor: pointer;
+    overflow: hidden;
+    outline: none;
+}
+
+.burgerBox {
+    position: relative;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+}
+
+.burger,.burger:before,.burger:after  {
+    width: 1.125rem;
+    height: 0.125rem;
+    background-color: #868E96;
+}
+
+.burger  {
+    position: absolute;
+}
+
+.burger:before {
+    top: -0.3125rem;
+}
+
+.burger:after {
+    top: 0.3125rem;
+}
+
+.burger:before, .burger:after {
+    position: absolute;
+    left: 0;
+    content: "";
+}
+
+.burgerClose  {
+    width: 1.125rem;
+    height: 0.125rem;
+    position: absolute;
+}
+
+.burgerClose:before {
+    transform: rotate(-45deg);
+}
+
+.burgerClose:after {
+    transform: rotate(45deg);
+}
+
+.burgerClose:before, .burgerClose:after {
+    position: absolute;
+    left: 0;
+    content: "";
+    width: 1.125rem;
+    height: 0.125rem;
+    background-color: #868E96;
+}
