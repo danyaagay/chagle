@@ -12,13 +12,13 @@
     color: var(--mantine-color-gray-5);
     transition: .2s transform, .2s color, .2s font-size, .2s padding, font-weight 0s .1s;
     transform: none;
-    font-weight: 400;
+    font-weight: 400 !important;
     background-color: #ffffff;
     padding: none;
 
     &[data-floating] {
         transform: translate(-.4475rem, calc(50px / -2 + .0625rem)) scale(.75);
-        font-weight: 500;
+        font-weight: 500 !important;
         padding: 0 5px;
     }
 

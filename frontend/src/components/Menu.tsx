@@ -29,19 +29,20 @@ export default function MobileHeader() {
     const { setMobileTitle, toggle, opened } = useMobileHeader();
     const { user } = useAuth();
 
-	function numberBalance(number:any) {
-		var rounded = +number.toFixed(15); // Округляем число до 15 знаков после запятой
-	  
-		// Преобразуем число в строку
-		var numberString = rounded.toString();
-	  
-		// Удаляем нули с конца строки
-		while (numberString.includes('.') && (numberString.endsWith('0') || numberString.endsWith('.'))) {
-		  numberString = numberString.slice(0, -1); // Удаляем последний символ
-		}
-	  
-		return numberString;
-	  }
+    function numberBalance(number: any) {
+        number = Number(number);
+        var rounded = +number.toFixed(15); // Округляем число до 15 знаков после запятой
+
+        // Преобразуем число в строку
+        var numberString = rounded.toString();
+
+        // Удаляем нули с конца строки
+        while (numberString.includes('.') && (numberString.endsWith('0') || numberString.endsWith('.'))) {
+            numberString = numberString.slice(0, -1); // Удаляем последний символ
+        }
+
+        return numberString;
+    }
 
     const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
         ({ name, email, icon, ...others }: UserButtonProps, ref) => (
@@ -57,10 +58,10 @@ export default function MobileHeader() {
                 <Group gap="xs">
                     <Avatar radius="xl" />
                     <div style={{ flex: 1 }}>
-                            <Text size="sm" fw={500}>
-                                {name}
-                            </Text>
-    
+                        <Text size="sm" fw={500}>
+                            {name}
+                        </Text>
+
                         <Text c="dimmed" size="xs">
                             {email}
                         </Text>

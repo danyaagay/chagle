@@ -6,7 +6,6 @@ import { useAuth } from '../contexts/AuthContext';
 import {
 	TextInput,
 	PasswordInput,
-	Text,
 	Button,
 	Stack,
 	Stepper,
@@ -145,18 +144,11 @@ export default function () {
 		<div className={classes.main}>
 			<div className={classes.container}>
 				<div className={classes.box}>
-					<Text
-						variant="gradient"
-						gradient={{ from: 'indigo', to: '', deg: 45 }}
-						ta="center"
-						fw={700}
-						size="1.5rem"
-						style={{
-							flex: '0 0 auto',
-						}}
-					>
-						-+-
-					</Text>
+					<div style={{textAlign: 'center'}}>
+						<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 26 26" fill="none">
+							<path d="M12.0697 1.35872C12.4027 0.514573 13.5973 0.514571 13.9303 1.35872L16.8005 8.63617C16.9021 8.8939 17.1061 9.0979 17.3638 9.19955L24.6413 12.0697C25.4854 12.4027 25.4854 13.5973 24.6413 13.9303L17.3638 16.8005C17.1061 16.9021 16.9021 17.1061 16.8005 17.3638L13.9303 24.6413C13.5973 25.4854 12.4027 25.4854 12.0697 24.6413L9.19955 17.3638C9.0979 17.1061 8.8939 16.9021 8.63618 16.8005L1.35872 13.9303C0.514573 13.5973 0.514571 12.4027 1.35872 12.0697L8.63617 9.19955C8.8939 9.0979 9.0979 8.8939 9.19955 8.63618L12.0697 1.35872Z" fill="#228BE6" />
+						</svg>
+					</div>
 
 					<p className={classes.title}>
 						{type === 'signup' ?
@@ -220,15 +212,15 @@ export default function () {
 								<Stack>
 									{active !== 0 && (
 										<Stack gap="xs">
-											<Button loading={isLoading} type="submit" fullWidth mt="xl" size="lg" radius="md">
+											<Button loading={isLoading} type="submit" fullWidth mt="xl" size="lg" fz="md" radius="md">
 												Зарегистрироваться
 											</Button>
-											<Button variant="light" color="gray" fullWidth size="lg" radius="md" fw={500} onClick={prevStep}>
+											<Button variant="light" color="gray" fullWidth size="lg" fz="md" radius="md" onClick={prevStep}>
 												Назад
 											</Button>
 										</Stack>
 									)}
-									{active !== 1 && <Button fullWidth mt="xl" size="lg" radius="md" onClick={nextStep}>Далее</Button>}
+									{active !== 1 && <Button fullWidth mt="xl" size="lg" fz="md" radius="md" onClick={nextStep}>Далее</Button>}
 								</Stack>
 							</>
 						)}
@@ -259,13 +251,13 @@ export default function () {
 										Забыли пароль?
 									</Anchor>
 								</Stack>
-								<Button loading={isLoading} type="submit" fullWidth mt="xl" size="lg" radius="md">
+								<Button loading={isLoading} type="submit" fullWidth mt="xl" size="lg" fz="md" radius="md">
 									Войти
 								</Button>
 							</>
 						)}
 
-						<Button variant="subtle" onClick={() => toggleType()} fullWidth radius="md" ta="center" mt="lg" size="lg" styles={{ root: { fontWeight: 'normal' } }}>
+						<Button variant="subtle" onClick={() => toggleType()} fullWidth radius="md" ta="center" mt="lg" size="lg" fz="md" styles={{ root: { fontWeight: 'normal' } }}>
 							{type === 'signup' ?
 								'Вход' :
 								'Регистрация'}
