@@ -126,15 +126,17 @@ export default function MobileHeader() {
 
             <div className={classes.footer}>
                 <Menu width={275} position="top-start">
-                    <Menu.Target>
-                        <Button
-                            variant="default"
-                            fullWidth
-                            mb='16px'
-                        >
-                            Админ панель
-                        </Button>
-                    </Menu.Target>
+                    {user.roles[0] == 'super-admin' && (
+                        <Menu.Target>
+                            <Button
+                                variant="default"
+                                fullWidth
+                                mb='16px'
+                            >
+                                Админ панель
+                            </Button>
+                        </Menu.Target>
+                    )}
 
                     <Menu.Dropdown>
                         <Menu.Item component={Link} to='Crr183gJkwKQwkC3jE9N' onClick={adminClick}>

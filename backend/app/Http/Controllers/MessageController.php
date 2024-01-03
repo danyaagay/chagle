@@ -107,7 +107,10 @@ class MessageController extends Controller
                 'role' => 'user',
             ]);
 
-            $history = $this->getHistory($chat->messages()->where('error_code', NULL)->get());
+            $messages = $chat->messages()->where('error_code', NULL)->orderByDesc('id')->limit(16)->get();
+            $reversedMessages = $messages->reverse();
+
+            $history = $this->getHistory($reversedMessages);
 
             $stream = new StreamsController;
             $answer = $stream->stream($request->text, $history);
@@ -181,7 +184,10 @@ class MessageController extends Controller
                 ]);
             }
 
-            $history = $this->getHistory($chat->messages()->where('error_code', NULL)->whereNot('id', $lastMessages[0]->id)->get());
+            $messages = $chat->messages()->where('error_code', NULL)->whereNot('id', $lastMessages[0]->id)->orderByDesc('id')->limit(16)->get();
+            $reversedMessages = $messages->reverse();
+
+            $history = $this->getHistory($reversedMessages);
 
             $stream = new StreamsController;
             $answer = $stream->stream($lastMessages[1]->text, $history);
@@ -216,12 +222,9 @@ class MessageController extends Controller
 
     public static function getHistory($messages)
     {
-        $i = 0;
         $array = [];
         foreach ($messages as $message) {
-            if ($i > 16) break;
             $array[] = ['role' => $message->role, 'content' => $message->content];
-            $i++;
         }
 
         return $array;
