@@ -8,8 +8,8 @@ html {
 
 html.is-ios {
     position: fixed;
-    -webkit-user-select: none !important;
-    -webkit-touch-callout: none !important;
+    /*-webkit-user-select: none !important;
+    -webkit-touch-callout: none !important;*/
 }
 
 body {

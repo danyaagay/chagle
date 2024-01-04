@@ -58,10 +58,39 @@ class TokenController extends Controller
 
     public static function getToken()
     {
-        $token = Token::where('status', 1)->first();
-        
-        //Limits work here
+        //Внимание! Нужно перенести в фоновый процесс!
+        //self::checkTokens();
 
-        return $token->token;
+        $token = Token::where('status', 1)
+        ->where('limit', '>', 0)
+        ->orderBy('updated_at', 'desc')
+        ->first();
+
+        if ($token) {
+            $token->decrement('limit');
+        }
+
+        return $token;
     }
+
+    public static function setStatus($token, $status)
+    {
+        $token->status = $status;
+        $token->save();
+    }
+
+    //public static function checkTokens()
+    //{
+    //    $tokens = Token::where('status', 2)->get();
+    //    foreach ($tokens as $token) {
+    //        $updatedAt = strtotime($token->updated_at);
+    //        $currentTime = time();
+    //        $tenMinutesAgo = strtotime('-10 minutes', $currentTime);
+    //    
+    //        if ($updatedAt < $tenMinutesAgo) {
+    //            $token->status = 1;
+    //            $token->save();
+    //        }
+    //    }
+    //}
 }

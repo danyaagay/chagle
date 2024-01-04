@@ -78,11 +78,9 @@ class MessageController extends Controller
                 $text = "Пополните баланс";
         
                 $json = json_encode(['message' => $text, 'error' => true]);
-    
-                echo 'data: ' . $json;
-                echo "\n\n";
+
+                echo 'data: ' . $json . "\n\n";
                 flush();
-    
                 ob_end_flush();
 
                 return false;
@@ -107,7 +105,11 @@ class MessageController extends Controller
                 'role' => 'user',
             ]);
 
-            $messages = $chat->messages()->where('error_code', NULL)->orderByDesc('id')->limit(16)->get();
+            $messages = $chat->messages()
+                ->where('error_code', NULL)
+                ->orderByDesc('id')
+                ->limit(16)
+                ->get();
             $reversedMessages = $messages->reverse();
 
             $history = $this->getHistory($reversedMessages);
@@ -132,15 +134,12 @@ class MessageController extends Controller
                 $user->save();
             }
 
-            echo 'data: {"answerId":"' . $chatAnswer->id . '"}';
-            echo "\n\n";
+            echo 'data: {"answerId":"' . $chatAnswer->id . '"}' . "\n\n";
 
-            echo 'data: {"messageId":"' . $message->id . '"}';
-            echo "\n\n";
+            echo 'data: {"messageId":"' . $message->id . '"}' . "\n\n";
 
             if (!$id) {
-                echo 'data: {"chatId":"' . $chat->id . '"}';
-                echo "\n\n";
+                echo 'data: {"chatId":"' . $chat->id . '"}' . "\n\n";
             }
         }, 200, [
             'Cache-Control' => 'no-cache',
@@ -156,15 +155,13 @@ class MessageController extends Controller
         return response()->stream(function () use ($user, $request, $id) {
             if ($user->balance <= 0) {
                 $text = "Пополните баланс";
-        
-                $json = json_encode(['message' => $text, 'error' => true]);
-    
-                echo 'data: ' . $json;
-                echo "\n\n";
-                flush();
-    
-                ob_end_flush();
 
+                $json = json_encode(['message' => $text, 'error' => true]);
+
+                echo 'data: ' . $json . "\n\n";
+                flush();
+                ob_end_flush();
+                
                 return false;
             }
             
@@ -184,7 +181,12 @@ class MessageController extends Controller
                 ]);
             }
 
-            $messages = $chat->messages()->where('error_code', NULL)->whereNot('id', $lastMessages[0]->id)->orderByDesc('id')->limit(16)->get();
+            $messages = $chat->messages()
+                ->where('error_code', NULL)
+                ->whereNot('id', $lastMessages[0]->id)
+                ->orderByDesc('id')
+                ->limit(16)
+                ->get();
             $reversedMessages = $messages->reverse();
 
             $history = $this->getHistory($reversedMessages);
@@ -210,7 +212,7 @@ class MessageController extends Controller
         }, 200, [
             'Cache-Control' => 'no-cache',
             'X-Accel-Buffering' => 'no',
-            'Content-Type' => 'text/event-stream',
+            'Content-Type' => 'text',
         ]);
     }
 

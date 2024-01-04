@@ -21,6 +21,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 interface RowData {
 	id: number;
 	token: string;
+	limit: number;
 	status: string;
 }
 
@@ -195,6 +196,13 @@ export function TokensList() {
 							Токен
 						</Th>
 						<Th
+							sorted={sortBy === 'limit'}
+							reversed={reverseSortDirection}
+							onSort={() => setSorting('limit')}
+						>
+							Лимит
+						</Th>
+						<Th
 							sorted={sortBy === 'status'}
 							reversed={reverseSortDirection}
 							onSort={() => setSorting('status')}
@@ -209,6 +217,7 @@ export function TokensList() {
 						<Table.Tr key={row.id}>
 							<Table.Td>{row.id}</Table.Td>
 							<Table.Td>{row.token}</Table.Td>
+							<Table.Td>{row.limit}</Table.Td>
 							<Table.Td>
 								{row.status == '1' && (
 									<Badge fullWidth variant="light">
