@@ -90,7 +90,7 @@ class MessageController extends Controller
                 $chat = $user->chats()->find($id);
             } else {
                 $chat = $user->chats()->create([
-                    'title' => $request->text,
+                    'title' => mb_substr($request->text, 0, 255),
                 ]);
             }
 
