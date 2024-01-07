@@ -34,23 +34,28 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::get('/users', [UserController::class, 'index']);
-    Route::get('/tokens', [TokenController::class, 'index']);
-    Route::post('/tokens', [TokenController::class, 'store']);
-    Route::delete('/tokens/{id}', [TokenController::class, 'destroy']);
-    Route::get('/summary/{type}', [SummaryController::class, 'index']);
+    Route::group(['middleware' => ['role:super-admin']], function () {
+        Route::get('/users', [UserController::class, 'index']);
+        Route::get('/tokens', [TokenController::class, 'index']);
+        Route::post('/tokens', [TokenController::class, 'store']);
+        Route::delete('/tokens/{id}', [TokenController::class, 'destroy']);
+        Route::get('/summary/{type}', [SummaryController::class, 'index']);
+        Route::post('/balance/{id}', [UserController::class, 'addBalance']);
+    });
+    
+    Route::middleware('verified')->group(function () {
+        Route::get('/chats', [ChatController::class, 'index']);
+        Route::patch('/chats/{id}', [ChatController::class, 'update']);
+        Route::delete('/chats/{id}', [ChatController::class, 'destroy']);
+        Route::get('/messages/{id}', [MessageController::class, 'index']);
+        Route::post('/messages/{id?}', [MessageController::class, 'store']);
+        Route::post('/messages/regenerate/{id}', [MessageController::class, 'regenerate']);
+        Route::post('/messages-cancel', [MessageController::class, 'cancel']);
+        Route::post('/settings-update', [SettingController::class, 'update']);
+    });
 
     Route::get('/user', [AuthController::class, 'user']);
-    Route::get('/chats', [ChatController::class, 'index']);
-    Route::patch('/chats/{id}', [ChatController::class, 'update']);
-    Route::delete('/chats/{id}', [ChatController::class, 'destroy']);
-    Route::get('/messages/{id}', [MessageController::class, 'index']);
-    Route::post('/messages/{id?}', [MessageController::class, 'store']);
-    Route::post('/messages/regenerate/{id}', [MessageController::class, 'regenerate']);
-    Route::post('/messages-cancel', [MessageController::class, 'cancel']);
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::post('/settings-update', [SettingController::class, 'update']);
-
     Route::post('/email/verify/resend', function (Request $request) {
         $request->user()->sendEmailVerificationNotification();
         return response()->json(['message' => 'Verification link sent!']);

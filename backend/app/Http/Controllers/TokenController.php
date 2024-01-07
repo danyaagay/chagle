@@ -9,31 +9,17 @@ class TokenController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $request->user();
-        if ($user->hasRole('super-admin')) {
-            $tokens =  Token::get();
-            return response()->json($tokens);
-        } else {
-            return response()->json([
-                'error' => 'Undefined',
-            ], 400);
-        }
+        $tokens =  Token::get();
+        return response()->json($tokens);
     }
 
     public function store(Request $request)
     {
-        $user = $request->user();
-        if ($user->hasRole('super-admin')) {
-            $token = Token::create([
-                'token' => $request->token,
-                'status' => 1,
-            ]);
-            return response()->json($token);
-        } else {
-            return response()->json([
-                'error' => 'Undefined',
-            ], 400);
-        }
+        $token = Token::create([
+            'token' => $request->token,
+            'status' => 1,
+        ]);
+        return response()->json($token);
     }
 
     public function update(Request $request, $id)
@@ -43,17 +29,9 @@ class TokenController extends Controller
 
     public function destroy(Request $request, $id)
     {
-        $user = $request->user();
-
-        if ($user->hasRole('super-admin')) {
-            $token = Token::find($id);
-            $token->delete();
-            return true;
-        } else {
-            return response()->json([
-                'error' => 'Undefined',
-            ], 400);
-        }
+        $token = Token::find($id);
+        $token->delete();
+        return true;
     }
 
     public static function getToken()

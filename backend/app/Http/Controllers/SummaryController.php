@@ -11,38 +11,30 @@ class SummaryController extends Controller
 {
     public function index(Request $request, $type)
     {
-        $user = $request->user();
+        if ($type === 'all') {
+            $userCount = User::count();
+            $tokenCount = Token::count();
+            $messageCount = Message::count();
 
-        if ($user->hasRole('super-admin')) {
-            if ($type === 'all') {
-                $userCount = User::count();
-                $tokenCount = Token::count();
-                $messageCount = Message::count();
-    
-                return response()->json([
-                    [ 'title' => 'Клиенты', 'value' => $userCount ],
-                    [ 'title' => 'Сообщения', 'value' => $messageCount ],
-                    [ 'title' => 'Токены', 'value' => $tokenCount ],
-                ]);
-            } elseif ($type === 'users') {
-                $userCount = User::count();
-                $messageCount = Message::count();
-    
-                return response()->json([
-                    [ 'title' => 'Клиенты', 'value' => $userCount ],
-                    [ 'title' => 'Сообщения', 'value' => $messageCount ],
-                ]);
-            } elseif ($type === 'tokens') {
-                $tokenCount = Token::count();
-    
-                return response()->json([
-                    [ 'title' => 'Токены', 'value' => $tokenCount ],
-                ]);
-            }
-        } else {
             return response()->json([
-                'error' => 'Undefined',
-            ], 400);
+                [ 'title' => 'Клиенты', 'value' => $userCount ],
+                [ 'title' => 'Сообщения', 'value' => $messageCount ],
+                [ 'title' => 'Токены', 'value' => $tokenCount ],
+            ]);
+        } elseif ($type === 'users') {
+            $userCount = User::count();
+            $messageCount = Message::count();
+
+            return response()->json([
+                [ 'title' => 'Клиенты', 'value' => $userCount ],
+                [ 'title' => 'Сообщения', 'value' => $messageCount ],
+            ]);
+        } elseif ($type === 'tokens') {
+            $tokenCount = Token::count();
+
+            return response()->json([
+                [ 'title' => 'Токены', 'value' => $tokenCount ],
+            ]);
         }
     }
 }

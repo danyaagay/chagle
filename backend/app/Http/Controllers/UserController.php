@@ -9,16 +9,9 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $request->user();
-        if ($user->hasRole('super-admin')) {
-            $users =  User::get();
+        $users = User::get();
+        return response()->json($users);
 
-            return response()->json($users);
-        } else {
-            return response()->json([
-                'error' => 'Undefined',
-            ], 400);
-        }
     }
 
     public function update(Request $request, $id)
@@ -29,5 +22,19 @@ class UserController extends Controller
     public function destroy(Request $request, $id)
     {
 
+    }
+
+    public function addBalance(Request $request, $id)
+    {
+        $currentUser = User::find($id);
+        
+        if ($currentUser) {
+            $currentUser->balance += $request->balance;
+            $currentUser->save();
+            
+            return response()->json(['message' => 'Balance updated successfully']);
+        }
+        
+        return response()->json(['message' => 'User not found'], 404);
     }
 }

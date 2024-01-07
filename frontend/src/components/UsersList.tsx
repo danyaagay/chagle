@@ -7,17 +7,23 @@ import {
 	Text,
 	Center,
 	TextInput,
+	ActionIcon,
+	NumberInput,
+	Flex,
 	rem
 } from '@mantine/core';
 import axios from '../axios';
 import { IconSelector, IconChevronDown, IconChevronUp, IconSearch } from '@tabler/icons-react';
 import classes from '../css/TableSort.module.css';
-import { useQuery } from '@tanstack/react-query';
+import { IconPlus } from '@tabler/icons-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import useStateRef from 'react-usestateref';
 
 interface RowData {
 	id: number;
 	name: string;
 	email: string;
+	balance: number;
 }
 
 interface ThProps {
@@ -63,43 +69,55 @@ function filterData(data: RowData[], search: string): RowData[] {
 }
 
 function sortData(
-    data: RowData[],
-    payload: { sortBy: keyof RowData | null; reversed: boolean; search: string }
+	data: RowData[],
+	payload: { sortBy: keyof RowData | null; reversed: boolean; search: string }
 ) {
-    const { sortBy, reversed, search } = payload;
-    
-    if (!sortBy) {
-        return filterData(data, search);
-    }
+	const { sortBy, reversed, search } = payload;
 
-    const sortedData = [...data].sort((a, b) => {
-        const valueA = a[sortBy];
-        const valueB = b[sortBy];
+	if (!sortBy) {
+		return filterData(data, search);
+	}
 
-        if (typeof valueA === 'string' && typeof valueB === 'string') {
-            return reversed ? valueB.localeCompare(valueA) : valueA.localeCompare(valueB);
-        } else if (typeof valueA === 'number' && typeof valueB === 'number') {
-            return reversed ? valueB - valueA : valueA - valueB;
-        }
+	const sortedData = [...data].sort((a, b) => {
+		const valueA = a[sortBy];
+		const valueB = b[sortBy];
 
-        return 0;
-    });
+		if (typeof valueA === 'string' && typeof valueB === 'string') {
+			return reversed ? valueB.localeCompare(valueA) : valueA.localeCompare(valueB);
+		} else if (typeof valueA === 'number' && typeof valueB === 'number') {
+			return reversed ? valueB - valueA : valueA - valueB;
+		}
 
-    return filterData(sortedData, search);
+		return 0;
+	});
+
+	return filterData(sortedData, search);
 }
 
 export function UsersList() {
-	const [search, setSearch] = useState('');
+	const [search, setSearch, searchRef] = useStateRef('');
 	//const [data, setData] = useState<RowData[]>([]);
 	const [sortedData, setSortedData] = useState<RowData[]>([]);
 	const [sortBy, setSortBy] = useState<keyof RowData | null>(null);
 	const [reverseSortDirection, setReverseSortDirection] = useState(false);
-	
+
+	const [balances, setBalances] = useState([]);
+	const handleBalanceChange = (index: number, value: any) => {
+		const updatedBalances: any = [...balances];
+		updatedBalances[index] = value;
+		setBalances(updatedBalances);
+	};
+
 	const { data } = useQuery({
 		queryKey: ['users'],
 		queryFn: async () => {
 			const res = await axios.get('/users');
-			setSortedData(res.data);
+			console.log(searchRef.current);
+			if (searchRef.current) {
+				setSortedData(sortData(res.data, { sortBy, reversed: reverseSortDirection, search: searchRef.current }));
+			} else {
+				setSortedData(res.data);
+			}
 			return res.data;
 		}
 	});
@@ -117,10 +135,23 @@ export function UsersList() {
 		setSortedData(sortData(data, { sortBy, reversed: reverseSortDirection, search: value }));
 	};
 
+	const queryClient = useQueryClient();
+
+	const { mutate: mutationAdd } = useMutation({
+		mutationFn: (id: number) => {
+			return axios.post(`/balance/${id}`, { balance: balances[id] });
+		},
+		onSuccess: (_data, id: number) => {
+			handleBalanceChange(id, '');
+
+			queryClient.invalidateQueries({ queryKey: ['users'] });
+		},
+	});
+
 	return (
 		<ScrollArea>
 			<TextInput
-				placeholder="Search by any field"
+				placeholder="Поиск по любым данным"
 				mb="md"
 				leftSection={<IconSearch style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
 				value={search}
@@ -134,7 +165,7 @@ export function UsersList() {
 							reversed={reverseSortDirection}
 							onSort={() => setSorting('name')}
 						>
-							Name
+							Имя
 						</Th>
 						<Th
 							sorted={sortBy === 'email'}
@@ -143,6 +174,14 @@ export function UsersList() {
 						>
 							Email
 						</Th>
+						<Th
+							sorted={sortBy === 'balance'}
+							reversed={reverseSortDirection}
+							onSort={() => setSorting('balance')}
+						>
+							Баланс
+						</Th>
+						<Table.Th />
 					</Table.Tr>
 				</Table.Thead>
 				<Table.Tbody>
@@ -150,6 +189,20 @@ export function UsersList() {
 						<Table.Tr key={row.id}>
 							<Table.Td>{row.name}</Table.Td>
 							<Table.Td>{row.email}</Table.Td>
+							<Table.Td>{row.balance}</Table.Td>
+							<Table.Td>
+								<Flex gap="8">
+									<NumberInput
+										placeholder="Баланс"
+										value={balances[row.id] ?? ''}
+										onChange={(value) => handleBalanceChange(row.id, value)}
+										min={1}
+									/>
+									<ActionIcon variant="filled" size="lg" w={36} h={36} onClick={() => mutationAdd(row.id)}>
+										<IconPlus style={{ width: '60%', height: '60%' }} stroke={1.5} />
+									</ActionIcon>
+								</Flex>
+							</Table.Td>
 						</Table.Tr>
 					))}
 				</Table.Tbody>

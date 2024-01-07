@@ -158,7 +158,7 @@ export function TokensList() {
 		<ScrollArea>
 			<Group grow>
 				<TextInput
-					placeholder="Search by any field"
+					placeholder="Поиск по любым данным"
 					mb="md"
 					leftSection={<IconSearch style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
 					value={search}

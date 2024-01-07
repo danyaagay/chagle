@@ -45,9 +45,13 @@
 }
 
 .root {
-    padding-left: calc(var(--mantine-spacing-xl) * 1.5);
-    padding-right: calc(var(--mantine-spacing-xl) * 1.5);
-    padding-top: calc(var(--mantine-spacing-xl) * 1.5);
+    padding-top: 15px;
+}
+
+.container {
+    max-Width: 970px;
+    height: 100%;
+    overflow: auto;
 }
 
 .label {
