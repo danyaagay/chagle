@@ -178,7 +178,7 @@ export function TokensList() {
 					</Group>
 				</Box>
 			</Group>
-			<Table>
+			<Table classNames={classes} horizontalSpacing="md" verticalSpacing="xs" miw={900} layout="fixed" striped>
 				<Table.Thead>
 					<Table.Tr>
 						<Th

@@ -83,7 +83,7 @@ function FloatingLabelInput({
 					<Group gap={5} grow mt="xs" mb="md">
 						{bars}
 					</Group>
-					<PasswordRequirement label="Содержит минимум 6 символов" meets={value.length > 5} />
+					<PasswordRequirement label="Содержит минимум 8 символов" meets={value.length > 7} />
 					{checks}
 				</>
 			)}
@@ -107,11 +107,10 @@ const requirements = [
 	{ re: /[0-9]/, label: 'Включает цифру' },
 	{ re: /[a-z]/, label: 'Включает букву нижнего регистра' },
 	{ re: /[A-Z]/, label: 'Включает букву верхнего регистра' },
-	{ re: /[$&+,:;=?@#|'<>.^*()%!-]/, label: 'Имеет специальный символ' },
 ];
 
 function getStrength(password: string) {
-	let multiplier = password.length > 5 ? 0 : 1;
+	let multiplier = password.length > 7 ? 0 : 1;
 
 	requirements.forEach((requirement) => {
 		if (!requirement.re.test(password)) {

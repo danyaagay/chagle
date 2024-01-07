@@ -157,7 +157,7 @@ export function UsersList() {
 				value={search}
 				onChange={handleSearchChange}
 			/>
-			<Table horizontalSpacing="md" verticalSpacing="xs" miw={700} layout="fixed">
+			<Table classNames={classes} horizontalSpacing="md" verticalSpacing="xs" miw={700} layout="fixed" striped>
 				<Table.Thead>
 					<Table.Tr>
 						<Th
