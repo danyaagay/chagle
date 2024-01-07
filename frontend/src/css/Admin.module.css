@@ -49,7 +49,7 @@
 }
 
 .container {
-    max-Width: 970px;
+    max-width: 1200px;
     height: 100%;
     overflow: auto;
 }
