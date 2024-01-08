@@ -49,9 +49,8 @@
 }
 
 .container {
-    max-width: 1200px;
-    height: 100%;
     overflow: auto;
+    height: 100%;
 }
 
 .label {

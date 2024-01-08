@@ -12,6 +12,8 @@ import {
 import { TokensList } from '../components/TokensList';
 import { useQuery } from '@tanstack/react-query';
 import classes from '../css/Admin.module.css';
+import { IS_MOBILE } from '../environment/userAgent';
+import { Scrollbars } from 'react-custom-scrollbars';
 
 type Stat = {
 	title: string;
@@ -53,11 +55,27 @@ export default function StatsGridIcons() {
 	});
 
 	return (
-		<Container className={classes.container} px={8}>
-			<SimpleGrid classNames={classes}>{stats}</SimpleGrid>
-			<Box className={classes.root}>
-				<TokensList />
-			</Box>
-		</Container>
+		<>
+			{!IS_MOBILE ? (
+				<Scrollbars
+					autoHide
+				>
+					<div style={{ 'maxWidth': '1200px', 'margin': 'auto' }}>
+						<SimpleGrid classNames={classes}>{stats}</SimpleGrid>
+						<Box className={classes.root}>
+							<TokensList />
+						</Box>
+					</div>
+				</Scrollbars>
+
+			) : (
+				<Container className={classes.container} px={8}>
+					<SimpleGrid classNames={classes}>{stats}</SimpleGrid>
+					<Box className={classes.root}>
+						<TokensList />
+					</Box>
+				</Container>
+			)}
+		</>
 	);
 }

@@ -62,7 +62,7 @@ const MessageList = () => {
                 if (scrollSaver.current.lastDown < 1) {
                     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
                 }
-                console.log('resize', scrollSaver.current.lastDown);
+                //console.log('resize', scrollSaver.current.lastDown);
             });
         }
     }, [])
@@ -239,8 +239,7 @@ const MessageList = () => {
                         ))}
                     </div>
                 </div>
-            )
-            }
+            )}
         </div >
     );
 };
