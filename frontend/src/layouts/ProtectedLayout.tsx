@@ -1,5 +1,8 @@
 import { useEffect } from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import {
+	Navigate,
+	Outlet
+} from 'react-router-dom';
 import axios from '../axios';
 import { AxiosError } from 'axios';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,14 +12,19 @@ import {
 import { useMobileHeader } from '../contexts/MobileHeaderContext';
 import MobileHeader from '../components/MobileHeader';
 import Menu from '../components/Menu';
+import ChatSettings from '../components/ChatSettings';
 import classes from '../css/ProtectedLayout.module.css';
 import { useLoading } from '../contexts/LoadingContext';
+
+import { useParams } from 'react-router-dom';
 
 
 export default function DefaultLayout() {
 	const { user, setUser } = useAuth();
 	const { opened } = useMobileHeader();
 	const { loading } = useLoading();
+	
+	const { id } = useParams();
 
 	useEffect(() => {
 		// Check if user is logged in or not from server
@@ -53,6 +61,7 @@ export default function DefaultLayout() {
 				classNames={classes}
 				layout='alt'
 				navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
+				aside={{ width: 300, breakpoint: 'sm', collapsed: { desktop: id ? false : true, mobile: id ? false : true } }}
 				transitionDuration={0}
 			>
 				<AppShell.Header hiddenFrom="sm" p="sm">
@@ -66,6 +75,10 @@ export default function DefaultLayout() {
 				<AppShell.Main>
 					<Outlet />
 				</AppShell.Main>
+
+				<AppShell.Aside p="md">
+					{id && <ChatSettings />}
+				</AppShell.Aside>
 			</AppShell>
 		</>
 	);

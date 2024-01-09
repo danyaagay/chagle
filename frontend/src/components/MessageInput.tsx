@@ -243,7 +243,14 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 							} else if (chatId) {
 								queryClient.setQueryData(['chats'], (oldData: any) => [...oldData, {
 									title: text,
-									id: chatId
+									id: chatId,
+									model: 'gpt-3.5-turbo',
+									system_message: '',
+									temperature: 0.7,
+									max_tokens: 1024,
+									top_p: 1.0,
+									frequency_penalty: 0.0,
+									presence_penalty: 0.0,
 								}]);
 
 								if (tempIdRef.current) {

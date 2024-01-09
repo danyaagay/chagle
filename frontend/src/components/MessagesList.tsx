@@ -156,7 +156,7 @@ const MessageList = () => {
             fetchNextPage();
         } else if (allItems?.length && firstLoaded.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-            console.log('donefirst', scrollRef.current.scrollTop);
+            //console.log('donefirst', scrollRef.current.scrollTop);
             firstLoaded.current = false;
         }
     }, [allItems?.length]);

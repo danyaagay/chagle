@@ -80,8 +80,7 @@ class MessageController extends Controller
                 $json = json_encode(['message' => $text, 'error' => true]);
 
                 echo 'data: ' . $json . "\n\n";
-                flush();
-                ob_end_flush();
+                flush(); ob_end_flush();
 
                 return false;
             }
@@ -114,8 +113,17 @@ class MessageController extends Controller
 
             $history = $this->getHistory($reversedMessages);
 
-            $stream = new StreamsController;
-            $answer = $stream->stream($request->text, $history);
+            $settings = [
+                'model' => $chat->model,
+                'system_message' => $chat->system_message,
+                'temperature' => $chat->temperature,
+                'max_tokens' => $chat->max_tokens,
+                'top_p' => $chat->top_p,
+                'frequency_penalty' => $chat->frequency_penalty,
+                'presence_penalty' => $chat->presence_penalty,
+            ];
+
+            $answer = StreamsController::stream($request->text, $history, $settings);
 
             if ($answer['error']) {
                 $chatAnswer = $chat->messages()->create([
@@ -144,7 +152,7 @@ class MessageController extends Controller
         }, 200, [
             'Cache-Control' => 'no-cache',
             'X-Accel-Buffering' => 'no',
-            'Content-Type' => 'text/event-stream',
+            'Content-Type' => 'text',
         ]);
     }
 
@@ -159,8 +167,7 @@ class MessageController extends Controller
                 $json = json_encode(['message' => $text, 'error' => true]);
 
                 echo 'data: ' . $json . "\n\n";
-                flush();
-                ob_end_flush();
+                flush(); ob_end_flush();
                 
                 return false;
             }
@@ -191,8 +198,17 @@ class MessageController extends Controller
 
             $history = $this->getHistory($reversedMessages);
 
-            $stream = new StreamsController;
-            $answer = $stream->stream($lastMessages[1]->text, $history);
+            $settings = [
+                'model' => $chat->model,
+                'system_message' => $chat->system_message,
+                'temperature' => $chat->temperature,
+                'max_tokens' => $chat->max_tokens,
+                'top_p' => $chat->top_p,
+                'frequency_penalty' => $chat->frequency_penalty,
+                'presence_penalty' => $chat->presence_penalty,
+            ];
+
+            $answer = StreamsController::stream($lastMessages[1]->text, $history, $settings);
 
             if ($answer['error']) {
                 $chatAnswer = $lastMessages[0]->update([
@@ -212,7 +228,7 @@ class MessageController extends Controller
         }, 200, [
             'Cache-Control' => 'no-cache',
             'X-Accel-Buffering' => 'no',
-            'Content-Type' => 'text/event-stream',
+            'Content-Type' => 'text',
         ]);
     }
 
