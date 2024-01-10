@@ -17,7 +17,7 @@ import classes from '../css/ProtectedLayout.module.css';
 import { useAuth } from '../contexts/AuthContext';
 
 import { forwardRef } from 'react';
-import { Group, Avatar, Text, UnstyledButton, rem } from '@mantine/core';
+import { Avatar, Text, UnstyledButton, rem, Flex } from '@mantine/core';
 
 interface UserButtonProps extends React.ComponentPropsWithoutRef<'button'> {
     name: string;
@@ -48,14 +48,15 @@ export default function MobileHeader() {
         ({ name, email, icon, ...others }: UserButtonProps, ref) => (
             <UnstyledButton
                 ref={ref}
+                p={12}
                 style={{
                     width: '100%',
                     color: 'var(--mantine-color-text)',
-                    borderRadius: 'var(--mantine-radius-sm)',
+                    borderRadius: 'var(--mantine-radius-md)',
                 }}
                 {...others}
             >
-                <Group gap="xs">
+                <Flex gap="xs" align="center">
                     <Avatar radius="xl" />
                     <div style={{ flex: 1 }}>
                         <Text size="sm" fw={500}>
@@ -65,8 +66,9 @@ export default function MobileHeader() {
                         <Text c="dimmed" size="xs">
                             {email}
                         </Text>
-                    </div><Badge color="blue">{numberBalance(user.balance)}₽</Badge>
-                </Group>
+                    </div>
+                    <Badge color="blue" w={'auto'}>{numberBalance(user.balance)}₽</Badge>
+                </Flex>
             </UnstyledButton>
         )
     );
@@ -104,13 +106,14 @@ export default function MobileHeader() {
             <Button
                 component={Link}
                 to='chat'
-                leftSection={<IconPlus />}
+                rightSection={<IconPlus stroke={1.5} size={22} />}
                 className={classes.link}
                 variant="default"
                 fullWidth
                 size='sm'
                 mb='16px'
                 fw={500}
+                radius="md"
                 onClick={() => {
                     setMobileTitle('Новый чат');
                     document.title = 'Новый чат';
@@ -125,13 +128,18 @@ export default function MobileHeader() {
             <ChatsList />
 
             <div className={classes.footer}>
-                <Menu width={275} position="top-start">
+                <Menu
+                    width={275}
+                    position="top-start"
+                    classNames={{ dropdown: classes.dropdown }}
+                >
                     {user.roles[0] == 'super-admin' && (
                         <Menu.Target>
                             <Button
                                 variant="default"
                                 fullWidth
                                 mb='16px'
+                                radius="md"
                             >
                                 Админ панель
                             </Button>
@@ -151,11 +159,16 @@ export default function MobileHeader() {
                     </Menu.Dropdown>
                 </Menu>
 
-                <Menu width={275} position="top-start">
+                <Menu
+                    width={275}
+                    position="top-start"
+                    classNames={{ dropdown: classes.dropdown }}
+                >
                     <Menu.Target>
                         <UserButton
                             name={user.name}
                             email={user.email}
+                            className={classes.user}
                         />
                     </Menu.Target>
                     <Menu.Dropdown>

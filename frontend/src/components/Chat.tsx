@@ -1,6 +1,5 @@
 import React, { useRef, useState, useContext } from 'react';
 import {
-	IconMessageCircle2,
 	IconTrash,
 	IconPencil,
 	IconX,
@@ -103,15 +102,23 @@ export default function ChatChatButton({
 
 	return (
 		<>
-			<Modal opened={deleting} onClose={close} title={`Удалить чат "${chatTitle}"?`} centered withCloseButton={false}>
+			<Modal opened={deleting} onClose={close} title={`Удалить чат "${chatTitle}"?`} centered withCloseButton={false} radius={'md'}>
 				<Group>
-					<Button variant="subtle" onClick={close}>Отмена</Button>
 					<Button
 						variant="subtle"
+						radius={'md'}
+						onClick={close}
+					>
+						Отмена
+					</Button>
+					<Button
+						variant="subtle"
+						radius={'md'}
 						color="red"
 						onClick={() => {
 							mutationDelete({ id: chatId });
-						}}>
+						}}
+					>
 						Удалить
 					</Button>
 				</Group>
@@ -125,7 +132,6 @@ export default function ChatChatButton({
 			}}
 			>
 				<a className={`${IS_MOBILE ? classes.linkMobile : classes.link} ${active ? classes.linkActive : ''}`}>
-					<IconMessageCircle2 className={classes.linkIcon} stroke={1.5} />
 					{editable ? (
 						<input
 							defaultValue={chatTitle}
@@ -136,13 +142,13 @@ export default function ChatChatButton({
 						<span className={classes.linkSpan}>{chatTitle}</span>
 					)}
 
-					{!IS_MOBILE && hovered || editable || IS_MOBILE && active ? (
+					{!IS_MOBILE && hovered || editable || active ? (
 						<div className={classes.buttonBox}>
 							{editable ? (
 								<>
 									<ActionIcon
 										variant="transparent"
-										size="lg"
+										size="md"
 										onClick={() => {
 											mutationEdit({
 												id: chatId,
@@ -150,39 +156,39 @@ export default function ChatChatButton({
 											});
 										}}
 									>
-										<IconCheck className={classes.linkIcon} stroke={1.5} />
+										<IconCheck className={classes.linkIcon} stroke={1.5} style={{ width: '22px', height: '22px' }} />
 									</ActionIcon>
 									<ActionIcon
 										variant="transparent"
-										size="lg"
+										size="md"
 										onClick={() => {
 											editToggle.toggle();
 										}}
 									>
-										<IconX className={classes.linkIcon} stroke={1.5} />
+										<IconX className={classes.linkIcon} stroke={1.5} style={{ width: '22px', height: '22px' }} />
 									</ActionIcon>
 								</>
 							) : (
 								<>
 									<ActionIcon
 										variant="transparent"
-										size="lg"
+										size="md"
 										onClick={(e) => {
 											e.stopPropagation();
 											editToggle.toggle();
 										}}
 									>
-										<IconPencil className={classes.linkIcon} stroke={1.5} />
+										<IconPencil className={classes.linkIcon} stroke={1.5} style={{ width: '22px', height: '22px' }} />
 									</ActionIcon>
 									<ActionIcon
 										variant="transparent"
-										size="lg"
+										size="md"
 										onClick={(e) => {
 											e.stopPropagation();
 											open();
 										}}
 									>
-										<IconTrash className={classes.linkIcon} stroke={1.5} />
+										<IconTrash className={classes.linkIcon} stroke={1.5} style={{ width: '22px', height: '22px' }} />
 									</ActionIcon>
 								</>
 							)}

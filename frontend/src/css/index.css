@@ -51,11 +51,11 @@ body, html {
 }
 
 .burger:before {
-    top: -0.3125rem;
+    top: -0.38rem;
 }
 
 .burger:after {
-    top: 0.3125rem;
+    top: 0.38rem;
 }
 
 .burger:before, .burger:after {

@@ -8,6 +8,8 @@ export default function Billing() {
                 <Text>Чтобы оплатить напишите нам, ответим быстро</Text>
                 <Group mt={15}>
                     <Button
+                        style={{margin: 'auto'}}
+                        radius={'md'}
                         variant="filled"
                         component="a"
                         href="https://t.me/chaglemanager"

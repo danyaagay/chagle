@@ -5,7 +5,9 @@ import {
     Stack,
     Select,
     Textarea,
-    Button
+    Button,
+    ActionIcon,
+    Flex
 } from '@mantine/core';
 import { useParams } from 'react-router-dom';
 import {
@@ -19,6 +21,13 @@ import {
     useQueryClient
 } from '@tanstack/react-query';
 import axios from '../axios';
+import {
+    IconX
+} from '@tabler/icons-react';
+import classes from '../css/ProtectedLayout.module.css';
+import { Scrollbars } from 'react-custom-scrollbars';
+import { useMobileHeader } from '../contexts/MobileHeaderContext';
+import { IS_MOBILE } from '../environment/userAgent';
 
 export default function ChatSettings() {
     const { id } = useParams();
@@ -26,6 +35,7 @@ export default function ChatSettings() {
     const timeoutRef = useRef<number>();
     const loaded = useRef<boolean>(false);
     const form = useForm();
+    const { toggleSettings } = useMobileHeader();
 
     const { data: chats } = useQuery({
         queryKey: ['chats'],
@@ -104,87 +114,127 @@ export default function ChatSettings() {
     return (
         <>
             {loaded.current && (
-                <Stack gap="lg">
-                    <div>
-                        <Text>Модель</Text>
-                        <Select
-                            name="model"
-                            data={['gpt-3.5-turbo', 'gpt-3.5-turbo-0301', 'gpt-3.5-turbo-1106', 'gpt-3.5-turbo-16k']}
-                            {...form.getInputProps('model')}
-                        />
+                <>
+                    {IS_MOBILE ? (
+                        <div className='burgerBox' style={{marginLeft: '0'}}>
+                            <button onClick={toggleSettings} className='burgerButton'></button>
+                            <div className='burgerClose' />
+                        </div>
+                    ) : (
+                        <Flex
+                            mih={45}
+                            gap="md"
+                            justify="flex-start"
+                            align="center"
+                            direction="row"
+                            wrap="wrap"
+                            mb='16px'
+                            className={classes.settingsBox}
+                        >
+                            <Text size='sm' fw={500}>Настройки</Text>
+                            <ActionIcon style={{ marginLeft: 'auto' }} variant="transparent" size="md" color="rgba(0, 0, 0, 1)" aria-label="Settings" onClick={toggleSettings}>
+                                <IconX style={{ width: '85%', height: '85%' }} stroke={1.5} />
+                            </ActionIcon>
+                        </Flex>
+                    )}
+                    <Scrollbars autoHide>
+                        <Stack gap="lg" className={classes.settingsBox}>
+                            <div>
+                                <Select
+                                    styles={{ input: { height: '45px' }, }}
+                                    size='sm'
+                                    radius="md"
+                                    data={['gpt-3.5-turbo', 'gpt-3.5-turbo-0301', 'gpt-3.5-turbo-1106', 'gpt-3.5-turbo-16k']}
+                                    withCheckIcon={false}
+                                    {...form.getInputProps('model')}
+                                />
+                            </div>
+                            <div>
+                                <Text size='sm' fw={500} mb={8} c='gray.7'>Системное сообщение</Text>
+                                <Textarea
+                                    size='md'
+                                    autosize
+                                    minRows={3}
+                                    radius="md"
+                                    {...form.getInputProps('system_message')}
+                                />
+                            </div>
+                            <div>
+                                <Text size='sm' fw={500} mb={8} c='gray.7'>Температура</Text>
+                                <Slider
+                                    min={0}
+                                    max={2}
+                                    label={(value) => value === 1.0 ? 1 : value.toFixed(1)}
+                                    step={0.1}
+                                    styles={{ markLabel: { display: 'none' } }}
+                                    {...form.getInputProps('temperature')}
+                                />
+                            </div>
+                            <div>
+                                <Text size='sm' fw={500} mb={8} c='gray.7'>Максимум токенов</Text>
+                                <Slider
+                                    min={0}
+                                    max={4096}
+                                    step={1}
+                                    styles={{ markLabel: { display: 'none' } }}
+                                    {...form.getInputProps('max_tokens')}
+                                />
+                            </div>
+                            <div>
+                                <Text size='sm' fw={500} mb={8} c='gray.7'>Top P</Text>
+                                <Slider
+                                    min={0}
+                                    max={1}
+                                    label={(value) => value === 1.0 ? 1 : value.toFixed(1)}
+                                    step={0.1}
+                                    styles={{ markLabel: { display: 'none' } }}
+                                    {...form.getInputProps('top_p')}
+                                />
+                            </div>
+                            <div>
+                                <Text size='sm' fw={500} mb={8} c='gray.7'>Штраф частоты</Text>
+                                <Slider
+                                    min={-2}
+                                    max={2}
+                                    label={(value) => value === 0.0 ? 0 : value.toFixed(1)}
+                                    step={0.1}
+                                    styles={{ markLabel: { display: 'none' } }}
+                                    {...form.getInputProps('frequency_penalty')}
+                                />
+                            </div>
+                            <div>
+                                <Text size='sm' fw={500} mb={8} c='gray.7'>Штраф присутствия</Text>
+                                <Slider
+                                    min={-2}
+                                    max={2}
+                                    label={(value) => value === 0.0 ? 0 : value.toFixed(1)}
+                                    step={0.1}
+                                    styles={{ markLabel: { display: 'none' } }}
+                                    {...form.getInputProps('presence_penalty')}
+                                />
+                            </div>
+                        </Stack>
+                    </Scrollbars>
+                    <div className={classes.footer}>
+                        <div className={classes.settingsBox}>
+                        <Button
+                            variant="default"
+                            fullWidth
+                            radius="md"
+                            onClick={() => form.setValues({
+                                model: 'gpt-3.5-turbo',
+                                system_message: '',
+                                temperature: 0.7,
+                                max_tokens: 1024,
+                                top_p: 1.0,
+                                frequency_penalty: 0.0,
+                                presence_penalty: 0.0,
+                            })}>
+                            Сбросить
+                        </Button>
+                        </div>
                     </div>
-                    <div>
-                        <Text>Системное сообщение</Text>
-                        <Textarea
-                            autosize
-                            minRows={3}
-                            {...form.getInputProps('system_message')}
-                        />
-                    </div>
-                    <div>
-                        <Text>Температура</Text>
-                        <Slider
-                            min={0}
-                            max={2}
-                            label={(value) => value === 1.0 ? 1 : value.toFixed(1)}
-                            step={0.1}
-                            styles={{ markLabel: { display: 'none' } }}
-                            {...form.getInputProps('temperature')}
-                        />
-                    </div>
-                    <div>
-                        <Text>Максимум токенов</Text>
-                        <Slider
-                            min={0}
-                            max={4096}
-                            step={1}
-                            styles={{ markLabel: { display: 'none' } }}
-                            {...form.getInputProps('max_tokens')}
-                        />
-                    </div>
-                    <div>
-                        <Text>Top P</Text>
-                        <Slider
-                            min={0}
-                            max={1}
-                            label={(value) => value === 1.0 ? 1 : value.toFixed(1)}
-                            step={0.1}
-                            styles={{ markLabel: { display: 'none' } }}
-                            {...form.getInputProps('top_p')}
-                        />
-                    </div>
-                    <div>
-                        <Text>Штраф частоты</Text>
-                        <Slider
-                            min={-2}
-                            max={2}
-                            label={(value) => value === 0.0 ? 0 : value.toFixed(1)}
-                            step={0.1}
-                            styles={{ markLabel: { display: 'none' } }}
-                            {...form.getInputProps('frequency_penalty')}
-                        />
-                    </div>
-                    <div>
-                        <Text>Штраф присутствия</Text>
-                        <Slider
-                            min={-2}
-                            max={2}
-                            label={(value) => value === 0.0 ? 0 : value.toFixed(1)}
-                            step={0.1}
-                            styles={{ markLabel: { display: 'none' } }}
-                            {...form.getInputProps('presence_penalty')}
-                        />
-                    </div>
-                    <Button variant="light" onClick={() => form.setValues({
-                        model: 'gpt-3.5-turbo',
-                        system_message: '',
-                        temperature: 0.7,
-                        max_tokens: 1024,
-                        top_p: 1.0,
-                        frequency_penalty: 0.0,
-                        presence_penalty: 0.0,
-                    })}>Сбросить</Button>
-                </Stack>
+                </>
             )}
         </>
     );
