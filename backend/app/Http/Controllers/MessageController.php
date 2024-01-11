@@ -107,11 +107,11 @@ class MessageController extends Controller
             $messages = $chat->messages()
                 ->where('error_code', NULL)
                 ->orderByDesc('id')
-                ->limit(16)
                 ->get();
-            $reversedMessages = $messages->reverse();
 
-            $history = $this->getHistory($reversedMessages);
+            $history = $this->getHistory($messages, $chat->model);
+
+            $history = array_reverse($history);
 
             $settings = [
                 'model' => $chat->model,
@@ -137,7 +137,7 @@ class MessageController extends Controller
                     'role' => 'assistant',
                 ]);
 
-                $newBalance = $this->calculate($history, $user->balance, $request->text, $answer['answer']);
+                $newBalance = $this->calculate($history, $user->balance, $request->text, $answer['answer'], $chat->model);
                 $user->balance = $newBalance;
                 $user->save();
             }
@@ -152,7 +152,7 @@ class MessageController extends Controller
         }, 200, [
             'Cache-Control' => 'no-cache',
             'X-Accel-Buffering' => 'no',
-            'Content-Type' => 'text',
+            'Content-Type' => 'text/event-stream',
         ]);
     }
 
@@ -192,11 +192,11 @@ class MessageController extends Controller
                 ->where('error_code', NULL)
                 ->whereNot('id', $lastMessages[0]->id)
                 ->orderByDesc('id')
-                ->limit(16)
                 ->get();
-            $reversedMessages = $messages->reverse();
 
-            $history = $this->getHistory($reversedMessages);
+            $history = $this->getHistory($messages, $chat->model);
+
+            $history = array_reverse($history);
 
             $settings = [
                 'model' => $chat->model,
@@ -221,14 +221,14 @@ class MessageController extends Controller
                     'error_code' => NULL
                 ]);
                 
-                $newBalance = $this->calculate($history, $user->balance, $request->text, $answer['answer']);
+                $newBalance = $this->calculate($history, $user->balance, $request->text, $answer['answer'], $chat->model);
                 $user->balance = $newBalance;
                 $user->save();
             }
         }, 200, [
             'Cache-Control' => 'no-cache',
             'X-Accel-Buffering' => 'no',
-            'Content-Type' => 'text',
+            'Content-Type' => 'text/event-stream',
         ]);
     }
 
@@ -238,17 +238,36 @@ class MessageController extends Controller
         return true;
     }
 
-    public static function getHistory($messages)
+    public static function getHistory($messages, $model)
     {
         $array = [];
+        if ($model === 'gpt-3.5-turbo-16k') {
+            $contextSize = 16383;
+        } else {
+            $contextSize = 4095;
+        }
+        $contextLength = 0;
+
         foreach ($messages as $message) {
-            $array[] = ['role' => $message->role, 'content' => $message->content];
+            $roleLength = mb_strlen($message->role);
+            $contentLength = mb_strlen($message->content);
+            
+            // Проверяем, поместится ли роль и содержимое в контекст
+            if (($contextLength + $roleLength + $contentLength) <= $contextSize) {
+                $array[] = ['role' => $message->role, 'content' => $message->content];
+                
+                // Увеличиваем длину контекста на длину роли и содержимого, а также учитываем пробелы между ними
+                $contextLength += $roleLength + $contentLength + 2;
+            } else {
+                // Если контекст уже достиг максимального размера, прекращаем добавление сообщений
+                break;
+            }
         }
 
         return $array;
     }
 
-    public static function calculate($history, $balance, $question, $answer)
+    public static function calculate($history, $balance, $question, $answer, $model)
     {
         if (!$history) {
             $history = [
@@ -270,7 +289,11 @@ class MessageController extends Controller
         $tokenCount = ceil(mb_strlen($text) / 2);
       
         // Рассчитываем стоимость
-        $pricePerTokens = 0.2;
+        if ($model === 'gpt-3.5-turbo-16k') {
+            $pricePerTokens = 0.4;
+        } else {
+            $pricePerTokens = 0.2;
+        }
         $pricePerToken = $pricePerTokens / 1000;
         $cost = $tokenCount * $pricePerToken;
       

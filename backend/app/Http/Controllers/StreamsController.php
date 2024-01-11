@@ -16,7 +16,7 @@ class StreamsController extends Controller
 	 */
 	public static function stream($question, $history, $settings)
 	{
-		$debug = true;
+		$debug = false;
 		 
 		ignore_user_abort(true);
 
@@ -73,11 +73,15 @@ class StreamsController extends Controller
 				} catch (\OpenAI\Exceptions\TransporterException $e) {
 					$errorCode = @$e->getCode();
 				}
+
+				//var_dump($errorCode);
 			
 				// Приостанавливаем токен
-				//if ($errorCode === 'rate_limit_exceeded') {
-				//	TokenController::setStatus($token, 2);
-				//}
+				if ($errorCode === 'rate_limit_exceeded') {
+					TokenController::setStatus($token, 2);
+				} elseif ($errorCode === 'invalid_request_error') {
+					break;
+				}
 				// Нужно дописать другие ошибки
 			} while ($error && $token);
 

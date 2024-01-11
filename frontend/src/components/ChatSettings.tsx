@@ -34,7 +34,17 @@ export default function ChatSettings() {
     const isMounted = useRef(false);
     const timeoutRef = useRef<number>();
     const loaded = useRef<boolean>(false);
-    const form = useForm();
+    const form = useForm({
+        initialValues: {
+            model: '',
+            system_message: '',
+            temperature: 0,
+            max_tokens: 0,
+            top_p: 0,
+            frequency_penalty: 0,
+            presence_penalty: 0,
+        },
+    });
     const { toggleSettings } = useMobileHeader();
 
     const { data: chats } = useQuery({
@@ -99,8 +109,12 @@ export default function ChatSettings() {
 
     useEffect(() => {
         //console.log(form.values, form.isDirty());
-        //console.log('update start', form.isDirty(), form.isTouched());
+        console.log('update start', form.isDirty(), form.isTouched());
         if (form.isDirty() && form.isTouched()) {
+            if (form.values['model'] !== 'gpt-3.5-turbo-16k' && form.values['max_tokens'] > 4096) {
+                console.log('here');
+                form.setFieldValue('max_tokens', 2048);
+            }
             clearTimeout(timeoutRef.current);
             timeoutRef.current = setTimeout(() => {
                 if (isMounted.current) {
@@ -116,7 +130,7 @@ export default function ChatSettings() {
             {loaded.current && (
                 <>
                     {IS_MOBILE ? (
-                        <div className='burgerBox' style={{marginLeft: '0'}}>
+                        <div className='burgerBox' style={{ marginLeft: '0' }}>
                             <button onClick={toggleSettings} className='burgerButton'></button>
                             <div className='burgerClose' />
                         </div>
@@ -174,7 +188,7 @@ export default function ChatSettings() {
                                 <Text size='sm' fw={500} mb={8} c='gray.7'>Максимум токенов</Text>
                                 <Slider
                                     min={0}
-                                    max={4096}
+                                    max={form.values['model'] === 'gpt-3.5-turbo-16k' ? 16384 : 4096}
                                     step={1}
                                     styles={{ markLabel: { display: 'none' } }}
                                     {...form.getInputProps('max_tokens')}
@@ -217,21 +231,24 @@ export default function ChatSettings() {
                     </Scrollbars>
                     <div className={classes.footer}>
                         <div className={classes.settingsBox}>
-                        <Button
-                            variant="default"
-                            fullWidth
-                            radius="md"
-                            onClick={() => form.setValues({
-                                model: 'gpt-3.5-turbo',
-                                system_message: '',
-                                temperature: 0.7,
-                                max_tokens: 1024,
-                                top_p: 1.0,
-                                frequency_penalty: 0.0,
-                                presence_penalty: 0.0,
-                            })}>
-                            Сбросить
-                        </Button>
+                            <Button
+                                variant="default"
+                                fullWidth
+                                radius="md"
+                                onClick={() => {
+                                    form.setValues({
+                                        model: 'gpt-3.5-turbo',
+                                        system_message: '',
+                                        temperature: 0.7,
+                                        max_tokens: 1024,
+                                        top_p: 1.0,
+                                        frequency_penalty: 0.0,
+                                        presence_penalty: 0.0,
+                                    });
+                                    form.setFieldValue('model', 'gpt-3.5-turbo');
+                                }}>
+                                Сбросить
+                            </Button>
                         </div>
                     </div>
                 </>

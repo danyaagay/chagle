@@ -18,6 +18,7 @@ class TokenController extends Controller
         $token = Token::create([
             'token' => $request->token,
             'status' => 1,
+            'limit' => 200
         ]);
         return response()->json($token);
     }
@@ -41,7 +42,7 @@ class TokenController extends Controller
 
         $token = Token::where('status', 1)
         ->where('limit', '>', 0)
-        ->orderBy('updated_at', 'desc')
+        ->orderBy('updated_at', 'asc')
         ->first();
 
         if ($token) {
