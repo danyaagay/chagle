@@ -48,6 +48,9 @@
     color: rgb(134, 142, 150);
 }
 
+.markdownBody {
+    white-space: pre-wrap;
+}
 
 .markdownBody>*:first-child {
     margin-top: 0!important;

@@ -20,6 +20,7 @@ import { useParams } from 'react-router-dom';
 import {
 	IconSettings
 } from '@tabler/icons-react';
+import { IS_IOS } from '../environment/userAgent';
 
 
 export default function DefaultLayout() {
@@ -56,6 +57,34 @@ export default function DefaultLayout() {
 	if (!user.email_verified_at) {
 		return <Navigate to="/verify" />;
 	}
+
+	// Устанавливаем правильный height на всех страницах (или там где есть скролл) для мобильной версии
+	useEffect(() => {
+		// Fix height
+		const w = (window.visualViewport || window) as Window & typeof window.visualViewport;
+		let setViewportVH = false; // HasFocus = false
+		let lastVH: number | undefined;
+		const setVH = (): void => {
+			let vh = (setViewportVH ? w.height || w.innerHeight : window.innerHeight) * 0.01;
+			vh = +vh.toFixed(2);
+			if (lastVH === vh) {
+				return;
+			}
+
+			lastVH = vh;
+
+			document.documentElement.style.setProperty('--vh', `${vh}px`);
+		};
+
+		if (IS_IOS) {
+			document.documentElement.classList.add('is-ios');
+			//window.visualViewport!.addEventListener('resize', setVH);
+		} else {
+			window.addEventListener('resize', setVH);
+		}
+
+		setVH();
+	}, []);
 
 	return (
 		<>
