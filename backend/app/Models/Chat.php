@@ -20,6 +20,13 @@ class Chat extends Authenticatable
      */
     protected $fillable = [
         'title',
+        'model',
+        'system_message',
+        'temperature',
+        'max_tokens',
+        'top_p',
+        'frequency_penalty',
+        'presence_penalty',
     ];
 
     public function messages(): HasMany

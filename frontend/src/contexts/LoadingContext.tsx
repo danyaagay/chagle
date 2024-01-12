@@ -30,7 +30,7 @@ function LoadingProvider(props: LoadingProviderProps) {
 		const page = path.split('/')[1];
 
 		if (pendingChats === 0 && mobileTitle) {
-			if (page === 'chats') {
+			if (page === 'chat') {
 				if (id) {
 					if (pendingMessages === 0) {
 						setLoading(false);

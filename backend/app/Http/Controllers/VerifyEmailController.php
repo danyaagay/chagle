@@ -11,18 +11,18 @@ use App\Models\User;
 class VerifyEmailController extends Controller
 {
 
-    public function __invoke(Request $request): RedirectResponse
-    {
-        $user = User::find($request->route('id'));
+	public function __invoke(Request $request): RedirectResponse
+	{
+		$user = User::find($request->route('id'));
 
-        if ($user->hasVerifiedEmail()) {
-            return redirect(env('FRONTEND_URL') . '/chat');
-        }
+		if ($user->hasVerifiedEmail()) {
+			return redirect(env('FRONTEND_URL') . '/chat');
+		}
 
-        if ($user->markEmailAsVerified()) {
-            event(new Verified($user));
-        }
+		if ($user->markEmailAsVerified()) {
+			event(new Verified($user));
+		}
 
-        return redirect(env('FRONTEND_URL') . '/verify/success');
-    }
+		return redirect(env('FRONTEND_URL') . '/verify/success');
+	}
 }

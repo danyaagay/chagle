@@ -39,7 +39,6 @@ const ChatsList = () => {
 						if (opened) {
 							toggle();
 						}
-						//setOpened((o) => !o);
 					}}
 				/>
 			))}

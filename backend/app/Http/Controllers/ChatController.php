@@ -10,38 +10,73 @@ use App\Http\Requests\SettingUpdatePasswordRequest;
 
 class ChatController extends Controller
 {
-    public function index(Request $request)
-    {
-        $user = $request->user();
+	public function index(Request $request)
+	{
+		$user = $request->user();
 
-        $chats = $user->chats;
+		$chats = $user->chats;
 
-        return response()->json([
-            'chats' => $chats,
-        ]);
-    }
+		return response()->json([
+			'chats' => $chats,
+		]);
+	}
 
-    public function update(Request $request, $id)
-    {
-        $user = $request->user();
+	public function update(Request $request, $id)
+	{
+		$user = $request->user();
 
-        $chat = $user->chats()->find($id);
+		$chat = $user->chats()->find($id);
 
-        $chat->title = $request->title;
+		if (!$chat) {
+			return response()->json([
+				'error' => 'Chat not found',
+			], 500);
+		}
 
-        $chat->save();
+		$chat->title = $request->title;
 
-        return true;
-    }
+		$chat->save();
 
-    public function destroy(Request $request, $id)
-    {
-        $user = $request->user();
+		return true;
+	}
 
-        $chat = $user->chats()->find($id);
+	public function settingsUpdate(Request $request, $id)
+	{
+		$user = $request->user();
 
-        $chat->delete();
+		$chat = $user->chats()->find($id);
 
-        return true;
-    }
+		if (!$chat) {
+			return response()->json([
+				'error' => 'Chat not found',
+			], 500);
+		}
+
+		$data = $request->all();
+
+		if (!$request->filled('system_message')) {
+			$data['system_message'] = '';
+		}
+
+		$chat->update($data);
+
+		return $data;
+	}
+
+	public function destroy(Request $request, $id)
+	{
+		$user = $request->user();
+
+		$chat = $user->chats()->find($id);
+
+		if (!$chat) {
+			return response()->json([
+				'error' => 'Chat not found',
+			], 500);
+		}
+
+		$chat->delete();
+
+		return true;
+	}
 }

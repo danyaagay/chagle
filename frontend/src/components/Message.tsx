@@ -9,12 +9,13 @@ import {oneLight} from 'react-syntax-highlighter/dist/esm/styles/prism';
 interface MessageProps {
 	text: string;
 	marker?: string;
-	time: string;
 	you?: boolean;
 	is_error?: boolean;
 }
 
-export default function Message({ you, marker, time, text, is_error, ...others }: MessageProps) {
+export default function Message({ you, marker, text, is_error, ...others }: MessageProps) {
+	you = !!you;
+	is_error = !!is_error;
 	return (
 		<>
 			{(marker ? <div className={classes.timeBox}><span className={classes.timeMarker}>{marker}</span></div> : null)}

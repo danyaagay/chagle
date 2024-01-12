@@ -46,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('verified')->group(function () {
         Route::get('/chats', [ChatController::class, 'index']);
         Route::patch('/chats/{id}', [ChatController::class, 'update']);
+        Route::patch('/chats/{id}/settings/update', [ChatController::class, 'settingsUpdate']);
         Route::delete('/chats/{id}', [ChatController::class, 'destroy']);
         Route::get('/messages/{id}', [MessageController::class, 'index']);
         Route::post('/messages/{id?}', [MessageController::class, 'store']);

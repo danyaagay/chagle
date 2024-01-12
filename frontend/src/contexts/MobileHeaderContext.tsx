@@ -4,17 +4,22 @@ import { useDisclosure } from '@mantine/hooks';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import { IS_MOBILE } from '../environment/userAgent';
 
 const MobileHeaderContext = createContext<{
 	mobileTitle: string | false;
 	setMobileTitle: (title: string) => void;
 	opened: boolean;
 	toggle: () => void;
+	openedSettings: boolean | undefined;
+	toggleSettings: () => void;
 }>({
 	mobileTitle: false,
 	setMobileTitle: () => { },
 	opened: false,
 	toggle: () => { },
+	openedSettings: undefined,
+	toggleSettings: () => { },
 });
 
 type MobileHeaderProviderProps = {
@@ -27,6 +32,22 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 	const [opened, { toggle }] = useDisclosure(false);
 	const { id } = useParams();
 	const navigate = useNavigate();
+
+	const [openedSettings, setOpenedSettings] = useState<boolean | undefined>(undefined);
+	useEffect(() => {
+		const storedValue = localStorage.getItem('openedSettings');
+		if (!IS_MOBILE && storedValue) {
+			setOpenedSettings(JSON.parse(storedValue));
+		}
+	}, []);
+	useEffect(() => {
+		if (!IS_MOBILE && openedSettings !== undefined) {
+			localStorage.setItem('openedSettings', JSON.stringify(openedSettings));
+		}
+	}, [openedSettings]);
+	const toggleSettings = () => {
+		setOpenedSettings(!openedSettings);
+	};
 
 	const { data: chats } = useQuery({
 		queryKey: ['chats'],
@@ -74,7 +95,7 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 	}, [chats]);
 
 	return (
-		<MobileHeaderContext.Provider value={{ mobileTitle, setMobileTitle, opened, toggle }}>
+		<MobileHeaderContext.Provider value={{ mobileTitle, setMobileTitle, opened, toggle, openedSettings, toggleSettings }}>
 			{props.children}
 		</MobileHeaderContext.Provider>
 	);

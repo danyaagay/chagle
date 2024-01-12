@@ -10,7 +10,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -28,7 +27,7 @@ class AuthController extends Controller
 
         event(new Registered($user));
 
-        $token = $user->createToken('auth_token', ['*'], Carbon::now()->addDay(2))->plainTextToken;
+        $token = $user->createToken('auth_token', ['*'], now()->addDay(2))->plainTextToken;
 
         $cookie = cookie('token', $token, 60 * 24 * 365); // one year
 
@@ -46,7 +45,7 @@ class AuthController extends Controller
             /** @var \App\Models\User $user **/
             $user = Auth::user();
 
-            $token = $user->createToken('auth_token', ['*'], Carbon::now()->addDay(2))->plainTextToken;
+            $token = $user->createToken('auth_token', ['*'], now()->addDay(2))->plainTextToken;
 
             $cookie = cookie('token', $token, 60 * 24 * 365); // one year
     
@@ -76,13 +75,13 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         $user = $request->user();
-    
-        if( $user ):            
+
+        if ($user) {
             $token = $user->currentAccessToken();
             $token->forceFill([
-                'expires_at' => Carbon::now()->addDay(2)
+                'expires_at' => now()->addDay(2)
             ])->save();
-        endif;
+        }
 
         return new UserResource($user);
     }
