@@ -57,7 +57,7 @@ export default function ChatSettings() {
     useEffect(() => {
         if (chats && Array.isArray(chats)) {
             const chat = chats.find(chat => chat.id == id);
-            console.log('loading start', chat);
+            //console.log('loading start', chat);
             const values = {
                 model: chat['model'],
                 system_message: chat['system_message'],
@@ -109,10 +109,10 @@ export default function ChatSettings() {
 
     useEffect(() => {
         //console.log(form.values, form.isDirty());
-        console.log('update start', form.isDirty(), form.isTouched());
+        //console.log('update start', form.isDirty(), form.isTouched());
         if (form.isDirty() && form.isTouched()) {
             if (form.values['model'] !== 'gpt-3.5-turbo-16k' && form.values['max_tokens'] > 4096) {
-                console.log('here');
+                //console.log('here');
                 form.setFieldValue('max_tokens', 2048);
             }
             clearTimeout(timeoutRef.current);

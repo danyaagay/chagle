@@ -209,7 +209,6 @@ const MessageList = () => {
                                 text={message.text}
                                 marker={message.marker}
                                 you={message.you}
-                                time={message.time}
                                 is_error={message.is_error}
                             />
                         ))}
@@ -233,7 +232,6 @@ const MessageList = () => {
                                 text={message.text}
                                 marker={message.marker}
                                 you={message.you}
-                                time={message.time}
                                 is_error={message.is_error}
                             />
                         ))}

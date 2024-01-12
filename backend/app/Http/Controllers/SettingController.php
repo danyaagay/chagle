@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Requests\SettingRequest;
 use App\Http\Resources\UserResource;
-use App\Http\Requests\SettingUpdatePasswordRequest;
 
 class SettingController extends Controller
 {
@@ -13,6 +11,12 @@ class SettingController extends Controller
     {
         $user = $request->user();
         $data = $request->validated();
+
+        if (!$user) {
+			return response()->json([
+				'error' => 'User not found',
+			], 500);
+		}
 
         $user->fill($data);
         $user->save();
