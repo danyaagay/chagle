@@ -29,14 +29,9 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         $this->routes(function () {
-            if(env('APP_ENV') !== 'production') {
-                Route::middleware('api')
-                ->prefix('api')
+            Route::middleware('api')
                 ->group(base_path('routes/api.php'));
-            } else {
-                Route::middleware('api')
-                ->group(base_path('routes/api.php'));
-            }
+
 
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));

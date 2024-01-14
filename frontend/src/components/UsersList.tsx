@@ -181,7 +181,9 @@ export function UsersList() {
 						>
 							Баланс
 						</Th>
-						<Table.Th />
+						<Table.Th> 
+							Пополнить
+						</Table.Th>
 					</Table.Tr>
 				</Table.Thead>
 				<Table.Tbody>
@@ -193,7 +195,6 @@ export function UsersList() {
 							<Table.Td>
 								<Flex gap="8">
 									<NumberInput
-										placeholder="Баланс"
 										value={balances[row.id] ?? ''}
 										onChange={(value) => handleBalanceChange(row.id, value)}
 										min={1}

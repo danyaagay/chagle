@@ -15,6 +15,8 @@ import { useForm } from '@mantine/form';
 import FloatingLabelInput from '../components/FloatingLabelInput';
 import classes from '../css/Authentication.module.css';
 
+import { useQuery } from '@tanstack/react-query';
+
 export interface FormValues {
 	email: string;
 	name: string;
@@ -59,6 +61,27 @@ export default function () {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const defaultType = location.pathname === '/signup' ? 'signup' : 'login';
+
+	const { data } = useQuery({
+		queryKey: ['googleLoginUrl'],
+		queryFn: () =>
+			axios.get('/auth/redirect').then(
+				(res) => res.data,
+			),
+	});
+
+	const googleAuth = async () => {
+		const resp = await axios.get(`/auth/callback${location.search}`);
+		if (resp?.status === 200) {
+			setUser(resp?.data?.user);
+			
+			return <Navigate to="/chat" />;
+		}
+	}
+
+	if (location.search) {
+		googleAuth();
+	}
 
 	useEffect(() => {
 		document.title = defaultType === 'signup'
@@ -284,9 +307,11 @@ export default function () {
 								<Button loading={isLoading} type="submit" fullWidth mt="xl" size="lg" fz="md" radius="md">
 									Войти
 								</Button>
-								<Button component="a" leftSection={<GoogleIcon />} href={'https://api.chagle.ru/auth/redirect'} variant="default" fullWidth mt="md" size="lg" fz="md" radius="md">
-									Войти через Google
-								</Button>
+								{data?.url && (
+									<Button component="a" leftSection={<GoogleIcon />} href={data.url} variant="default" fullWidth mt="md" size="lg" fz="md" radius="md">
+										Войти через Google
+									</Button>
+								)}
 							</>
 						)}
 

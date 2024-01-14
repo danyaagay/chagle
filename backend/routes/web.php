@@ -7,6 +7,7 @@ use App\Models\User;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Resources\UserResource;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,7 +29,9 @@ Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke
     ->name('verification.verify');
 
 Route::get('/auth/redirect', function () {
-    return Socialite::driver('google')->stateless()->redirect();
+    return response()->json([
+        'url' => Socialite::driver('google')->stateless()->redirect()->getTargetUrl(),
+    ]);
 });
 
 Route::get('/auth/callback', function () {
@@ -38,13 +41,15 @@ Route::get('/auth/callback', function () {
     //$avatarName = uniqid('avatar_') . '.jpg';
     //Storage::disk('public')->put($avatarName, $avatarContents);
 
-    $user = User::updateOrCreate([
-        'name' => $googleuUser->given_name,
-        'email' => $googleuUser->email,
-        'avatar' => $googleuUser->picture,
-        'balance' => '20',
-        'free' => 1
-    ]);
+    $user = User::firstOrCreate(
+        ['email' =>  $googleuUser->email],
+        [
+            'name' => $googleuUser->name,
+            'avatar' => $googleuUser->avatar,
+            'balance' => '20',
+            'free' => 1
+        ]
+    );
 
     $token = $user->createToken('auth_token', ['*'], now()->addDay(2))->plainTextToken;
 
@@ -56,7 +61,9 @@ Route::get('/auth/callback', function () {
         $user->markEmailAsVerified();
     }
 
-    return redirect(env('FRONTEND_URL') . '/chat')->withCookie($cookie);
+    return response()->json([
+        'user' => new UserResource($user),
+    ])->withCookie($cookie);
 
     // $user->token
 });
