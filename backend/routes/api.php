@@ -6,7 +6,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\MessageController;
-use App\Http\Controllers\StreamsController;
 use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\TokenController;
@@ -29,8 +28,6 @@ use App\Models\User;
 
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/login', [AuthController::class, 'login']);
-
-//Route::get('/stream', [StreamsController::class, 'stream']);
 
 Route::middleware('auth:sanctum')->group(function () {
 
