@@ -17,6 +17,7 @@ use App\Models\User;
 
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\UserResource;
 
 /*
 |--------------------------------------------------------------------------
@@ -98,13 +99,7 @@ Route::post('/reset-password', function (Request $request) {
 });
 
 
-//Вход/регистрация через поставщика Google
-
-Route::get('/auth/redirect', function () {
-    return response()->json([
-        'url' => Socialite::driver('google')->stateless()->redirect()->getTargetUrl(),
-    ]);
-});
+// Вход и регистрация через поставщика Google
 
 Route::get('/auth/callback', function () {
     $googleuUser = Socialite::driver('google')->stateless()->user();
@@ -133,10 +128,7 @@ Route::get('/auth/callback', function () {
         $user->markEmailAsVerified();
     }
 
-    //return response()->json([
-    //    'user' => new UserResource($user),
-    //])->withCookie($cookie);
-    return redirect(env('FRONTEND_URL') . '/chat')->withCookie($cookie);
-
-    // $user->token
+    return response()->json([
+        'user' => new UserResource($user),
+    ])->withCookie($cookie);
 });

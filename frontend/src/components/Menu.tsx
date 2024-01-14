@@ -21,7 +21,6 @@ import { Avatar, Text, UnstyledButton, rem, Flex } from '@mantine/core';
 
 interface UserButtonProps extends React.ComponentPropsWithoutRef<'button'> {
     name: string;
-    email: string;
     icon?: React.ReactNode;
 }
 
@@ -45,10 +44,11 @@ export default function MobileHeader() {
     }
 
     const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
-        ({ name, email, icon, ...others }: UserButtonProps, ref) => (
+        ({ name, icon, ...others }: UserButtonProps, ref) => (
             <UnstyledButton
                 ref={ref}
-                p={12}
+                px={12}
+                py={10}
                 style={{
                     width: '100%',
                     color: 'var(--mantine-color-text)',
@@ -61,10 +61,6 @@ export default function MobileHeader() {
                     <div style={{ flex: 1 }}>
                         <Text size="sm" fw={500}>
                             {name}
-                        </Text>
-
-                        <Text c="dimmed" size="xs">
-                            {email}
                         </Text>
                     </div>
                     <Badge color="blue" w={'auto'}>{numberBalance(user.balance)}₽</Badge>
@@ -167,7 +163,6 @@ export default function MobileHeader() {
                     <Menu.Target>
                         <UserButton
                             name={user.name}
-                            email={user.email}
                             className={classes.user}
                         />
                     </Menu.Target>

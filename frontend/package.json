@@ -25,6 +25,7 @@
     "@mantine/prism": "^6.0.21",
     "@mantine/spotlight": "^7.1.0",
     "@mantine/tiptap": "^7.1.0",
+    "@react-oauth/google": "^0.12.1",
     "@tabler/icons-react": "^2.38.0",
     "@tanstack/react-query": "^5.13.4",
     "@tiptap/extension-link": "^2.1.11",
