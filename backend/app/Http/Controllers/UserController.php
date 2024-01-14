@@ -30,6 +30,7 @@ class UserController extends Controller
 		}
 
 		$currentUser->balance += $request->balance;
+		$currentUser->free = 0;
 		$currentUser->save();
 
 		return response()->json(['message' => 'Balance updated successfully']);

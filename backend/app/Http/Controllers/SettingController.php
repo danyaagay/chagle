@@ -18,7 +18,7 @@ class SettingController extends Controller
 			], 500);
 		}
 
-        $user->fill($data);
+        $user->name = $data['name'];
         $user->save();
 
         return response()->json([

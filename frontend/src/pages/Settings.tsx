@@ -16,7 +16,6 @@ import FloatingLabelInput from '../components/FloatingLabelInput';
 import { useForm } from '@mantine/form';
 import classes from '../css/Settings.module.css';
 export interface FormValues {
-	email: string;
 	name: string;
 }
 
@@ -58,11 +57,6 @@ export default function Settings() {
 					} else {
 						form.clearFieldError('name');
 					}
-					if (error.response.data.errors.email) {
-						form.setFieldError('email', error.response.data.errors.email[0]);
-					} else {
-						form.clearFieldError('email');
-					}
 				}
 			}
 		}
@@ -70,14 +64,12 @@ export default function Settings() {
 
 	const form = useForm({
 		initialValues: {
-			email: user.email,
 			name: user.name,
 		},
 
 		validate: (values) => {
 			return {
 				name: (values.name && values.name.length < 2 ? 'Имя должно состоять как минимум из 2 букв' : null),
-				email: (values.email && /^\S+@\S+$/.test(values.email) ? null : 'Неверный адрес электронной почты.'),
 			};
 		},
 	});
@@ -95,15 +87,6 @@ export default function Settings() {
 							value={form.values.name}
 							onChange={(value) => form.setFieldValue('name', value)}
 							error={form.errors.name}
-						/>
-						<FloatingLabelInput
-							autoComplete='email'
-							label={'Электронная почта'}
-							field='email'
-							InputType={TextInput}
-							value={form.values.email}
-							onChange={(value) => form.setFieldValue('email', value)}
-							error={form.errors.email}
 						/>
 					</Stack>
 					<Button loading={isLoading} type="submit" mt="1rem" mb="2rem" size="md" radius="md">
