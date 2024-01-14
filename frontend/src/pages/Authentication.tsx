@@ -70,19 +70,6 @@ export default function () {
 			),
 	});
 
-	const googleAuth = async () => {
-		const resp = await axios.get(`/auth/callback${location.search}`);
-		if (resp?.status === 200) {
-			setUser(resp?.data?.user);
-			
-			return <Navigate to="/chat" />;
-		}
-	}
-
-	if (location.search) {
-		googleAuth();
-	}
-
 	useEffect(() => {
 		document.title = defaultType === 'signup'
 			? 'Регистрация'

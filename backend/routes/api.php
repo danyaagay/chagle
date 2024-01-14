@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Models\User;
 
+use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Auth;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -92,4 +95,48 @@ Route::post('/reset-password', function (Request $request) {
     );
  
     return response()->json(['status' => $status === Password::PASSWORD_RESET ? __($status) : null, 'errors' => $status !== Password::PASSWORD_RESET ? ['email' => __($status)] : null]);
+});
+
+
+//Вход/регистрация через поставщика Google
+
+Route::get('/auth/redirect', function () {
+    return response()->json([
+        'url' => Socialite::driver('google')->stateless()->redirect()->getTargetUrl(),
+    ]);
+});
+
+Route::get('/auth/callback', function () {
+    $googleuUser = Socialite::driver('google')->stateless()->user();
+
+    //$avatarContents = file_get_contents($googleuUser->picture);
+    //$avatarName = uniqid('avatar_') . '.jpg';
+    //Storage::disk('public')->put($avatarName, $avatarContents);
+
+    $user = User::firstOrCreate(
+        ['email' =>  $googleuUser->email],
+        [
+            'name' => $googleuUser->name,
+            'avatar' => $googleuUser->avatar,
+            'balance' => '20',
+            'free' => 1
+        ]
+    );
+
+    $token = $user->createToken('auth_token', ['*'], now()->addDay(2))->plainTextToken;
+
+    $cookie = cookie('token', $token, 60 * 24 * 365); // one year
+
+    Auth::login($user);
+
+    if (!$user->hasVerifiedEmail()) {
+        $user->markEmailAsVerified();
+    }
+
+    //return response()->json([
+    //    'user' => new UserResource($user),
+    //])->withCookie($cookie);
+    return redirect(env('FRONTEND_URL') . '/chat')->withCookie($cookie);
+
+    // $user->token
 });
