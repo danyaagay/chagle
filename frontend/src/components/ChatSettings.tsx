@@ -240,7 +240,7 @@ export default function ChatSettings() {
                                         model: 'gpt-3.5-turbo',
                                         system_message: '',
                                         temperature: 0.7,
-                                        max_tokens: 1024,
+                                        max_tokens: 2048,
                                         top_p: 1.0,
                                         frequency_penalty: 0.0,
                                         presence_penalty: 0.0,

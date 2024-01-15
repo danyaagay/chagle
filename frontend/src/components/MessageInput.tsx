@@ -136,7 +136,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 				const requestBody = { text };
 
-				const url = import.meta.env.MODE == 'development' ? "http://192.168.0.116:8000/api/messages/" + (id ? id : '') : "https://api.chagle.ru/messages/" + (id ? id : '');
+				const url = import.meta.env.MODE == 'development' ? "http://192.168.0.116:8000/messages/" + (id ? id : '') : "https://api.chagle.ru/messages/" + (id ? id : '');
 
 				try {
 					const response = await fetch(url, {
@@ -325,7 +325,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 					}
 				);
 
-				const url = import.meta.env.MODE == 'development' ? "http://192.168.0.116:8000/api/messages/regenerate/" + id : "https://api.chagle.ru/messages/regenerate/" + id;
+				const url = import.meta.env.MODE == 'development' ? "http://192.168.0.116:8000/messages/regenerate/" + id : "https://api.chagle.ru/messages/regenerate/" + id;
 
 				try {
 					const response = await fetch(url, {

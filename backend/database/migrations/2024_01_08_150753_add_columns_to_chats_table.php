@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('model', 255)->default('gpt-3.5-turbo');
             $table->string('system_message', 255)->default('');
             $table->float('temperature', 2, 1)->default(0.7);
-            $table->integer('max_tokens')->default(1024);
+            $table->integer('max_tokens')->default(2048);
             $table->float('top_p', 2, 1)->default(1);
             $table->float('frequency_penalty', 2, 1)->default(0);
             $table->float('presence_penalty', 2, 1)->default(0);

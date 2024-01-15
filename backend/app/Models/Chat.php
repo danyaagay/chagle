@@ -29,6 +29,17 @@ class Chat extends Authenticatable
         'presence_penalty',
     ];
 
+    // Продублировано в базе данных и в фронтенде
+    protected $attributes = [
+        'model' => 'gpt-3.5-turbo',
+        'system_message' => '',
+        'temperature' => 0.7,
+        'max_tokens' => 2048,
+        'top_p' => 1,
+        'frequency_penalty' => 0,
+        'presence_penalty' => 0,
+    ];
+
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class);
