@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
             DB::table('tokens')->where('status', '!=', 3)->update(['limit' => 200, 'status' => 1]);
         })->daily();
+        $schedule->command('auth:clear-resets')->daily();
     }
 
     /**
