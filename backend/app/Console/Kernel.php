@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
             DB::table('tokens')->where('status', '!=', 3)->update(['limit' => 200, 'status' => 1]);
         })->daily();
         $schedule->command('auth:clear-resets')->daily();
+        $schedule->command('sanctum:prune-expired --hours=24')->daily();
     }
 
     /**

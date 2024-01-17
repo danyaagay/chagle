@@ -1,6 +1,4 @@
 import Admin from './pages/Admin';
-import AdminUsers from './pages/AdminUsers';
-import AdminTokens from './pages/AdminTokens';
 import Chat from './pages/Chat';
 import Settings from './pages/Settings';
 import Billing from './pages/Billing';
@@ -69,15 +67,7 @@ const router = createBrowserRouter([
 				element: <Settings />,
 			},
 			{
-				path: '/Crr183gJkwKQwkC3jE9N/users',
-				element: <AdminUsers />,
-			},
-			{
-				path: '/Crr183gJkwKQwkC3jE9N/tokens',
-				element: <AdminTokens />,
-			},
-			{
-				path: '/Crr183gJkwKQwkC3jE9N',
+				path: '/Crr183gJkwKQwkC3jE9N/:section?',
 				element: <Admin />,
 			},
 			{

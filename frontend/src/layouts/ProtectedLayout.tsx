@@ -133,7 +133,7 @@ export default function DefaultLayout() {
 					<Outlet />
 				</AppShell.Main>
 
-				<AppShell.Aside p="sm">
+				<AppShell.Aside p="sm" style={{ height: "100%" }}>
 					{id && <ChatSettings />}
 				</AppShell.Aside>
 			</AppShell>

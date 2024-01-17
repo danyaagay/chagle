@@ -65,6 +65,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 
+// Сброс пароля
+
 Route::post('/forgot-password', function (Request $request) {
     $request->validate(['email' => 'required|email']);
  

@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect, useCallback, useEffect } from 'react';
+import { useRef, useLayoutEffect, useCallback } from 'react';
 import { IS_MOBILE, IS_ANDROID } from '../environment/userAgent';
 import { Scrollbars } from 'react-custom-scrollbars';
 import Message from './Message';
@@ -56,16 +56,15 @@ const MessageList = () => {
     const { data: tempDataId }: any = useQuery({ queryKey: ['messages', 'temp' + id] });
 
     //Android fix messages down on window resize
-    useEffect(() => {
-        if (IS_ANDROID) {
-            window.addEventListener('resize', () => {
-                if (scrollSaver.current.lastDown < 1) {
-                    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-                }
-                //console.log('resize', scrollSaver.current.lastDown);
-            });
-        }
-    }, [])
+    if (IS_ANDROID) {
+        window.addEventListener('resize', () => {
+            if (scrollSaver.current.lastDown < 1) {
+                scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+                //console.log('fixed', scrollSaver.current.lastDown, scrollRef.current.scrollTop, scrollRef.current.scrollHeight);
+            }
+            //console.log('resize', scrollSaver.current.lastDown, scrollRef.current.scrollTop, scrollRef.current.scrollHeight);
+        });
+    }
 
     const {
         data: realData,
