@@ -15,6 +15,7 @@ import { IS_MOBILE } from '../environment/userAgent';
 import { Scrollbars } from 'react-custom-scrollbars';
 import { TokensList } from '../components/TokensList';
 import { UsersList } from '../components/UsersList';
+import { ProxyList } from '../components/ProxyList';
 
 type Stat = {
 	title: string;
@@ -60,7 +61,7 @@ export default function StatsGridIcons() {
 			{!IS_MOBILE ? (
 				<Scrollbars autoHide>
 					<div style={{ 'maxWidth': '1200px', 'margin': 'auto' }}>
-						<SimpleGrid cols={{ base: 1, sm: !section ? 3 : section === 'tokens' ? 1 : 2 }} classNames={classes}>{stats}</SimpleGrid>
+						<SimpleGrid cols={{ base: 1, sm: !section || section === 'proxy' ? 3 : section === 'tokens' ? 1 : 2 }} classNames={classes}>{stats}</SimpleGrid>
 						{section === 'tokens' &&
 							<Box className={classes.root}>
 								<TokensList />
@@ -71,12 +72,17 @@ export default function StatsGridIcons() {
 								<UsersList />
 							</Box>
 						}
+						{section === 'proxy' &&
+							<Box className={classes.root}>
+								<ProxyList />
+							</Box>
+						}
 					</div>
 				</Scrollbars>
 
 			) : (
 				<Container className={classes.container} px={8}>
-					<SimpleGrid cols={{ base: 1, sm: 3 }} classNames={classes}>{stats}</SimpleGrid>
+					<SimpleGrid cols={{ base: 1, sm: !section || section === 'proxy' ? 3 : section === 'tokens' ? 1 : 2 }} classNames={classes}>{stats}</SimpleGrid>
 					{section === 'tokens' &&
 						<Box className={classes.root}>
 							<TokensList />
@@ -85,6 +91,11 @@ export default function StatsGridIcons() {
 					{section === 'users' &&
 						<Box className={classes.root}>
 							<UsersList />
+						</Box>
+					}
+					{section === 'proxy' &&
+						<Box className={classes.root}>
+							<ProxyList />
 						</Box>
 					}
 				</Container>

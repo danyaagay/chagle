@@ -69,14 +69,14 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 			setMobileTitle('Админ панель');
 			document.title = 'Админ панель';
 		} else if (path === '/Crr183gJkwKQwkC3jE9N/users') {
-			setMobileTitle('Админ панель');
-			document.title = 'Админ панель';
-		} else if (path === '/Crr183gJkwKQwkC3jE9N/users') {
 			setMobileTitle('Клиенты');
-			document.title = 'Админ панель';
+			document.title = 'Клиенты';
 		} else if (path === '/Crr183gJkwKQwkC3jE9N/tokens') {
 			setMobileTitle('Токены');
 			document.title = 'Токены';
+		} else if (path === '/Crr183gJkwKQwkC3jE9N/proxy') {
+			setMobileTitle('Прокси');
+			document.title = 'Прокси';
 		} else if (path === '/billing') {
 			setMobileTitle('Оплата');
 			document.title = 'Оплата';

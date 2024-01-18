@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('schema');
             $table->string('ip')->unique();
-            $table->integer('type');
-            $table->integer('alive');
+            $table->string('auth')->nullable();
+            $table->integer('status');
             $table->timestamp('checked_at')->nullable();
             $table->timestamps();
         });

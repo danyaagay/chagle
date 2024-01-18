@@ -11,6 +11,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\TokenController;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
+use App\Http\Controllers\ProxyController;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Models\User;
@@ -31,10 +32,9 @@ use App\Http\Resources\UserResource;
 */
 
 Route::post('/signup', [AuthController::class, 'signup']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:6,1');
 
 Route::middleware('auth:sanctum')->group(function () {
-
     Route::group(['middleware' => ['role:super-admin']], function () {
         Route::get('/users', [UserController::class, 'index']);
         Route::get('/tokens', [TokenController::class, 'index']);
@@ -42,6 +42,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/tokens/{id}', [TokenController::class, 'destroy']);
         Route::get('/summary/{type}', [SummaryController::class, 'index']);
         Route::post('/balance/{id}', [UserController::class, 'addBalance']);
+        Route::get('/proxy', [ProxyController::class, 'index']);
+        Route::post('/proxy', [ProxyController::class, 'store']);
+        Route::delete('/proxy/{id}', [ProxyController::class, 'destroy']);
     });
     
     Route::middleware('verified')->group(function () {

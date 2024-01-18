@@ -156,6 +156,7 @@ export function UsersList() {
 				leftSection={<IconSearch style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
 				value={search}
 				onChange={handleSearchChange}
+				radius={'md'}
 			/>
 			<Table classNames={classes} horizontalSpacing="md" verticalSpacing="xs" miw={700} layout="fixed" striped>
 				<Table.Thead>
@@ -198,8 +199,9 @@ export function UsersList() {
 										value={balances[row.id] ?? ''}
 										onChange={(value) => handleBalanceChange(row.id, value)}
 										min={1}
+										radius={'md'}
 									/>
-									<ActionIcon variant="filled" size="lg" w={36} h={36} onClick={() => mutationAdd(row.id)}>
+									<ActionIcon variant="default" size="lg" w={36} h={36} onClick={() => mutationAdd(row.id)} radius={'md'}>
 										<IconPlus style={{ width: '60%', height: '60%' }} stroke={1.5} />
 									</ActionIcon>
 								</Flex>

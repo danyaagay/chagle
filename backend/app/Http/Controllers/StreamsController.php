@@ -6,6 +6,7 @@ use OpenAI;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
 use App\Http\Controllers\TokenController;
+use App\Http\Controllers\ProxyController;
 
 class StreamsController extends Controller
 {
@@ -47,14 +48,15 @@ class StreamsController extends Controller
 				$errorCode = false;
 
 				$token = TokenController::getToken();
-				if (!$token) {
+				$proxy = ProxyController::getProxy();
+				if (!$token || !$proxy) {
 					$errorCode = '1';
 					break;
 				}
 
 				$client = OpenAI::factory()
 					->withApiKey($token->token)
-					->withHttpClient(new \GuzzleHttp\Client(['verify' => false, 'proxy' => 'http://user145254:y96c1e@146.19.137.214:6830']))
+					->withHttpClient(new \GuzzleHttp\Client(['verify' => false, 'proxy' => "{$proxy->schema}://{$proxy->auth}1@{$proxy->ip}"]))
 					->make();
 
 				try {
@@ -71,20 +73,25 @@ class StreamsController extends Controller
 					$error = false;
 				} catch (\OpenAI\Exceptions\ErrorException $e) {
 					$errorCode = @$e->getErrorCode() ?: $e->getErrorType();
+					$errorMessage = @$e->getMessage();
+					//var_dump('2', $errorMessage, $errorCode);
 				} catch (\OpenAI\Exceptions\TransporterException $e) {
 					$errorCode = @$e->getCode();
+					$errorMessage = @$e->getMessage();
+					//var_dump('1', $errorMessage, $errorCode);
 				}
-
-				//var_dump($errorCode);
 
 				// Приостанавливаем токен
 				if ($errorCode === 'rate_limit_exceeded') {
 					TokenController::setStatus($token, 2);
 				} elseif ($errorCode === 'invalid_request_error') {
 					break;
+				} elseif ($errorCode === 0 ) {
+					ProxyController::setStatus($proxy, 2);
+					break;
 				}
 				// Нужно дописать другие ошибки
-			} while ($error && $token);
+			} while ($error && $token && $proxy);
 
 			if ($error) {
 				$text = "В данный момент невозможно обработать запрос. Ошибка: {$errorCode}";

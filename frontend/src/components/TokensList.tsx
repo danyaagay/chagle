@@ -156,28 +156,28 @@ export function TokensList() {
 
 	return (
 		<ScrollArea>
-			<Group grow>
-				<TextInput
-					placeholder="Поиск по любым данным"
-					mb="md"
-					leftSection={<IconSearch style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
-					value={search}
-					onChange={handleSearchChange}
-				/>
-				<Box mb="md">
-					<Group gap={8} justify="flex-end">
-						<TextInput
-							placeholder="Токен"
-							rightSectionPointerEvents="all"
-							value={token}
-							onChange={(e) => setToken(e.target.value)}
-						/>
-						<ActionIcon variant="filled" size="lg" w={36} h={36} onClick={() => mutationAdd()}>
-							<IconPlus style={{ width: '60%', height: '60%' }} stroke={1.5} />
-						</ActionIcon>
-					</Group>
-				</Box>
-			</Group>
+			<Box mb="md">
+				<Group gap={8} justify="flex-end">
+					<TextInput
+						placeholder="Токен"
+						rightSectionPointerEvents="all"
+						value={token}
+						onChange={(e) => setToken(e.target.value)}
+						radius={'md'}
+					/>
+					<ActionIcon variant="default" size="lg" w={36} h={36} onClick={() => mutationAdd()} radius={'md'}>
+						<IconPlus style={{ width: '60%', height: '60%' }} stroke={1.5} />
+					</ActionIcon>
+				</Group>
+			</Box>
+			<TextInput
+				placeholder="Поиск по любым данным"
+				mb="md"
+				leftSection={<IconSearch style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
+				value={search}
+				onChange={handleSearchChange}
+				radius={'md'}
+			/>
 			<Table classNames={classes} horizontalSpacing="md" verticalSpacing="xs" miw={900} layout="fixed" striped>
 				<Table.Thead>
 					<Table.Tr>

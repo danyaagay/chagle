@@ -135,7 +135,7 @@ class MessageController extends Controller
 		}, 200, [
 			'Cache-Control' => 'no-cache',
 			'X-Accel-Buffering' => 'no',
-			'Content-Type' => 'text/event-stream',
+			'Content-Type' => 'text',
 		]);
 	}
 

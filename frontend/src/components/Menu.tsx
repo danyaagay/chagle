@@ -152,6 +152,9 @@ export default function MobileHeader() {
                         <Menu.Item component={Link} to='Crr183gJkwKQwkC3jE9N/tokens' onClick={adminClick}>
                             Токены
                         </Menu.Item>
+                        <Menu.Item component={Link} to='Crr183gJkwKQwkC3jE9N/proxy' onClick={adminClick}>
+                            Прокси
+                        </Menu.Item>
                     </Menu.Dropdown>
                 </Menu>
 

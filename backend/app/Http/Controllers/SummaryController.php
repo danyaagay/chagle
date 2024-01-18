@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\StreamsController;
 use App\Models\User;
 use App\Models\Token;
 use App\Models\Message;
+use App\Models\Proxy;
 
 class SummaryController extends Controller
 {
@@ -35,6 +35,24 @@ class SummaryController extends Controller
 
 			return response()->json([
 				['title' => 'Токены', 'value' => $tokenCount],
+			]);
+		} elseif ($type === 'proxy') {
+			$all = Proxy::count();
+			$alive = Proxy::where('status', '=', 1)->count();
+
+			return response()->json([
+				[
+					'title' => 'Всего',
+					'value' => $all,
+				],
+				[
+					'title' => 'Рабочих',
+					'value' => $alive,
+				],
+				[
+					'title' => 'Не рабочих',
+					'value' => $all - $alive,
+				]
 			]);
 		}
 	}
