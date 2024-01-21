@@ -56,7 +56,7 @@ class StreamsController extends Controller
 
 				$client = OpenAI::factory()
 					->withApiKey($token->token)
-					->withHttpClient(new \GuzzleHttp\Client(['verify' => false, 'proxy' => "{$proxy->schema}://{$proxy->auth}1@{$proxy->ip}"]))
+					->withHttpClient(new \GuzzleHttp\Client(['verify' => false, 'proxy' => "{$proxy->schema}://{$proxy->auth}@{$proxy->ip}"]))
 					->make();
 
 				try {

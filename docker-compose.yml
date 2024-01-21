@@ -60,6 +60,9 @@ services:
       MYSQL_ROOT_HOST: '%'
       MYSQL_DATABASE: chagle
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    entrypoint:
+      sh -c "echo 'CREATE DATABASE IF NOT EXISTS chagle; CREATE DATABASE IF NOT EXISTS chagle_bot;' > /docker-entrypoint-initdb.d/init.sql;
+        /usr/local/bin/docker-entrypoint.sh --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
     networks:
       - app
 

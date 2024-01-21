@@ -23,6 +23,7 @@ interface RowData {
 	id: number;
 	name: string;
 	email: string;
+	telegram_id: number;
 	balance: number;
 }
 
@@ -176,6 +177,13 @@ export function UsersList() {
 							Email
 						</Th>
 						<Th
+							sorted={sortBy === 'telegram_id'}
+							reversed={reverseSortDirection}
+							onSort={() => setSorting('telegram_id')}
+						>
+							Telegram
+						</Th>
+						<Th
 							sorted={sortBy === 'balance'}
 							reversed={reverseSortDirection}
 							onSort={() => setSorting('balance')}
@@ -192,6 +200,7 @@ export function UsersList() {
 						<Table.Tr key={row.id}>
 							<Table.Td>{row.name}</Table.Td>
 							<Table.Td>{row.email}</Table.Td>
+							<Table.Td>{row.telegram_id}</Table.Td>
 							<Table.Td>{row.balance}</Table.Td>
 							<Table.Td>
 								<Flex gap="8">

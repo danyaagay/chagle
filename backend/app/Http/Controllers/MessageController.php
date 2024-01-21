@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 use App\Http\Controllers\StreamsController;
-use Carbon\Carbon;
 
 class MessageController extends Controller
 {
@@ -135,7 +134,7 @@ class MessageController extends Controller
 		}, 200, [
 			'Cache-Control' => 'no-cache',
 			'X-Accel-Buffering' => 'no',
-			'Content-Type' => 'text',
+			'Content-Type' => 'text/event-stream',
 		]);
 	}
 

@@ -23,7 +23,7 @@ class AuthController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'balance' => '20',
-            'free' => 1
+            'level' => 1
         ]);
 
         event(new Registered($user));

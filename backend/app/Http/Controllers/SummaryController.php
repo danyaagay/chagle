@@ -13,12 +13,12 @@ class SummaryController extends Controller
 	public function index(Request $request, $type)
 	{
 		if ($type === 'all') {
-			$userCount = User::count();
+			$userCount = User::count() + \App\Models\Bot\User::count();
 			$tokenCount = Token::count();
 			$messageCount = Message::count();
 
 			return response()->json([
-				['title' => 'Клиенты', 'value' => $userCount],
+				['title' => 'Клиенты', 'value' => $userCount ],
 				['title' => 'Сообщения', 'value' => $messageCount],
 				['title' => 'Токены', 'value' => $tokenCount],
 			]);

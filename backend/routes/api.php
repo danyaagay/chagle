@@ -53,8 +53,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/chats/{id}/settings/update', [ChatController::class, 'settingsUpdate']);
         Route::delete('/chats/{id}', [ChatController::class, 'destroy']);
         Route::get('/messages/{id}', [MessageController::class, 'index']);
-        Route::post('/messages/{id?}', [MessageController::class, 'store']);
-        Route::post('/messages/regenerate/{id}', [MessageController::class, 'regenerate']);
+        Route::post('/messages/{id?}', [MessageController::class, 'store'])->middleware('throttle:8,1');
+        Route::post('/messages/regenerate/{id}', [MessageController::class, 'regenerate'])->middleware('throttle:8,1');
         Route::post('/messages-cancel', [MessageController::class, 'cancel']);
         Route::post('/settings-update', [SettingController::class, 'update']);
     });
@@ -66,6 +66,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return response()->json(['message' => 'Verification link sent!']);
     })->middleware(['throttle:1,1'])->name('verification.send');
 
+    Route::get('/telegram/{token}', [UserController::class, 'connectionTelegram']);
 });
 
 // Сброс пароля
