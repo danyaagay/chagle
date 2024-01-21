@@ -12,8 +12,26 @@ class UserController extends Controller
 {
 	public function index(Request $request)
 	{
-		$users = User::get()->concat(\App\Models\Bot\User::where('web', 0)->get());
-		return response()->json($users);
+		if ($request->s) {
+			$users = User::where('name', 'like', '%' . $request->s . '%')
+				->orWhere('email', 'like', '%' . $request->s . '%')
+				->orWhere('telegram_id', 'like', '%' . $request->s . '%')
+				->get();
+
+			$botUsers = \App\Models\Bot\User::where('web', 0)
+				->where(function ($query) use ($request) {
+					$query->where('name', 'like', '%' . $request->s . '%');
+					$query->orWhere('telegram_id', 'like', '%' . $request->s . '%');
+				})->get();
+		} else {
+			$users = User::get();
+
+			$botUsers = \App\Models\Bot\User::where('web', 0)->get();
+		}
+
+		$combinedArray = array_merge($users->toArray(), $botUsers->toArray());
+
+		return response()->json($combinedArray);
 	}
 
 	public function update(Request $request, $id)
@@ -35,7 +53,7 @@ class UserController extends Controller
 		$data = Crypt::decryptString($token);
 		$data = unserialize($data);
 
-		if(!$data || now()->gt(Carbon::parse($data['expired']))) {
+		if (!$data || now()->gt(Carbon::parse($data['expired']))) {
 			return response()->json(['message' => 'Token expired'], 500);
 		}
 
@@ -53,7 +71,11 @@ class UserController extends Controller
 
 	public function addBalance(Request $request, $id)
 	{
-		$currentUser = User::find($id);
+		if ($request->telegram) {
+			$currentUser = \App\Models\Bot\User::find($id);
+		} else {
+			$currentUser = User::find($id);
+		}
 
 		if (!$currentUser) {
 			return response()->json(['message' => 'User not found'], 500);

@@ -28,11 +28,11 @@ import classes from '../css/ProtectedLayout.module.css';
 import { Scrollbars } from 'react-custom-scrollbars';
 import { useMobileHeader } from '../contexts/MobileHeaderContext';
 import { IS_MOBILE } from '../environment/userAgent';
+import { useDebouncedValue } from '@mantine/hooks';
 
 export default function ChatSettings() {
     const { id } = useParams();
     const isMounted = useRef(false);
-    const timeoutRef = useRef<number>();
     const loaded = useRef<boolean>(false);
     const form = useForm({
         initialValues: {
@@ -45,6 +45,7 @@ export default function ChatSettings() {
             presence_penalty: 0,
         },
     });
+    const [debounced] = useDebouncedValue(form.values, 500);
     const { toggleSettings } = useMobileHeader();
 
     const { data: chats } = useQuery({
@@ -76,7 +77,6 @@ export default function ChatSettings() {
         return () => {
             isMounted.current = false;
             form.reset();
-            clearTimeout(timeoutRef.current);
         };
     }, [id, chats]);
 
@@ -115,15 +115,12 @@ export default function ChatSettings() {
                 //console.log('here');
                 form.setFieldValue('max_tokens', 2048);
             }
-            clearTimeout(timeoutRef.current);
-            timeoutRef.current = setTimeout(() => {
-                if (isMounted.current) {
-                    form.resetDirty(form.values);
-                    mutationEdit();
-                }
-            }, 500)
+            if (isMounted.current) {
+                form.resetDirty(form.values);
+                mutationEdit();
+            }
         }
-    }, [form.values]);
+    }, [debounced]);
 
     return (
         <>

@@ -23,7 +23,7 @@ class SummaryController extends Controller
 				['title' => 'Токены', 'value' => $tokenCount],
 			]);
 		} elseif ($type === 'users') {
-			$userCount = User::count();
+			$userCount = User::count() + \App\Models\Bot\User::count();
 			$messageCount = Message::count();
 
 			return response()->json([
