@@ -5,7 +5,7 @@ export default function Billing() {
     return (
         <Center h='100%'>
             <Paper p="xl">
-                <Text>Чтобы оплатить напишите нам, ответим быстро</Text>
+                <Text ta="center">Чтобы оплатить напишите нам, ответим быстро</Text>
                 <Group mt={15}>
                     <Button
                         style={{margin: 'auto'}}

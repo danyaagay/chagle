@@ -22,7 +22,7 @@ class AuthController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'balance' => '20',
+            'balance' => '2',
             'level' => 1
         ]);
 

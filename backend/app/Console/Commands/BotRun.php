@@ -134,7 +134,7 @@ class BotRun extends Command
                 'telegram_id' => $from->id,
                 'shortname' => @$from->username,
                 'name' => $userName,
-                'balance' => '20',
+                'balance' => '2',
                 'level' => 1
             ]);
         }
