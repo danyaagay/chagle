@@ -21,3 +21,5 @@ Route::get('/', function () {
 Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke'])
     ->middleware(['signed', 'throttle:6,1'])
     ->name('verification.verify');
+
+Route::post('/6877689154:AAHFiKvlcmC7EhCXovN2z5KC-gJdwck7PzE/webhook', [App\Http\Controllers\BotController::class, 'handle']);
