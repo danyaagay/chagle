@@ -152,7 +152,7 @@ export default function ChatSettings() {
                         <Stack gap="lg" className={classes.settingsBox}>
                             <div>
                                 <Select
-                                    styles={{ input: { height: '45px' }, }}
+                                    styles={{ input: { height: '45px' }, dropdown: { borderRadius: '8px' }, option: { borderRadius: '8px' } }}
                                     size='sm'
                                     radius="md"
                                     data={['gpt-3.5-turbo', 'gpt-3.5-turbo-0301', 'gpt-3.5-turbo-1106', 'gpt-3.5-turbo-16k']}

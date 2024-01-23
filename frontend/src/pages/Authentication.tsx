@@ -294,6 +294,7 @@ export default function () {
 										field='password'
 										InputType={PasswordInput}
 										required
+										autoComplete="current-password"
 										value={form.values.password}
 										onChange={(value) => form.setFieldValue('password', value)}
 										error={form.errors.password}

@@ -127,7 +127,7 @@ export default function MobileHeader() {
                 <Menu
                     width={275}
                     position="top-start"
-                    classNames={{ dropdown: classes.dropdown }}
+                    styles={{ item: { borderRadius: '8px' }, dropdown: { borderRadius: '8px' } }}
                 >
                     {user.roles[0] == 'super-admin' && (
                         <Menu.Target>
@@ -161,7 +161,7 @@ export default function MobileHeader() {
                 <Menu
                     width={275}
                     position="top-start"
-                    classNames={{ dropdown: classes.dropdown }}
+                    styles={{ item: { borderRadius: '8px' }, dropdown: { borderRadius: '8px' } }}
                 >
                     <Menu.Target>
                         <UserButton
