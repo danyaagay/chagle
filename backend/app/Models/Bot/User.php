@@ -17,8 +17,9 @@ class User extends Model
         'telegram_id',
         'name',
         'shortname',
-        'balance',
         'level',
+        'paid_at',
+        'quick',
         'model',
         'web',
     ];

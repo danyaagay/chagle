@@ -7,7 +7,8 @@ import {
     Textarea,
     Button,
     ActionIcon,
-    Flex
+    Flex,
+    SegmentedControl
 } from '@mantine/core';
 import { useParams } from 'react-router-dom';
 import {
@@ -36,13 +37,10 @@ export default function ChatSettings() {
     const loaded = useRef<boolean>(false);
     const form = useForm({
         initialValues: {
-            model: '',
+            model: 'gpt-3.5-turbo',
             system_message: '',
-            temperature: 0,
-            max_tokens: 0,
-            top_p: 0,
-            frequency_penalty: 0,
-            presence_penalty: 0,
+            max_tokens: '2048',
+            history: '1',
         },
     });
     const [debounced] = useDebouncedValue(form.values, 500);
@@ -62,11 +60,8 @@ export default function ChatSettings() {
             const values = {
                 model: chat['model'],
                 system_message: chat['system_message'],
-                temperature: chat['temperature'],
-                max_tokens: chat['max_tokens'],
-                top_p: chat['top_p'],
-                frequency_penalty: chat['frequency_penalty'],
-                presence_penalty: chat['presence_penalty'],
+                max_tokens: `${chat['max_tokens']}`,
+                history: `${chat['history']}`,
             };
             form.setValues(values);
             form.resetDirty(values);
@@ -111,10 +106,6 @@ export default function ChatSettings() {
         //console.log(form.values, form.isDirty());
         //console.log('update start', form.isDirty(), form.isTouched());
         if (form.isDirty() && form.isTouched()) {
-            if (form.values['model'] !== 'gpt-3.5-turbo-16k' && form.values['max_tokens'] > 4096) {
-                //console.log('here');
-                form.setFieldValue('max_tokens', 2048);
-            }
             if (isMounted.current) {
                 form.resetDirty(form.values);
                 mutationEdit();
@@ -171,57 +162,28 @@ export default function ChatSettings() {
                                 />
                             </div>
                             <div>
-                                <Text size='sm' fw={500} mb={8} c='gray.7'>Температура</Text>
-                                <Slider
-                                    min={0}
-                                    max={2}
-                                    label={(value) => value === 1.0 ? 1 : value.toFixed(1)}
-                                    step={0.1}
-                                    styles={{ markLabel: { display: 'none' } }}
-                                    {...form.getInputProps('temperature')}
-                                />
-                            </div>
-                            <div>
-                                <Text size='sm' fw={500} mb={8} c='gray.7'>Максимум токенов</Text>
-                                <Slider
-                                    min={0}
-                                    max={form.values['model'] === 'gpt-3.5-turbo-16k' ? 16384 : 4096}
-                                    step={1}
-                                    styles={{ markLabel: { display: 'none' } }}
+                                <Text size='sm' fw={500} mb={8} c='gray.7'>Длина ответа</Text>
+                                <SegmentedControl
+                                    fullWidth
+                                    radius="md"
+                                    data={[
+                                        { value: '500', label: 'Короткая' },
+                                        { value: '2048', label: 'Средняя' },
+                                        { value: '4096', label: 'Длинная' },
+                                      ]}
                                     {...form.getInputProps('max_tokens')}
                                 />
                             </div>
                             <div>
-                                <Text size='sm' fw={500} mb={8} c='gray.7'>Top P</Text>
-                                <Slider
-                                    min={0}
-                                    max={1}
-                                    label={(value) => value === 1.0 ? 1 : value.toFixed(1)}
-                                    step={0.1}
-                                    styles={{ markLabel: { display: 'none' } }}
-                                    {...form.getInputProps('top_p')}
-                                />
-                            </div>
-                            <div>
-                                <Text size='sm' fw={500} mb={8} c='gray.7'>Штраф частоты</Text>
-                                <Slider
-                                    min={-2}
-                                    max={2}
-                                    label={(value) => value === 0.0 ? 0 : value.toFixed(1)}
-                                    step={0.1}
-                                    styles={{ markLabel: { display: 'none' } }}
-                                    {...form.getInputProps('frequency_penalty')}
-                                />
-                            </div>
-                            <div>
-                                <Text size='sm' fw={500} mb={8} c='gray.7'>Штраф присутствия</Text>
-                                <Slider
-                                    min={-2}
-                                    max={2}
-                                    label={(value) => value === 0.0 ? 0 : value.toFixed(1)}
-                                    step={0.1}
-                                    styles={{ markLabel: { display: 'none' } }}
-                                    {...form.getInputProps('presence_penalty')}
+                                <Text size='sm' fw={500} mb={8} c='gray.7'>История чата</Text>
+                                <SegmentedControl
+                                    fullWidth
+                                    radius="md"
+                                    data={[
+                                        { value: '1', label: 'Учитывать' },
+                                        { value: '0', label: 'Не учитывать' },
+                                      ]}
+                                    {...form.getInputProps('history')}
                                 />
                             </div>
                         </Stack>
@@ -236,11 +198,8 @@ export default function ChatSettings() {
                                     form.setValues({
                                         model: 'gpt-3.5-turbo',
                                         system_message: '',
-                                        temperature: 0.7,
-                                        max_tokens: 2048,
-                                        top_p: 1.0,
-                                        frequency_penalty: 0.0,
-                                        presence_penalty: 0.0,
+                                        max_tokens: '2048',
+                                        history: '1'
                                     });
                                     form.setFieldValue('model', 'gpt-3.5-turbo');
                                 }}>

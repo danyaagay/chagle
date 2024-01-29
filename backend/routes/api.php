@@ -119,8 +119,8 @@ Route::get('/auth/callback', function () {
         [
             'name' => $googleuUser->name,
             'avatar' => $googleuUser->avatar,
-            'balance' => '20',
-            'free' => 1
+            'quick' => 50,
+            'level' => 1
         ]
     );
 

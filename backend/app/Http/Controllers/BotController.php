@@ -105,7 +105,7 @@ class BotController extends Controller
 				'telegram_id' => $from->id,
 				'shortname' => @$from->username,
 				'name' => $userName,
-				'balance' => '2',
+				'quick' => 50,
 				'level' => 1
 			]);
 		}
@@ -149,7 +149,7 @@ class BotController extends Controller
 		$this->bot->sendMessage([
 			'chat_id' => $chatId,
 			'text' => $user->name . ' (id' . $user->telegram_id . ')
-Баланс ' . $user->balance . '₽
+Запросов ' . $user->quick . '
 Модель ' . $this->user->model,
 			'reply_markup' => $this->markup
 		]);
@@ -384,9 +384,7 @@ class BotController extends Controller
 			} else {
 				$user = $this->user;
 			}
-			$newBalance = MessageController::calculate($history, $user->balance, $text, $result->choices[0]->message->content, 'gpt-3.5-turbo');
-			$user->balance = $newBalance;
-			$user->save();
+			$user->decrement('quick', 1);
 		}
 
 		$this->bot->sendMessage([

@@ -22,7 +22,7 @@ class StreamsController extends Controller
 
 		ignore_user_abort(true);
 
-		$question = 'Provide your response in a markdown code block ' . $question;
+		//$question = 'Provide your response in a markdown code block ' . $question;
 
 		if (!$history) {
 			$history = [
@@ -62,12 +62,8 @@ class StreamsController extends Controller
 				try {
 					$stream = $client->chat()->createStreamed([
 						'model' => $settings['model'],
-						'temperature' => $settings['temperature'],
 						'messages' => $history,
 						'max_tokens' => $settings['max_tokens'],
-						'top_p' => $settings['top_p'],
-						'frequency_penalty' => $settings['frequency_penalty'],
-						'presence_penalty' => $settings['presence_penalty'],
 					]);
 
 					$error = false;

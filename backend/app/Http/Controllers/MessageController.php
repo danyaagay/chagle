@@ -55,7 +55,7 @@ class MessageController extends Controller
 		$user = $request->user();
 
 		return response()->stream(function () use ($user, $request, $id) {
-			if ($user->balance <= 0) {
+			if ($user->quick <= 0) {
 				$text = "Пополните баланс";
 
 				$json = json_encode(['message' => $text, 'error' => true]);
@@ -86,23 +86,23 @@ class MessageController extends Controller
 				'role' => 'user',
 			]);
 
-			$messages = $chat->messages()
-				->where('error_code', NULL)
-				->orderByDesc('id')
-				->get();
+			if ($chat->history) {
+				$messages = $chat->messages()
+					->where('error_code', NULL)
+					->orderByDesc('id')
+					->get();
 
-			$history = $this->getHistory($messages, $chat->model);
+				$history = $this->getHistory($messages, $chat->model);
 
-			$history = array_reverse($history);
+				$history = array_reverse($history);
+			} else {
+				$history = [];
+			}
 
 			$settings = [
 				'model' => $chat->model,
 				'system_message' => $chat->system_message,
-				'temperature' => $chat->temperature,
 				'max_tokens' => $chat->max_tokens,
-				'top_p' => $chat->top_p,
-				'frequency_penalty' => $chat->frequency_penalty,
-				'presence_penalty' => $chat->presence_penalty,
 			];
 
 			$answer = StreamsController::stream($request->text, $history, $settings);
@@ -119,9 +119,8 @@ class MessageController extends Controller
 					'role' => 'assistant',
 				]);
 
-				$newBalance = $this->calculate($history, $user->balance, $request->text, $answer['answer'], $chat->model);
-				$user->balance = $newBalance;
-				$user->save();
+
+				$user->decrement('quick', 1);
 			}
 
 			echo 'data: {"answerId":"' . $chatAnswer->id . '"}' . "\n\n";
@@ -143,7 +142,7 @@ class MessageController extends Controller
 		$user = $request->user();
 
 		return response()->stream(function () use ($user, $request, $id) {
-			if ($user->balance <= 0) {
+			if ($user->quick <= 0) {
 				$text = "Пополните баланс";
 
 				$json = json_encode(['message' => $text, 'error' => true]);
@@ -157,11 +156,11 @@ class MessageController extends Controller
 
 			$chat = $user->chats()->find($id);
 
-            if (!$chat) {
-                return response()->json([
-                    'error' => 'Chat not found',
-                ], 500);
-            }
+			if (!$chat) {
+				return response()->json([
+					'error' => 'Chat not found',
+				], 500);
+			}
 
 			$lastMessages = $chat->messages()->orderBy('id', 'desc')->limit(2)->get();
 
@@ -171,42 +170,40 @@ class MessageController extends Controller
 				]);
 			}
 
-			$messages = $chat->messages()
-				->where('error_code', NULL)
-				->whereNot('id', $lastMessages[0]->id)
-				->orderByDesc('id')
-				->get();
+			if ($chat->history) {
+				$messages = $chat->messages()
+					->where('error_code', NULL)
+					->whereNot('id', $lastMessages[0]->id)
+					->orderByDesc('id')
+					->get();
 
-			$history = $this->getHistory($messages, $chat->model);
+				$history = $this->getHistory($messages, $chat->model);
 
-			$history = array_reverse($history);
+				$history = array_reverse($history);
+			} else {
+				$history = [];
+			}
 
 			$settings = [
 				'model' => $chat->model,
 				'system_message' => $chat->system_message,
-				'temperature' => $chat->temperature,
 				'max_tokens' => $chat->max_tokens,
-				'top_p' => $chat->top_p,
-				'frequency_penalty' => $chat->frequency_penalty,
-				'presence_penalty' => $chat->presence_penalty,
 			];
 
 			$answer = StreamsController::stream($lastMessages[1]->text, $history, $settings);
 
 			if ($answer['error']) {
-				$chatAnswer = $lastMessages[0]->update([
+				$lastMessages[0]->update([
 					'content' => $answer['answer'],
 					'error_code' => $answer['error_code']
 				]);
 			} else {
-				$chatAnswer = $lastMessages[0]->update([
+				$lastMessages[0]->update([
 					'content' => $answer['answer'],
 					'error_code' => NULL
 				]);
 
-				$newBalance = $this->calculate($history, $user->balance, $request->text, $answer['answer'], $chat->model);
-				$user->balance = $newBalance;
-				$user->save();
+				$user->decrement('quick', 1);
 			}
 		}, 200, [
 			'Cache-Control' => 'no-cache',
@@ -244,34 +241,5 @@ class MessageController extends Controller
 		}
 
 		return $array;
-	}
-
-	public static function calculate($history, $balance, $question, $answer, $model)
-	{
-		if (!$history) {
-			$history = [
-				['role' => 'user', 'content' => $question]
-			];
-		}
-
-		$text = '';
-		foreach ($history as $history) {
-			$text .= $history['content'];
-		}
-		$text .= $answer;
-		$text = str_replace(" ", "", $text);
-
-		// Считаем количество токенов
-		$tokenCount = ceil(mb_strlen($text) / 2);
-
-		// Рассчитываем стоимость
-		$pricePerTokens = ($model === 'gpt-3.5-turbo-16k') ? 0.4 : 0.2;
-		$pricePerToken = $pricePerTokens / 1000;
-		$cost = $tokenCount * $pricePerToken;
-
-		// Вычитаем стоимость из баланса
-		$balance -= $cost;
-
-		return $balance;
 	}
 }

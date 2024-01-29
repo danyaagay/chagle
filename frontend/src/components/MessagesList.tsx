@@ -5,43 +5,6 @@ import Message from './Message';
 import { useInfiniteQuery, useQueryClient, useQuery } from '@tanstack/react-query';
 import axios from '../axios';
 import { useParams } from 'react-router-dom';
-import dayjs from 'dayjs';
-import 'dayjs/locale/ru';
-import { produce } from 'immer';
-
-//Датировка
-const dateStamping = (pages: any[]): any[] => {
-    return produce(pages, (draft: any[]) => {
-        let currentDate: dayjs.Dayjs;
-
-        draft.forEach((page: any) => {
-            page.messages.forEach((message: any) => {
-                const today = dayjs();
-                const date = dayjs(message.date);
-                let formattedDate: string | undefined;
-
-                if (!currentDate || !currentDate.isSame(date, 'day')) {
-                    if (today.isSame(date, 'day')) {
-                        formattedDate = 'Сегодня';
-                    } else if (date.isSame(today.subtract(1, 'day'), 'day')) {
-                        formattedDate = 'Вчера';
-                    } else {
-                        const now = dayjs();
-                        if (date.year() !== now.year()) {
-                            formattedDate = date.locale('ru').format('D MMMM YYYY');
-                        } else {
-                            formattedDate = date.locale('ru').format('D MMMM');
-                        }
-                    }
-                }
-
-                currentDate = date;
-
-                message.marker = formattedDate;
-            });
-        });
-    });
-};
 
 const MessageList = () => {
     const scrollRef = useRef<any>();
@@ -84,7 +47,7 @@ const MessageList = () => {
             return lastPageParam ? lastPageParam + 30 : tempDataId ? lastPage.messages.length + tempDataId?.pages[0].messages.length : lastPage.messages.length;
         },
         select: (data: any) => ({
-            pages: dateStamping([...data.pages].reverse()),
+            pages: [...data.pages].reverse(),
             pageParams: [...data.pageParams].reverse(),
         }),
         enabled: !!id,

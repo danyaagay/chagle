@@ -3,13 +3,19 @@ import axios from '../axios';
 import {
     Button,
     Menu,
-    Badge
+    Badge,
+    HoverCard,
+    Group,
+    Grid
 } from '@mantine/core';
 import {
     IconSettings,
     IconLogout,
     IconPlus,
     IconCurrencyRubel,
+    IconStarFilled,
+    IconMail,
+    IconBrandTelegram
 } from '@tabler/icons-react';
 import ChatsList from './ChatsList';
 import { useMobileHeader } from '../contexts/MobileHeaderContext';
@@ -27,21 +33,6 @@ interface UserButtonProps extends React.ComponentPropsWithoutRef<'button'> {
 export default function MobileHeader() {
     const { setMobileTitle, toggle, opened } = useMobileHeader();
     const { user } = useAuth();
-
-    function numberBalance(number: any) {
-        number = Number(number);
-        var rounded = +number.toFixed(15); // Округляем число до 15 знаков после запятой
-
-        // Преобразуем число в строку
-        var numberString = rounded.toString();
-
-        // Удаляем нули с конца строки
-        while (numberString.includes('.') && (numberString.endsWith('0') || numberString.endsWith('.'))) {
-            numberString = numberString.slice(0, -1); // Удаляем последний символ
-        }
-
-        return numberString;
-    }
 
     const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
         ({ name, icon, ...others }: UserButtonProps, ref) => (
@@ -62,8 +53,23 @@ export default function MobileHeader() {
                         <Text size="sm" fw={500}>
                             {name}
                         </Text>
+                        <Text c="dimmed" size="xs">
+                            {user.email}
+                        </Text>
                     </div>
-                    <Badge color="blue" w={'auto'}>{numberBalance(user.balance)}₽</Badge>
+                    <div style={{ flex: 1 }}>
+                        <Group gap={5}>
+                            <Text size="sm" style={{
+                                marginLeft: "auto",
+                            }}>
+                                {user.quick}
+                            </Text>
+                            <IconStarFilled size={14} style={{
+                                color: "rgb(34, 139, 230)",
+                            }} />
+                        </Group>
+                    </div>
+
                 </Flex>
             </UnstyledButton>
         )
@@ -172,17 +178,27 @@ export default function MobileHeader() {
                     <Menu.Dropdown>
                         <Menu.Item
                             component={Link}
-                            to='billing'
-                            onClick={() => {
-                                setMobileTitle('Оплата');
-                                document.title = 'Оплата';
-                                if (opened) {
-                                    toggle();
-                                }
-                            }}
+                            to='https://t.me/chaglemanager'
+                            target="_blank"
                             leftSection={<IconCurrencyRubel style={{ width: rem(14), height: rem(14) }} />}
                         >
                             Оплата
+                        </Menu.Item>
+                        <Menu.Item
+                            component={Link}
+                            to='https://t.me/chaglebot'
+                            target="_blank"
+                            leftSection={<IconBrandTelegram style={{ width: rem(14), height: rem(14) }} />}
+                        >
+                            Telegram бот
+                        </Menu.Item>
+                        <Menu.Item
+                            component={Link}
+                            to='https://t.me/chaglemanager'
+                            target="_blank"
+                            leftSection={<IconMail style={{ width: rem(14), height: rem(14) }} />}
+                        >
+                            Обратная связь
                         </Menu.Item>
                         <Menu.Item
                             component={Link}
