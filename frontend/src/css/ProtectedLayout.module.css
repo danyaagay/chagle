@@ -121,9 +121,7 @@
 
 .buttonBox {
     display: flex;
-    position: absolute;
-    right: 0;
-    margin-right: 4px;
+    margin-left: auto;
 }
 
 .main {
@@ -139,6 +137,84 @@
 .root {
     height: 100% !important;
     min-height: 100% !important;
+}
+
+.chatLink {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    min-height: 45px;
+    font-size: var(--mantine-font-size-sm);
+    color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-1));
+    padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+    border-radius: var(--mantine-radius-md);
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+
+    @mixin hover {
+        background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+        color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+    }
+}
+
+.chatLinkMobile {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    min-height: 45px;
+    font-size: var(--mantine-font-size-sm);
+    color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-1));
+    padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+    border-radius: var(--mantine-radius-md);
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+}
+
+.chatLinkActive {
+    background-Color: var(--mantine-color-gray-0);
+    color: #000000;
+    cursor: default;
+}
+
+.chatSpan {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    height: 25px;
+    line-height: 25px !important;
+    font-size: var(--mantine-font-size-sm);
+    background: transparent;
+    border: none;
+    line-height: 25px;
+    padding: 0;
+}
+
+.chatInputSpan {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    height: 50px;
+    font-size: var(--mantine-font-size-sm);
+    background: transparent;
+    border: none;
+    line-height: 25px;
+    padding: 0;
+}
+
+.chatInputSpan:focus { 
+    background: transparent;
+    border: none;
+    outline-width: 0;
+}
+
+.chatSpanBox {
+    display: flex;
+}
+.chatTimeBox {
+    margin-left: auto !important;
+    line-height: 25px !important;
 }
 
 .user {

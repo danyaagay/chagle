@@ -20,6 +20,7 @@ class Chat extends Authenticatable
      */
     protected $fillable = [
         'title',
+        'sub_title',
         'model',
         'system_message',
         'max_tokens',

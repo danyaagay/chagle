@@ -69,7 +69,7 @@ class UserController extends Controller
 		return 'Профиль успешно привязан, вы можете вернуться в Telegram';
 	}
 
-	public function addBalance(Request $request, $id)
+	public function addQuick(Request $request, $id)
 	{
 		if ($request->telegram) {
 			$currentUser = \App\Models\Bot\User::find($id);
@@ -81,10 +81,39 @@ class UserController extends Controller
 			return response()->json(['message' => 'User not found'], 500);
 		}
 
-		$currentUser->balance += $request->balance;
-		$currentUser->level = 2;
+		$currentUser->quick += $request->quick;
+		//$currentUser->level = 2;
 		$currentUser->save();
 
-		return response()->json(['message' => 'Balance updated successfully']);
+		return response()->json(['message' => 'Quick updated successfully']);
+	}
+
+	public function setLevel(Request $request, $id)
+	{
+		if ($request->telegram) {
+			$currentUser = \App\Models\Bot\User::find($id);
+		} else {
+			$currentUser = User::find($id);
+		}
+
+		if (!$currentUser) {
+			return response()->json(['message' => 'User not found'], 500);
+		}
+
+		if ($request->level === 2) {
+			$currentUser->level = 2;
+			$currentUser->quick += 1500;
+		} elseif ($request->level === 3) {
+			$currentUser->level = 3;
+			$currentUser->quick += 3000;
+		} else {
+			return response()->json(['message' => 'Level not found'], 500);
+		}
+
+		$currentUser->paid_at = now();
+
+		$currentUser->save();
+
+		return response()->json(['message' => 'Level set successfully']);
 	}
 }

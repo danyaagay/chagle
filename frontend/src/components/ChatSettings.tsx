@@ -56,7 +56,7 @@ export default function ChatSettings() {
     useEffect(() => {
         if (chats && Array.isArray(chats)) {
             const chat = chats.find(chat => chat.id == id);
-            //console.log('loading start', chat);
+            console.log('loading start', chat);
             const values = {
                 model: chat['model'],
                 system_message: chat['system_message'],

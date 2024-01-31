@@ -14,7 +14,7 @@ class ChatController extends Controller
 	{
 		$user = $request->user();
 
-		$chats = $user->chats;
+		$chats = $user->chats()->orderBy('updated_at', 'desc')->take(20)->get();
 
 		return response()->json([
 			'chats' => $chats,

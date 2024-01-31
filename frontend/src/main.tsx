@@ -70,10 +70,6 @@ const router = createBrowserRouter([
 				path: '/Crr183gJkwKQwkC3jE9N/:section?',
 				element: <Admin />,
 			},
-			{
-				path: '/billing',
-				element: <Billing />,
-			},
 		],
 	},
 	{

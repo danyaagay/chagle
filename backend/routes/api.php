@@ -41,7 +41,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/tokens', [TokenController::class, 'store']);
         Route::delete('/tokens/{id}', [TokenController::class, 'destroy']);
         Route::get('/summary/{type}', [SummaryController::class, 'index']);
-        Route::post('/balance/{id}', [UserController::class, 'addBalance']);
+        Route::post('/quick/{id}', [UserController::class, 'addQuick']);
+        Route::post('/level/{id}', [UserController::class, 'setLevel']);
         Route::get('/proxy', [ProxyController::class, 'index']);
         Route::post('/proxy', [ProxyController::class, 'store']);
         Route::delete('/proxy/{id}', [ProxyController::class, 'destroy']);

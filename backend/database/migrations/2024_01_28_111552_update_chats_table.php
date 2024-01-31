@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::table('chats', function (Blueprint $table) {
             $table->dropColumn(['temperature', 'top_p', 'frequency_penalty', 'presence_penalty']);
             $table->boolean('history')->default(1);
+            $table->string('sub_title')->nullable()->after('title');
         });
     }
 
@@ -24,6 +25,7 @@ return new class extends Migration
     {
         Schema::table('chats', function (Blueprint $table) {
             $table->dropColumn('history');
+            $table->dropColumn('sub_title');
             $table->float('temperature', 2, 1)->default(0.7);
             $table->float('top_p', 2, 1)->default(1);
             $table->float('frequency_penalty', 2, 1)->default(0);

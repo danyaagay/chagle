@@ -36,6 +36,7 @@
 
 .you {
     flex-Direction: row-reverse;
+    white-space: pre-wrap;
 }
 
 .timeBox {
@@ -48,10 +49,6 @@
     color: rgb(134, 142, 150);
 }
 
-.markdownBody {
-    white-space: pre-wrap;
-}
-
 .markdownBody>*:first-child {
     margin-top: 0!important;
 }
@@ -60,6 +57,21 @@
 }
 .markdownBody p,ul,ol {
     margin-top: 0;
+}
+.markdownBody ul {
+    padding-inline-start: 20px;
+}
+.markdownBody ol {
+    padding-inline-start: 18px;
+}
+.markdownBody blockquote {
+    padding: 0 0.9em;
+    border-left: 0.2em solid #dee2e6;
+    margin: 0;
+    margin-bottom: 16px;
+}
+.markdownBody blockquote p {
+    margin: 0;
 }
 .markdownBody h1, .markdownBody h2, .markdownBody h3, .markdownBody h4, .markdownBody h5, .markdownBody h6 {
     margin-top: 24px;

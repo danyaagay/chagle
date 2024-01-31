@@ -9,7 +9,9 @@ import {
 	ActionIcon,
 	Modal,
 	Button,
-	Group
+	Group,
+	Flex,
+	Text
 } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { useHover, useDisclosure } from '@mantine/hooks';
@@ -22,6 +24,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 interface ChatChatButtonProps {
 	chatId: string,
 	title: string,
+	sub_title: string,
+	date: string,
 	active: boolean,
 	onClick(value: string): void,
 }
@@ -29,6 +33,8 @@ interface ChatChatButtonProps {
 export default function ChatChatButton({
 	chatId,
 	title,
+	sub_title,
+	date,
 	active,
 	onClick,
 	...props
@@ -131,69 +137,88 @@ export default function ChatChatButton({
 				}
 			}}
 			>
-				<a className={`${IS_MOBILE ? classes.linkMobile : classes.link} ${active ? classes.linkActive : ''}`}>
+				<a className={`${IS_MOBILE ? classes.chatLinkMobile : classes.chatLink} ${active ? classes.chatLinkActive : ''}`}>
 					{editable ? (
-						<input
-							defaultValue={chatTitle}
-							ref={chatTitleRef}
-							className={classes.linkSpan}
-						/>
+						<>
+							<div style={{ display: 'flex' }}>
+								<input
+									defaultValue={chatTitle}
+									ref={chatTitleRef}
+									className={classes.chatInputSpan}
+								/>
+								<div className={classes.buttonBox} style={{
+									alignItems: 'center',
+									marginLeft: 'auto'
+								}}>
+									<Flex gap={2}>
+										<ActionIcon
+											variant="transparent"
+											size="sm"
+											onClick={() => {
+												mutationEdit({
+													id: chatId,
+													title: chatTitleRef.current?.value
+												});
+											}}
+										>
+											<IconCheck className={classes.linkIcon} stroke={1.5} style={{ width: '22px', height: '22px' }} />
+										</ActionIcon>
+										<ActionIcon
+											variant="transparent"
+											size="sm"
+											onClick={() => {
+												editToggle.toggle();
+											}}
+										>
+											<IconX className={classes.linkIcon} stroke={1.5} style={{ width: '22px', height: '22px' }} />
+										</ActionIcon>
+									</Flex>
+								</div>
+							</div>
+						</>
 					) : (
-						<span className={classes.linkSpan}>{chatTitle}</span>
-					)}
+						<>
+							<div className={classes.chatSpanBox}>
+								<span className={classes.chatSpan}>{chatTitle}</span>
+								<Text c="dimmed" size={date.length > 2 ? "xs" : "sm"} className={classes.chatTimeBox}>
+									{date}
+								</Text>
 
-					{!IS_MOBILE && hovered || editable || active ? (
-						<div className={classes.buttonBox}>
-							{editable ? (
-								<>
-									<ActionIcon
-										variant="transparent"
-										size="md"
-										onClick={() => {
-											mutationEdit({
-												id: chatId,
-												title: chatTitleRef.current?.value
-											});
-										}}
-									>
-										<IconCheck className={classes.linkIcon} stroke={1.5} style={{ width: '22px', height: '22px' }} />
-									</ActionIcon>
-									<ActionIcon
-										variant="transparent"
-										size="md"
-										onClick={() => {
-											editToggle.toggle();
-										}}
-									>
-										<IconX className={classes.linkIcon} stroke={1.5} style={{ width: '22px', height: '22px' }} />
-									</ActionIcon>
-								</>
-							) : (
-								<>
-									<ActionIcon
-										variant="transparent"
-										size="md"
-										onClick={(e) => {
-											e.stopPropagation();
-											editToggle.toggle();
-										}}
-									>
-										<IconPencil className={classes.linkIcon} stroke={1.5} style={{ width: '22px', height: '22px' }} />
-									</ActionIcon>
-									<ActionIcon
-										variant="transparent"
-										size="md"
-										onClick={(e) => {
-											e.stopPropagation();
-											open();
-										}}
-									>
-										<IconTrash className={classes.linkIcon} stroke={1.5} style={{ width: '22px', height: '22px' }} />
-									</ActionIcon>
-								</>
-							)}
-						</div>
-					) : ''}
+							</div>
+
+							<div className={classes.chatSpanBox}>
+								<Text c="dimmed" size="sm" className={classes.chatSpan}>
+									{sub_title}
+								</Text>
+
+								{!IS_MOBILE && hovered || editable || active ? (
+									<div className={classes.buttonBox}>
+										<Flex gap={2}>
+											<ActionIcon
+												variant="transparent"
+												size="sm"
+												onClick={(e) => {
+													e.stopPropagation();
+													editToggle.toggle();
+												}}
+											>
+												<IconPencil className={classes.linkIcon} stroke={1.5} style={{ width: '22px', height: '22px' }} />
+											</ActionIcon>
+											<ActionIcon
+												variant="transparent"
+												size="sm"
+												onClick={(e) => {
+													e.stopPropagation();
+													open();
+												}}
+											>
+												<IconTrash className={classes.linkIcon} stroke={1.5} style={{ width: '22px', height: '22px' }} />
+											</ActionIcon>
+										</Flex>
+									</div>
+								) : ''}
+							</div>
+						</>)}
 				</a>
 			</div>
 		</>

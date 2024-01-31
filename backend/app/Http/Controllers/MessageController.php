@@ -119,9 +119,10 @@ class MessageController extends Controller
 					'role' => 'assistant',
 				]);
 
-
 				$user->decrement('quick', 1);
 			}
+
+			$chat->update(['sub_title' => mb_substr($answer['answer'], 0, 255)]);
 
 			echo 'data: {"answerId":"' . $chatAnswer->id . '"}' . "\n\n";
 
@@ -205,6 +206,8 @@ class MessageController extends Controller
 
 				$user->decrement('quick', 1);
 			}
+
+			$chat->update(['sub_title' => mb_substr($answer['answer'], 0, 255)]);
 		}, 200, [
 			'Cache-Control' => 'no-cache',
 			'X-Accel-Buffering' => 'no',

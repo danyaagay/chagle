@@ -16,6 +16,12 @@ import classes from '../css/MessageInput.module.css';
 import { useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { produce } from 'immer';
+import { useAuth } from '../contexts/AuthContext';
+
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import 'dayjs/locale/ru';
+dayjs.extend(utc);
 
 export default function MessageInput({ textareaRef }: { textareaRef: React.RefObject<HTMLTextAreaElement> }) {
 	const [isLoading, setIsLoading] = useState(false);
@@ -25,6 +31,8 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 	const location = useLocation();
 	const navigate = useNavigate();
 	const { id } = useParams();
+
+	const { user } = useAuth();
 
 	useEffect(() => {
 		const handleResize = () => {
@@ -241,17 +249,19 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 								);
 								//console.log('change answer');
 							} else if (chatId) {
-								queryClient.setQueryData(['chats'], (oldData: any) => [...oldData, {
+								const now = dayjs();
+
+								queryClient.setQueryData(['chats'], (oldData: any) => [{
 									title: text,
+									sub_title: answer,
 									id: chatId,
+									date: now.format('HH:mm'),
+									updated_at: now.utc(),
 									model: 'gpt-3.5-turbo',
 									system_message: '',
-									temperature: 0.7,
-									max_tokens: 1024,
-									top_p: 1.0,
-									frequency_penalty: 0.0,
-									presence_penalty: 0.0,
-								}]);
+									max_tokens: '2048',
+									history: '1',
+								}, ...oldData]);
 
 								if (tempIdRef.current) {
 									setActive(chatId);
@@ -260,9 +270,23 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 							}
 						}
 					}
+					queryClient.setQueryData(['chats'], (oldData: any) => {
+						return produce(oldData, (draft: any) => {
+							draft.forEach((chat: any) => {
+								if (chat.id == id) {
+									const now = dayjs();
+									chat.date = now.format('HH:mm');
+									chat.updated_at = now.utc();
+									chat.sub_title = answer;
+								}
+							});
+						});
+					});
 				} catch (error) {
 					console.error(error);
 				}
+
+				user.quick -= 1;
 
 				setIsLoading(false);
 			} catch (error: unknown) {
@@ -415,7 +439,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 	}
 
 	const handleStop = async () => {
-		await fetch(import.meta.env.MODE == 'development' ? "http://192.168.0.116:8000/api/messages-cancel" : "https://api.chagle.ru/messages-cancel", {
+		await fetch(import.meta.env.MODE == 'development' ? "http://192.168.0.116:8000/messages-cancel" : "https://api.chagle.ru/messages-cancel", {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'

@@ -205,7 +205,7 @@ export function ProxyList() {
 					radius={'md'}
 				/>
 
-				<Table classNames={classes} horizontalSpacing="md" verticalSpacing="xs" miw={900} layout="fixed" striped>
+				<Table classNames={classes} horizontalSpacing="md" verticalSpacing="xs" miw={900} striped>
 					<Table.Thead>
 						<Table.Tr>
 							<Th
