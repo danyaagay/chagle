@@ -102,10 +102,10 @@ class UserController extends Controller
 
 		if ($request->level === 2) {
 			$currentUser->level = 2;
-			$currentUser->quick += 1500;
+			$currentUser->quick += 700;
 		} elseif ($request->level === 3) {
 			$currentUser->level = 3;
-			$currentUser->quick += 3000;
+			$currentUser->quick += 1500;
 		} else {
 			return response()->json(['message' => 'Level not found'], 500);
 		}

@@ -105,7 +105,7 @@ class BotController extends Controller
 				'telegram_id' => $from->id,
 				'shortname' => @$from->username,
 				'name' => $userName,
-				'quick' => 50,
+				'quick' => 30,
 				'level' => 1
 			]);
 		}
@@ -244,9 +244,17 @@ class BotController extends Controller
             
 🚀 Наши тарифы:
             
-0.2₽ за 1000 токенов: gpt-3.5-turbo
-            
-0.4₽ за 1000 токенов: gpt-3.5-turbo-16k
+Бесплатно
+30 запросов
+ChatGPT 3.5
+
+Базовый 199 ₽
+700 запросов
+ChatGPT 3.5
+
+Премиум 299 ₽
+1500 запросов
+ChatGPT 3.5
             
 🔄 Чтобы оптимизировать расходы, нажмите кнопку "Новый чат", чтобы сбросить контекст',
 			'reply_markup' => $this->markup
@@ -384,6 +392,7 @@ class BotController extends Controller
 			} else {
 				$user = $this->user;
 			}
+			
 			$user->decrement('quick', 1);
 		}
 
