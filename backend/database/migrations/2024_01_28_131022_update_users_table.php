@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->integer('quick')->default(0);
+            $table->integer('extended')->default(0);
+            $table->integer('images')->default(0);
             $table->timestamp('paid_at')->nullable();
             $table->dropColumn('balance');
         });
@@ -25,6 +27,8 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('quick');
+            $table->dropColumn('extended');
+            $table->dropColumn('images');
             $table->dropColumn('paid_at');
             $table->decimal('balance', 10, 5)->default(0);
         });

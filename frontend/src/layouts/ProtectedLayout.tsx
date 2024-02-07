@@ -100,7 +100,7 @@ export default function DefaultLayout() {
 					<MobileHeader />
 				</AppShell.Header>
 
-				<AppShell.Navbar p="sm" style={{ height: "100%" }}>
+				<AppShell.Navbar py="sm" style={{ height: "100%" }}>
 					<Menu />
 				</AppShell.Navbar>
 
@@ -110,7 +110,7 @@ export default function DefaultLayout() {
 							style={{
 								display: 'block',
 								position: 'fixed',
-								right: '16px',
+								right: '12px',
 								top: '12px',
 								zIndex: '2',
 							}}
@@ -133,7 +133,7 @@ export default function DefaultLayout() {
 					<Outlet />
 				</AppShell.Main>
 
-				<AppShell.Aside p="sm" style={{ height: "100%" }}>
+				<AppShell.Aside py="sm" style={{ height: "100%" }}>
 					{id && <ChatSettings />}
 				</AppShell.Aside>
 			</AppShell>

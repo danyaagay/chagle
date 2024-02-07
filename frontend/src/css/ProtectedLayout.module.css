@@ -1,7 +1,6 @@
 .aside {
     height: rem(700px);
     width: rem(300px);
-    padding: var(--mantine-spacing-md);
     display: flex;
     flex-direction: column;
     border-right: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
@@ -10,7 +9,6 @@
 .navbar {
     height: rem(700px);
     width: rem(300px);
-    padding: var(--mantine-spacing-md);
     display: flex;
     flex-direction: column;
     border-right: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
@@ -48,6 +46,12 @@
 
 .footer {
     margin-top: 16px;
+    padding: 0 var(--mantine-spacing-sm);
+}
+
+.settingsFooter {
+    margin-top: 16px;
+    padding: 0 21px;
 }
 
 .linkStructure {
@@ -147,6 +151,7 @@
     font-size: var(--mantine-font-size-sm);
     color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-1));
     padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+    margin: 0 var(--mantine-spacing-sm);
     border-radius: var(--mantine-radius-md);
     font-weight: 500;
     cursor: pointer;
@@ -166,6 +171,7 @@
     font-size: var(--mantine-font-size-sm);
     color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-1));
     padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+    margin: 0 var(--mantine-spacing-sm);
     border-radius: var(--mantine-radius-md);
     font-weight: 500;
     cursor: pointer;
@@ -232,8 +238,8 @@
 }
 
 .settingsBox {
-    margin: 0 12px 0 12px;
+    margin: 0 21px;
     @media (max-width: $mantine-breakpoint-sm) {
-        margin: 0 6px 0 6px !important;
+        margin: 0 12px;
     }
 }

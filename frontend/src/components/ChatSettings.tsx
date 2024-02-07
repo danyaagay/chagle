@@ -116,28 +116,30 @@ export default function ChatSettings() {
         <>
             {loaded.current && (
                 <>
-                    {IS_MOBILE ? (
-                        <div className='burgerBox' style={{ marginLeft: '0' }}>
-                            <button onClick={toggleSettings} className='burgerButton'></button>
-                            <div className='burgerClose' />
-                        </div>
-                    ) : (
-                        <Flex
-                            mih={45}
-                            gap="md"
-                            justify="flex-start"
-                            align="center"
-                            direction="row"
-                            wrap="wrap"
-                            mb='16px'
-                            className={classes.settingsBox}
-                        >
-                            <Text size='sm' fw={500}>Настройки</Text>
-                            <ActionIcon style={{ marginLeft: 'auto' }} variant="transparent" size="md" color="rgba(0, 0, 0, 1)" aria-label="Settings" onClick={toggleSettings}>
-                                <IconX style={{ width: '85%', height: '85%' }} stroke={1.5} />
-                            </ActionIcon>
-                        </Flex>
-                    )}
+                    <div>
+                        {IS_MOBILE ? (
+                            <div className='burgerBox' style={{ margin: '0px 12px 0px 12px' }}>
+                                <button onClick={toggleSettings} className='burgerButton'></button>
+                                <div className='burgerClose' />
+                            </div>
+                        ) : (
+                            <Flex
+                                mih={45}
+                                gap="md"
+                                justify="flex-start"
+                                align="center"
+                                direction="row"
+                                wrap="wrap"
+                                px="21px"
+                                mb='16px'
+                            >
+                                <Text size='sm' fw={500}>Настройки</Text>
+                                <ActionIcon style={{ marginLeft: 'auto' }} variant="transparent" size="md" color="rgba(0, 0, 0, 1)" aria-label="Settings" onClick={toggleSettings}>
+                                    <IconX style={{ width: 24, height: 24 }} stroke={1.5} />
+                                </ActionIcon>
+                            </Flex>
+                        )}
+                    </div>
                     <Scrollbars autoHide>
                         <Stack gap="lg" className={classes.settingsBox}>
                             <div>
@@ -169,7 +171,7 @@ export default function ChatSettings() {
                                         { value: '500', label: 'Короткая' },
                                         { value: '2048', label: 'Средняя' },
                                         { value: '4096', label: 'Длинная' },
-                                      ]}
+                                    ]}
                                     {...form.getInputProps('max_tokens')}
                                 />
                             </div>
@@ -181,30 +183,29 @@ export default function ChatSettings() {
                                     data={[
                                         { value: '1', label: 'Учитывать' },
                                         { value: '0', label: 'Не учитывать' },
-                                      ]}
+                                    ]}
                                     {...form.getInputProps('history')}
                                 />
                             </div>
                         </Stack>
                     </Scrollbars>
-                    <div className={classes.footer}>
-                        <div className={classes.settingsBox}>
-                            <Button
-                                variant="default"
-                                fullWidth
-                                radius="md"
-                                onClick={() => {
-                                    form.setValues({
-                                        model: 'gpt-3.5-turbo',
-                                        system_message: '',
-                                        max_tokens: '2048',
-                                        history: '1'
-                                    });
-                                    form.setFieldValue('model', 'gpt-3.5-turbo');
-                                }}>
-                                Сбросить
-                            </Button>
-                        </div>
+                    <div className={classes.settingsFooter}>
+                        <Button
+                            variant="default"
+                            fullWidth
+                            radius="md"
+                            onClick={() => {
+                                form.setValues({
+                                    model: 'gpt-3.5-turbo',
+                                    system_message: '',
+                                    max_tokens: '2048',
+                                    history: '1'
+                                });
+                                form.setFieldValue('model', 'gpt-3.5-turbo');
+                            }}>
+                            Сбросить
+                        </Button>
+
                     </div>
                 </>
             )}

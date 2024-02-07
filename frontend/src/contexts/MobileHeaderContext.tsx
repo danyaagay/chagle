@@ -59,39 +59,56 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 	// Set mobile title when loading page first time
 	useEffect(() => {
 		const path = window.location.pathname;
-		if (path === '/settings') {
-			setMobileTitle('Настройки');
-			document.title = 'Настройки';
-		} else if (path === '/chat') {
-			setMobileTitle('Новый чат');
-			document.title = 'Новый чат';
-		} else if (path === '/Crr183gJkwKQwkC3jE9N') {
-			setMobileTitle('Админ панель');
-			document.title = 'Админ панель';
-		} else if (path === '/Crr183gJkwKQwkC3jE9N/users') {
-			setMobileTitle('Клиенты');
-			document.title = 'Клиенты';
-		} else if (path === '/Crr183gJkwKQwkC3jE9N/tokens') {
-			setMobileTitle('Токены');
-			document.title = 'Токены';
-		} else if (path === '/Crr183gJkwKQwkC3jE9N/proxy') {
-			setMobileTitle('Прокси');
-			document.title = 'Прокси';
-		} else if (path === '/billing') {
-			setMobileTitle('Оплата');
-			document.title = 'Оплата';
-		} else if (Array.isArray(chats) && id) {
-			const chat = chats.find((chat: any) => chat.id == id);
-			if (chat) {
-				setMobileTitle(chat.title);
-				document.title = chat.title;
-				setActive(id);
-			} else {
-				setMobileTitle('Новый чат');
-				document.title = 'Новый чат';
-				navigate('/chat');
-			}
+		let title = '';
+
+
+		switch (path) {
+			case '/settings':
+				title = 'Настройки';
+				break;
+			case '/chat':
+				title = 'Новый чат';
+				break;
+			case '/Crr183gJkwKQwkC3jE9N':
+				title = 'Админ панель';
+				break;
+			case '/Crr183gJkwKQwkC3jE9N/users':
+				title = 'Клиенты';
+				break;
+			case '/Crr183gJkwKQwkC3jE9N/tokens':
+				title = 'Токены';
+				break;
+			case '/Crr183gJkwKQwkC3jE9N/proxy':
+				title = 'Прокси';
+				break;
+			case '/billing':
+				title = 'Оплата';
+				break;
+			case '/tool':
+				title = 'Инструменты';
+				break;
+			case '/tool/improve':
+				title = 'Улучшить';
+				break;
+			case '/tool/grammar':
+				title = 'Орфография';
+				break;
+			default:
+				if (Array.isArray(chats) && id) {
+					const chat = chats.find((chat: any) => chat.id == id);
+					if (chat) {
+						title = chat.title;
+						setActive(id);
+					} else {
+						title = 'Новый чат';
+						navigate('/chat');
+					}
+				}
+				break;
 		}
+
+		setMobileTitle(title);
+		document.title = title;
 	}, [chats]);
 
 	return (

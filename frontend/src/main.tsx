@@ -1,12 +1,16 @@
 import Admin from './pages/Admin';
 import Chat from './pages/Chat';
 import Settings from './pages/Settings';
-import Billing from './pages/Billing';
 import Authentication from './pages/Authentication';
 import ResetPassword from './pages/ResetPassword';
 import Verify from './pages/Verify';
 import GuestLayout from './layouts/GuestLayout';
 import ContextLayout from './layouts/ContextLayout';
+
+//Испорты инструментов
+import Tool from './pages/Tool';
+import Improve from './pages/Tools/Improve';
+import Grammar from './pages/Tools/Grammar';
 
 //Импорты роутера
 import React from 'react';
@@ -61,6 +65,20 @@ const router = createBrowserRouter([
 			{
 				path: '/chat/:id?',
 				element: <Chat />,
+			},
+			{
+				path: '/tool',
+				element: <Tool />,
+				children: [
+					{
+						path: 'improve',
+						element: <Improve />,
+					},
+					{
+						path: 'grammar',
+						element: <Grammar />,
+					},
+				],
 			},
 			{
 				path: '/settings',
