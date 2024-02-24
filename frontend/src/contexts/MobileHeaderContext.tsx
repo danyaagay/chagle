@@ -84,15 +84,18 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 			case '/billing':
 				title = 'Оплата';
 				break;
-			case '/tool':
-				title = 'Инструменты';
+			case '/transactions':
+				title = 'Транзакции';
 				break;
-			case '/tool/improve':
-				title = 'Улучшить';
-				break;
-			case '/tool/grammar':
-				title = 'Орфография';
-				break;
+			//case '/tool':
+			//	title = 'Инструменты';
+			//	break;
+			//case '/tool/improve':
+			//	title = 'Улучшить';
+			//	break;
+			//case '/tool/grammar':
+			//	title = 'Орфография';
+			//	break;
 			default:
 				if (Array.isArray(chats) && id) {
 					const chat = chats.find((chat: any) => chat.id == id);

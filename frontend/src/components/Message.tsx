@@ -1,6 +1,5 @@
 import {
-	Stack,
-	Text
+	Stack
 } from '@mantine/core';
 import Markdown from 'react-markdown'
 import classes from '../css/Message.module.css';
@@ -23,11 +22,6 @@ export default function Message({ you, marker, text, is_error, ...others }: Mess
 			<Stack className={classes.message} {...others}>
 				<div className={`${classes.messageWrapper} ${(you ? classes.you : '')}`}>
 					<div className={`${classes.messageContent} ${(you ? classes.messageContentYou : '')}`}>
-						{!you && (
-							<Text size="sm" fw={500}>
-								GPT 3.5 Turbo
-							</Text>
-						)}
 						<div className={classes.markdownBody}>
 							{you && text}
 

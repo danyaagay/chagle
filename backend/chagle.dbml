@@ -1,0 +1,162 @@
+Project Chagle {
+  database_type: 'MySQL'
+}
+
+Table "users" {
+  "id" bigint [not null]
+  "telegram_id" varchar(255) [not null]
+  "name" varchar(255) [not null]
+  "balance" decimal(10,5) [not null]
+  "level" int [not null]
+  "avatar" varchar(255) [not null]
+  "email" varchar(255) [not null]
+  "email_verified_at" timestamp [default: NULL]
+  "password" varchar(255) [not null]
+  "remember_token" varchar(100) [default: NULL]
+  "created_at" timestamp [default: NULL]
+  "updated_at" timestamp [default: NULL]
+  Note: '''
+Хранит зарегестрированных пользователей.
+
+`id`  
+`telegram_id`  
+`name` имя пользователя  
+`balance` остаток на балансе в валюте Спаркли (1 р = 1 спаркли)  
+`level` уровень аккаунта (если оплатить 299р будет доступно больше моделей)  
+`avatar` ссылка на аватарку пользователя  
+`email` почта пользователя (если ее нет вход выполнен через Google (но не всегда))  
+`email_verified_at` дата когда почта была подтверждена пользователем   
+`password` пароль хранится в зашифрованном виде  
+`remember_token` токен сброса пароля?  
+`created_at` дата создания  
+`updated_at` дата обновления  
+'''
+}
+
+Table "chats" {
+  "id" bigint [not null]
+  "user_id" bigint [not null]
+  "title" varchar(255) [not null]
+  "sub_title" varchar(255) [default: NULL]
+  "model" varchar(255) [default: 'gpt-3.5-turbo']
+  "system_message" varchar(255) [not null]
+  "max_tokens" int [default: 2048]
+  "history" tinyint(1) [default: 1]
+  "created_at" timestamp [default: NULL]
+  "updated_at" timestamp [default: NULL]
+  Note: '''
+Хранит созданные пользователем чаты.
+
+`id`  
+`user_id` связь с таблицей `Users`  
+`title` название чата  
+`sub_title` последнее сообщение в чате   
+`model` активная модель  
+
+Настройки для модели:
+
+`system_message` начальное сообщение  
+`max_tokens` выбор длины ответа  
+`history`  
+  1 история чата учитывается  
+  2 история чата не учитывается   
+`created_at` дата создания  
+`updated_at` дата обновления  
+'''
+}
+
+Table "messages" {
+  "id" bigint [not null]
+  "chat_id" bigint [not null]
+  "role" varchar(255) [not null]
+  "content" text [not null]
+  "error_code" varchar(255) [default: NULL]
+  "created_at" timestamp [default: NULL]
+  "updated_at" timestamp [default: NULL]
+  Note: '''
+Хранит отправленные в чат сообщения.
+
+`id`  
+`chat_id` связь с таблицей `Chats`  
+`role`  
+  user это сообщение принадлежит пользователю  
+  assistant это сообщение принадлежит асистенту   
+`content` содержимое сообщения   
+`error_code` содержит ли сообщение ошибку, если да то какую   
+`created_at` дата создания  
+`updated_at` дата обновления  
+'''
+}
+
+Table "tokens" {
+  "id" bigint [pk, not null]
+  "token" varchar(255) [not null]
+  "limit" int [default: NULL]
+  "status" tinyint(1) [not null, default: "1"]
+  "created_at" timestamp [default: NULL]
+  "updated_at" timestamp [default: NULL]
+  Note: '''
+Содержит "бесплатные" токены для модели OpenAi
+
+`id`  
+`token` строка с токеном  
+`limit` лимит OpenAi на использование токена (200, обновляется раз в сутки)   
+`status`  
+  1 работает  
+  2 приостановлен  
+  3 вышел из строя  
+`created_at` дата создания  
+`updated_at` дата обновления  
+'''
+}
+
+Table "proxies" {
+  "id" bigint [pk, not null]
+  "schema" varchar(255) [not null]
+  "ip" varchar(255) [not null]
+  "auth" varchar(255) [default: NULL]
+  "status" int [not null]
+  "checked_at" timestamp [default: NULL]
+  "created_at" timestamp [default: NULL]
+  "updated_at" timestamp [default: NULL]
+  Note: '''
+Содержит прокси для работы с моделями на прямую (и для работы Telegram *временно)
+
+`id`  
+`schema` содержит строку вида "http" или "https"  
+`ip` содержит ip адрес прокси с портом   
+`auth` строка данных авторизации в формате login:password   
+`status`  
+  1 работает  
+  2 приостановлен  
+  3 вышел из строя    
+`created_at` дата создания  
+`updated_at` дата обновления  
+'''
+}
+
+Table "transactions" {
+  "id" bigint [pk, not null]
+  "user_id" varchar(255) [not null]
+  "amount" decimal(10,5) [not null]
+  "type" varchar(255) [not null]
+  "created_at" timestamp [default: NULL]
+  "updated_at" timestamp [default: NULL]
+  Note: '''
+Информация о разных транзакциях (операциях) с балансом
+
+`id`  
+`user_id` связь с таблицей `Users`  
+`amount` сумма операции   
+`type`  
+  1 работает  
+  2 приостановлен  
+  3 вышел из строя    
+`created_at` дата создания  
+`updated_at` дата обновления  
+'''
+}
+
+Ref:"users"."id" < "chats"."user_id" [delete: cascade]
+Ref:"chats"."id" < "messages"."chat_id" [delete: cascade]
+Ref:"users"."id" < "transactions"."user_id" [delete: cascade]

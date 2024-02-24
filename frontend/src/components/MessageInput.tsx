@@ -17,6 +17,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { produce } from 'immer';
 import { useAuth } from '../contexts/AuthContext';
+import ModelChangeButton from './ModelChangeButton';
 
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -488,17 +489,22 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 					</ActionIcon>
 				)}
 
-				<Card shadow="0" padding="0" radius="lg" withBorder style={{ width: '100%' }}>
-					<Textarea
-						ref={textareaRef}
-						placeholder="Сообщение"
-						autosize
-						minRows={1}
-						maxRows={6}
-						size="lg"
-						classNames={{ input: classes.input, root: classes.root }}
-						variant="unstyled"
-					/>
+				<Card shadow="0" padding="0" radius="lg" withBorder style={{ width: '100%', flexDirection: 'row' }}>
+					<div style={{ width: '100%' }}>
+						<Textarea
+							ref={textareaRef}
+							placeholder="Сообщение"
+							autosize
+							minRows={1}
+							maxRows={6}
+							size="lg"
+							classNames={{ input: classes.input, root: classes.root }}
+							variant="unstyled"
+						/>
+					</div>
+					<div style={{ display: 'flex' }}>
+						
+					</div>
 				</Card>
 
 				<ActionIcon

@@ -6,8 +6,7 @@ import {
 	ActionIcon,
 	NumberInput,
 	Flex,
-	rem,
-	Button
+	rem
 } from '@mantine/core';
 import axios from '../axios';
 import { IconSearch } from '@tabler/icons-react';
@@ -19,11 +18,11 @@ import { useDebouncedState } from '@mantine/hooks';
 export function UsersList() {
 	const [search, setSearch] = useDebouncedState('', 500);
 
-	const [quickes, setQuickes] = useState([]);
-	const handleQuickChange = (index: string, value: any) => {
-		const updatedQuickes: any = [...quickes];
-		updatedQuickes[index] = value;
-		setQuickes(updatedQuickes);
+	const [balances, setBalances] = useState([]);
+	const handleBalanceChange = (index: string, value: any) => {
+		const updatedBalances: any = [...balances];
+		updatedBalances[index] = value;
+		setBalances(updatedBalances);
 	};
 
 	const { data } = useQuery({
@@ -38,21 +37,10 @@ export function UsersList() {
 
 	const { mutate: mutationAdd } = useMutation({
 		mutationFn: (data: any) => {
-			return axios.post(`/quick/${data.id}`, { quick: quickes[data.key], telegram: data.telegram });
+			return axios.post(`/balance/${data.id}`, { balance: (data.sum ? data.sum : balances[data.key]), telegram: data.telegram });
 		},
 		onSuccess: (_data, data: any) => {
-			handleQuickChange(data.key, '');
-
-			queryClient.invalidateQueries({ queryKey: ['users'] });
-		},
-	});
-
-	const { mutate: mutationSet } = useMutation({
-		mutationFn: (data: any) => {
-			return axios.post(`/level/${data.id}`, { level: data.level, telegram: data.telegram });
-		},
-		onSuccess: (_data, data: any) => {
-			handleQuickChange(data.key, '');
+			handleBalanceChange(data.key, '');
 
 			queryClient.invalidateQueries({ queryKey: ['users'] });
 		},
@@ -68,7 +56,7 @@ export function UsersList() {
 				onChange={(event) => setSearch(event.currentTarget.value)}
 				radius={'md'}
 			/>
-			<Table classNames={classes} horizontalSpacing="md" verticalSpacing="xs" miw={700}  striped>
+			<Table classNames={classes} horizontalSpacing="md" verticalSpacing="xs" miw={700} layout="fixed" striped>
 				<Table.Thead>
 					<Table.Tr>
 						<Table.Th>
@@ -81,16 +69,10 @@ export function UsersList() {
 							Telegram
 						</Table.Th>
 						<Table.Th>
-							Тариф
+							Баланс
 						</Table.Th>
 						<Table.Th>
-							Запросы
-						</Table.Th>
-						<Table.Th>
-							Добавить запросы
-						</Table.Th>
-						<Table.Th>
-							Активировать тариф
+							Пополнить
 						</Table.Th>
 					</Table.Tr>
 				</Table.Thead>
@@ -100,30 +82,24 @@ export function UsersList() {
 							<Table.Td>{row.name}</Table.Td>
 							<Table.Td>{row.email}</Table.Td>
 							<Table.Td>{row.telegram_id}</Table.Td>
-							<Table.Td>{row.level === 1 ? '0 ₽' : row.level === 2 ? '199 ₽' : '299 ₽'}</Table.Td>
-							<Table.Td>{row.quick}</Table.Td>
+							<Table.Td>{row.balance}</Table.Td>
 							<Table.Td>
 								<Flex gap="8">
 									<NumberInput
-										value={quickes[i] ?? ''}
-										onChange={(value) => handleQuickChange(i, value)}
+										value={balances[i] ?? ''}
+										onChange={(value) => handleBalanceChange(i, value)}
 										min={1}
 										radius={'md'}
-										miw={100}
 									/>
 									<ActionIcon variant="default" size="lg" w={36} h={36} onClick={() => mutationAdd({ key: i, id: row.id, telegram: row.email ? false : true })} radius={'md'}>
 										<IconPlus style={{ width: '60%', height: '60%' }} stroke={1.5} />
 									</ActionIcon>
-								</Flex>
-							</Table.Td>
-							<Table.Td>
-								<Flex gap="8">
-									<Button variant="default" h={36} onClick={() => mutationSet({ key: i, id: row.id, telegram: row.email ? false : true, level: 2 })} radius={'md'}>
-										199 ₽
-									</Button>
-									<Button variant="default" h={36} onClick={() => mutationSet({ key: i, id: row.id, telegram: row.email ? false : true, level: 3 })} radius={'md'}>
-										299 ₽
-									</Button>
+									<ActionIcon variant="default" size="lg" w={36} h={36} onClick={() => mutationAdd({ sum: 200, id: row.id, telegram: row.email ? false : true })} radius={'md'}>
+										200
+									</ActionIcon>
+									<ActionIcon variant="default" size="lg" w={36} h={36} onClick={() => mutationAdd({ sum: 300, id: row.id, telegram: row.email ? false : true })} radius={'md'}>
+										300
+									</ActionIcon>
 								</Flex>
 							</Table.Td>
 						</Table.Tr>

@@ -22,15 +22,18 @@ const ChatsList = () => {
 				const now = dayjs(); // текущая дата и время
 				const updatedDate = dayjs(chat.updated_at); // дата и время обновления
 
-				if (now.diff(updatedDate, 'day') < 1) {
-					// Если прошло менее суток, показываем время
-					chat.date = updatedDate.format('HH:mm');
-				} else if (now.diff(updatedDate, 'week') > 1) {
-					// Если прошло больше недели, показываем дату
-					chat.date = updatedDate.format('DD.MM.YYYY');
+				const isNewDay = now.isAfter(updatedDate, 'day');
+
+				if (isNewDay) {
+					if (now.diff(updatedDate, 'week') > 1) {
+						// Если прошло больше недели, показываем дату
+						chat.date = updatedDate.format('DD.MM.YYYY');
+					} else {
+						// Если прошло меньше недели, не изменяем chat.date
+						chat.date = dayjs().locale("ru").format("dd");
+					}
 				} else {
-					// Если прошло меньше недели, не изменяем chat.date
-					chat.date = dayjs().locale("ru").format("dd");
+					chat.date = updatedDate.format('HH:mm');
 				}
 			});
 		});

@@ -55,7 +55,7 @@ class MessageController extends Controller
 		$user = $request->user();
 
 		return response()->stream(function () use ($user, $request, $id) {
-			if ($user->quick <= 0) {
+			if ($user->balance <= 0) {
 				$text = "Пополните баланс";
 
 				$json = json_encode(['message' => $text, 'error' => true]);
@@ -119,7 +119,16 @@ class MessageController extends Controller
 					'role' => 'assistant',
 				]);
 
-				$user->decrement('quick', 1);
+				$newBalance = $this->calculate($history, $user->balance, $request->text, $answer['answer'], $chat->model);
+
+				//Учет в транзакциях
+				$user->transactions()->create([
+					'type' => 'Списание',
+					'amount' => ($user->balance - $newBalance),
+				]);
+
+				$user->balance = $newBalance;
+				$user->save();
 			}
 
 			$chat->update(['sub_title' => mb_substr($answer['answer'], 0, 255)]);
@@ -143,7 +152,7 @@ class MessageController extends Controller
 		$user = $request->user();
 
 		return response()->stream(function () use ($user, $request, $id) {
-			if ($user->quick <= 0) {
+			if ($user->balance <= 0) {
 				$text = "Пополните баланс";
 
 				$json = json_encode(['message' => $text, 'error' => true]);
@@ -204,7 +213,16 @@ class MessageController extends Controller
 					'error_code' => NULL
 				]);
 
-				$user->decrement('quick', 1);
+				$newBalance = $this->calculate($history, $user->balance, $request->text, $answer['answer'], $chat->model);
+
+				//Учет в транзакциях
+				$user->transactions()->create([
+					'type' => 'Списание',
+					'amount' => ($user->balance - $newBalance),
+				]);
+
+				$user->balance = $newBalance;
+				$user->save();
 			}
 
 			$chat->update(['sub_title' => mb_substr($answer['answer'], 0, 255)]);
@@ -244,5 +262,34 @@ class MessageController extends Controller
 		}
 
 		return $array;
+	}
+
+	public static function calculate($history, $balance, $question, $answer, $model)
+	{
+		if (!$history) {
+			$history = [
+				['role' => 'user', 'content' => $question]
+			];
+		}
+
+		$text = '';
+		foreach ($history as $history) {
+			$text .= $history['content'];
+		}
+		$text .= $answer;
+		$text = str_replace(" ", "", $text);
+
+		// Считаем количество токенов
+		$tokenCount = ceil(mb_strlen($text) / 2);
+
+		// Рассчитываем стоимость
+		$pricePerTokens = ($model === 'gpt-3.5-turbo-16k') ? 0.4 : 0.2;
+		$pricePerToken = $pricePerTokens / 1000;
+		$cost = $tokenCount * $pricePerToken;
+
+		// Вычитаем стоимость из баланса
+		$balance -= $cost;
+
+		return $balance;
 	}
 }

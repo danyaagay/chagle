@@ -19,8 +19,7 @@ return new class extends Migration
             $table->string('model', 255)->default('gpt-3.5-turbo');
             $table->boolean('web')->default(0);
             $table->integer('level')->default(1);
-            $table->integer('quick')->default(0);
-            $table->timestamp('paid_at')->nullable();
+            $table->decimal('balance', 10, 5)->default(0);
             $table->timestamps();
         });
     }

@@ -18,12 +18,12 @@ class Kernel extends ConsoleKernel
         })->daily();
         $schedule->command('auth:clear-resets')->daily();
         $schedule->command('sanctum:prune-expired --hours=24')->daily();
-        $schedule->call(function () {
-            $oneMonthAgo = now()->subMonth();
-            DB::table('users')
-                ->where('paid_at', '<=', $oneMonthAgo)
-                ->update(['paid_at' => null, 'level' => 1, 'quick' => 0]);
-        })->daily();
+        //$schedule->call(function () {
+        //    $oneMonthAgo = now()->subMonth();
+        //    DB::table('users')
+        //        ->where('paid_at', '<=', $oneMonthAgo)
+        //        ->update(['paid_at' => null, 'level' => 1, 'quick' => 0]);
+        //})->daily();
     }
 
     /**

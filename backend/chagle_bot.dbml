@@ -1,0 +1,55 @@
+Project Chagle_bot {
+  database_type: 'MySQL'
+}
+
+Table "users" {
+  "id" bigint [not null]
+  "telegram_id" bigint [not null]
+  "shortname" varchar(255) [not null]
+  "name" varchar(255) [not null]
+  "model" varchar(255) [not null]
+  "web" tinyint(1) [not null]
+  "level" int [not null]
+  "balance" decimal(10,5) [not null]
+  "created_at" timestamp [default: NULL]
+  "updated_at" timestamp [default: NULL]
+  Note: '''
+Хранит зарегестрированных пользователей.
+
+`id`  
+`telegram_id`  
+`shortname` shortname пользователя telegram  
+`name` название telegram аккаунта  
+`model` активная модель  
+`web` привязан ли аккаунт к веб версии Chagle  
+`level` уровень аккаунта (если оплатить 299р будет доступно больше моделей)  
+`balance` остаток на балансе в валюте Спаркли (1 р = 1 спаркли)  
+`created_at` дата создания  
+`updated_at` дата обновления  
+'''
+}
+
+Table "messages" {
+  "id" bigint [not null]
+  "user_id" bigint [not null]
+  "role" varchar(255) [not null]
+  "content" text [not null]
+  "error_code" varchar(255) [default: NULL]
+  "created_at" timestamp [default: NULL]
+  "updated_at" timestamp [default: NULL]
+  Note: '''
+Хранит отправленные в чат сообщения.
+
+`id`  
+`user_id` связь с таблицей `Users`  
+`role`  
+  user это сообщение принадлежит пользователю  
+  assistant это сообщение принадлежит асистенту   
+`content` содержимое сообщения   
+`error_code` содержит ли сообщение ошибку, если да то какую   
+`created_at` дата создания  
+`updated_at` дата обновления  
+'''
+}
+
+Ref:"users"."id" < "messages"."user_id" [delete: cascade]

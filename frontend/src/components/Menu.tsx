@@ -2,7 +2,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
     Button,
     Menu,
-    SegmentedControl,
 } from '@mantine/core';
 import {
     IconPlus,
@@ -40,29 +39,6 @@ export default function MobileHeader() {
                 <button onClick={toggle} className='burgerButton'></button>
                 <div
                     className='burgerClose'
-                />
-            </div>
-
-            <div>
-                <SegmentedControl
-                    value={section}
-                    onChange={(value: any) => {
-                        setSection(value);
-                        navigate(value);
-                    }}
-                    onClick={(value: any) => {
-                        setSection(value);
-                        navigate(value);
-                    }}
-                    transitionTimingFunction="ease"
-                    fullWidth
-                    data={[
-                        { label: 'Чат', value: 'chat' },
-                        { label: 'Инструменты', value: 'tool' },
-                    ]}
-                    mx={12}
-                    mb={16}
-                    radius="md"
                 />
             </div>
 
@@ -134,3 +110,26 @@ export default function MobileHeader() {
         </>
     );
 }
+
+//<div>
+//<SegmentedControl
+//    value={section}
+//    onChange={(value: any) => {
+//        setSection(value);
+//        navigate(value);
+//    }}
+//    onClick={(value: any) => {
+//        setSection(value);
+//        navigate(value);
+//    }}
+//    transitionTimingFunction="ease"
+//    fullWidth
+//    data={[
+//        { label: 'Чат', value: 'chat' },
+//        { label: 'Инструменты', value: 'tool' },
+//    ]}
+//    mx={12}
+//    mb={16}
+//    radius="md"
+///>
+//</div>

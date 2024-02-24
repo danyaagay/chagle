@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import axios from '../axios';
 import {
     Group,
-    HoverCard,
     Avatar,
     Text,
     UnstyledButton,
@@ -11,14 +10,13 @@ import {
     rem
 } from '@mantine/core';
 import {
-    IconStarFilled,
-    IconStarsFilled,
-    IconPhotoFilled,
+    IconSparkles,
     IconSettings,
     IconLogout,
     IconCurrencyRubel,
     IconMail,
     IconBrandTelegram,
+    IconList,
 } from '@tabler/icons-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useMobileHeader } from '../contexts/MobileHeaderContext';
@@ -27,18 +25,33 @@ const UserButton = () => {
     const { user } = useAuth();
     const { setMobileTitle, toggle, opened } = useMobileHeader();
 
-        // Logout user
-        const handleLogout = async () => {
-            try {
-                const resp = await axios.post('/logout');
-                if (resp.status === 200) {
-                    localStorage.removeItem('user');
-                    window.location.href = '/';
-                }
-            } catch (error) {
-                console.log(error);
+    // Logout user
+    const handleLogout = async () => {
+        try {
+            const resp = await axios.post('/logout');
+            if (resp.status === 200) {
+                localStorage.removeItem('user');
+                window.location.href = '/';
             }
-        };
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    function numberBalance(number: any) {
+        number = Number(number);
+        var rounded = +number.toFixed(15); // Округляем число до 15 знаков после запятой
+
+        // Преобразуем число в строку
+        var numberString = rounded.toString();
+
+        // Удаляем нули с конца строки
+        while (numberString.includes('.') && (numberString.endsWith('0') || numberString.endsWith('.'))) {
+            numberString = numberString.slice(0, -1); // Удаляем последний символ
+        }
+
+        return numberString;
+    }
 
     return (
         <Menu
@@ -67,67 +80,16 @@ const UserButton = () => {
                             </Text>
                         </div>
                         <div style={{ flex: 1 }}>
-                            <HoverCard radius="md">
-                                <HoverCard.Target>
-                                    <Group gap={5}>
-                                        <Text size="sm" style={{
-                                            marginLeft: "auto",
-                                        }}>
-                                            {user.quick}
-                                        </Text>
-                                        <IconStarFilled size={14} style={{
-                                            color: "rgb(34, 139, 230)",
-                                        }} />
-                                    </Group>
-                                </HoverCard.Target>
-                                <HoverCard.Dropdown>
-                                    <Group gap={5}>
-                                        <div>
-                                            <IconStarFilled size={14} style={{
-                                                color: "rgb(34, 139, 230)",
-                                            }} />
-                                            <Text size="sm">
-                                                ChatGPT 3.5, Claude Instant, Gemini Pro
-                                            </Text>
-                                        </div>
-                                        <Text size="sm" style={{
-                                            marginLeft: "auto",
-                                        }}>
-                                            {user.quick}
-                                        </Text>
-                                    </Group>
-                                    <Group gap={5}>
-                                        <div>
-                                            <IconStarsFilled size={14} style={{
-                                                color: "rgb(34, 139, 230)",
-                                            }} />
-                                            <Text size="sm">
-                                                ChatGPT 4, Claude 2
-                                            </Text>
-                                        </div>
-                                        <Text size="sm" style={{
-                                            marginLeft: "auto",
-                                        }}>
-                                            {user.extended}
-                                        </Text>
-                                    </Group>
-                                    <Group gap={5}>
-                                        <div>
-                                            <IconPhotoFilled size={14} style={{
-                                                color: "rgb(34, 139, 230)",
-                                            }} />
-                                            <Text size="sm">
-                                                Midjourney
-                                            </Text>
-                                        </div>
-                                        <Text size="sm" style={{
-                                            marginLeft: "auto",
-                                        }}>
-                                            {user.images}
-                                        </Text>
-                                    </Group>
-                                </HoverCard.Dropdown>
-                            </HoverCard>
+                            <Group gap={5}>
+                                <Text size="sm" style={{
+                                    marginLeft: "auto",
+                                }}>
+                                    {numberBalance(user.balance)}
+                                </Text>
+                                <IconSparkles size={20} style={{
+                                    color: "rgb(34, 139, 230)",
+                                }} stroke={2} />
+                            </Group>
                         </div>
                     </Flex>
                 </UnstyledButton>
@@ -140,6 +102,13 @@ const UserButton = () => {
                     leftSection={<IconCurrencyRubel style={{ width: rem(14), height: rem(14) }} />}
                 >
                     Оплата
+                </Menu.Item>
+                <Menu.Item
+                    component={Link}
+                    to='transactions'
+                    leftSection={<IconList style={{ width: rem(14), height: rem(14) }} />}
+                >
+                    История использования
                 </Menu.Item>
                 <Menu.Item
                     component={Link}
