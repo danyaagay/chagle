@@ -22,7 +22,7 @@ export default function MobileHeader() {
         setSection(window.location.pathname.startsWith('/tool') ? 'tool' : 'chat');
     }, []);
 
-    const navigate = useNavigate();
+    //const navigate = useNavigate();
     const { user } = useAuth();
 
     const adminClick = () => {

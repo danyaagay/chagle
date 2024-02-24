@@ -137,6 +137,8 @@ class MessageController extends Controller
 
 			echo 'data: {"messageId":"' . $message->id . '"}' . "\n\n";
 
+			echo 'data: {"amount":"' . $newBalance . '"}' . "\n\n";
+
 			if (!$id) {
 				echo 'data: {"chatId":"' . $chat->id . '"}' . "\n\n";
 			}
@@ -224,6 +226,8 @@ class MessageController extends Controller
 				$user->balance = $newBalance;
 				$user->save();
 			}
+
+			echo 'data: {"amount":"' . $newBalance . '"}' . "\n\n";
 
 			$chat->update(['sub_title' => mb_substr($answer['answer'], 0, 255)]);
 		}, 200, [

@@ -191,7 +191,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 						for (const parsedLine of parsedLines) {
 							//console.log(parsedLine);
-							const { message, answerId, messageId, chatId, tempId, error } = parsedLine;
+							const { message, answerId, messageId, chatId, tempId, amount, error } = parsedLine;
 
 							//console.log(answer, message);
 
@@ -215,6 +215,8 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 										return oldData;
 									}
 								);
+							} else if (amount) {
+								user.balance = amount;
 							} else if (tempId) {
 								tempIdRef.current = tempId;
 							} else if (messageId) {
@@ -286,8 +288,6 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 				} catch (error) {
 					console.error(error);
 				}
-
-				user.quick -= 1;
 
 				setIsLoading(false);
 			} catch (error: unknown) {
@@ -395,7 +395,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 						for (const parsedLine of parsedLines) {
 							//console.log(parsedLine);
-							const { message, tempId, error } = parsedLine;
+							const { message, tempId, amount, error } = parsedLine;
 
 							//console.log(answer, message);
 
@@ -421,11 +421,25 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 										return oldData;
 									}
 								);
+							} else if (amount) {
+								user.balance = amount;
 							} else if (tempId) {
 								tempIdRef.current = tempId;
 							}
 						}
 					}
+					queryClient.setQueryData(['chats'], (oldData: any) => {
+						return produce(oldData, (draft: any) => {
+							draft.forEach((chat: any) => {
+								if (chat.id == id) {
+									const now = dayjs();
+									chat.date = now.format('HH:mm');
+									chat.updated_at = now.utc();
+									chat.sub_title = answer;
+								}
+							});
+						});
+					});
 				} catch (error) {
 					console.error(error);
 				}

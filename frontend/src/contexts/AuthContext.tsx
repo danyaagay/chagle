@@ -5,19 +5,19 @@ const AuthContent = createContext<{
 	user: null | any;
 	setUser: (user: any) => void;
 	csrfToken: () => Promise<boolean>;
-  }>({
+}>({
 	user: null,
-	setUser: () => {},
+	setUser: () => { },
 	csrfToken: async () => false,
 });
 
 export const AuthProvider = ({ children }: any) => {
 	const [user, _setUser] = useState<string | null>(
 		() => {
-		  const storedUser = localStorage.getItem('user');
-		  return storedUser ? JSON.parse(storedUser) : null;
+			const storedUser = localStorage.getItem('user');
+			return storedUser ? JSON.parse(storedUser) : null;
 		}
-	  );
+	);
 
 	// set user to local storage
 	const setUser = (user: any) => {

@@ -14,6 +14,7 @@ import classes from '../css/TableSort.module.css';
 import { IconPlus } from '@tabler/icons-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDebouncedState } from '@mantine/hooks';
+import { IS_MOBILE } from '../environment/userAgent';
 
 export function UsersList() {
 	const [search, setSearch] = useDebouncedState('', 500);
@@ -56,7 +57,7 @@ export function UsersList() {
 				onChange={(event) => setSearch(event.currentTarget.value)}
 				radius={'md'}
 			/>
-			<Table classNames={classes} horizontalSpacing="md" verticalSpacing="xs" miw={700} layout="fixed" striped>
+			<Table classNames={classes} horizontalSpacing="md" verticalSpacing="xs" layout={IS_MOBILE ? undefined : 'fixed'} striped>
 				<Table.Thead>
 					<Table.Tr>
 						<Table.Th>
@@ -90,6 +91,7 @@ export function UsersList() {
 										onChange={(value) => handleBalanceChange(i, value)}
 										min={1}
 										radius={'md'}
+										miw={80}
 									/>
 									<ActionIcon variant="default" size="lg" w={36} h={36} onClick={() => mutationAdd({ key: i, id: row.id, telegram: row.email ? false : true })} radius={'md'}>
 										<IconPlus style={{ width: '60%', height: '60%' }} stroke={1.5} />

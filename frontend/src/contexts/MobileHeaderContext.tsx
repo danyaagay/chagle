@@ -61,16 +61,12 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 		const path = window.location.pathname;
 		let title = '';
 
-
 		switch (path) {
 			case '/settings':
 				title = 'Настройки';
 				break;
 			case '/chat':
 				title = 'Новый чат';
-				break;
-			case '/Crr183gJkwKQwkC3jE9N':
-				title = 'Админ панель';
 				break;
 			case '/Crr183gJkwKQwkC3jE9N/users':
 				title = 'Клиенты';
@@ -81,11 +77,14 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 			case '/Crr183gJkwKQwkC3jE9N/proxy':
 				title = 'Прокси';
 				break;
+			case '/Crr183gJkwKQwkC3jE9N':
+				title = 'Админ панель';
+				break;
 			case '/billing':
 				title = 'Оплата';
 				break;
 			case '/transactions':
-				title = 'Транзакции';
+				title = 'История использования';
 				break;
 			//case '/tool':
 			//	title = 'Инструменты';
@@ -112,7 +111,7 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 
 		setMobileTitle(title);
 		document.title = title;
-	}, [chats]);
+	}, [chats, window.location.pathname]);
 
 	return (
 		<MobileHeaderContext.Provider value={{ mobileTitle, setMobileTitle, opened, toggle, openedSettings, toggleSettings }}>
