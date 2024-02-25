@@ -17,7 +17,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { produce } from 'immer';
 import { useAuth } from '../contexts/AuthContext';
-import ModelChangeButton from './ModelChangeButton';
+import MobileTitleContext from '../contexts/MobileHeaderContext';
+//import ModelChangeButton from './ModelChangeButton';
 
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -32,6 +33,8 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 	const location = useLocation();
 	const navigate = useNavigate();
 	const { id } = useParams();
+
+	const { setMobileTitle } = useContext(MobileTitleContext);
 
 	const { user } = useAuth();
 
@@ -269,6 +272,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 								if (tempIdRef.current) {
 									setActive(chatId);
 									navigate('/chat/' + chatId);
+									setMobileTitle(text);
 								}
 							}
 						}

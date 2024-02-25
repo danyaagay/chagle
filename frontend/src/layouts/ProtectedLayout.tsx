@@ -92,11 +92,12 @@ export default function DefaultLayout() {
 				style={{ visibility: !loading ? "visible" : "hidden" }}
 				classNames={classes}
 				layout='alt'
+				header={{height: 57}}
 				navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
 				aside={{ width: 300, breakpoint: 'sm', collapsed: { desktop: id ? !openedSettings : true, mobile: id ? !openedSettings : true } }}
 				transitionDuration={0}
 			>
-				<AppShell.Header hiddenFrom="sm" p="sm">
+				<AppShell.Header hiddenFrom="sm" px={8} py={0}>
 					<MobileHeader />
 				</AppShell.Header>
 

@@ -1,21 +1,12 @@
-import { useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Chat from './Chat';
-import ChatsContext from '../contexts/ChatsContext';
-import MobileHeaderContext from '../contexts/MobileHeaderContext';
 import { Scrollbars } from 'react-custom-scrollbars';
 import axios from '../axios';
 import { useQuery } from '@tanstack/react-query';
-
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 import { produce } from 'immer';
 
 const ChatsList = () => {
-	const { active, setActive } = useContext(ChatsContext);
-	const { setMobileTitle, opened, toggle } = useContext(MobileHeaderContext);
-	const navigate = useNavigate();
-
 	const dateStamping = (chats: any[]): any[] => {
 		return produce(chats, (draft: any[]) => {
 			draft.forEach((chat: any) => {
@@ -62,16 +53,6 @@ const ChatsList = () => {
 					title={chat.title}
 					sub_title={chat.sub_title}
 					date={chat.date}
-					active={active == chat.id ? true : false}
-					onClick={() => {
-						setMobileTitle(chat.title);
-						document.title = chat.title;
-						setActive(chat.id);
-						navigate('chat/' + chat.id);
-						if (opened) {
-							toggle();
-						}
-					}}
 				/>
 			))}
 		</Scrollbars>

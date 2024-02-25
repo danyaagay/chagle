@@ -20,32 +20,66 @@ import axios from '../axios';
 import { IS_MOBILE } from '../environment/userAgent';
 import classes from '../css/ProtectedLayout.module.css';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useClickOutside } from '@mantine/hooks';
+
+import ChatsContext from '../contexts/ChatsContext';
+import useLongPress from '../hooks/useLongPress';
 
 interface ChatChatButtonProps {
 	chatId: string,
 	title: string,
 	sub_title: string,
 	date: string,
-	active: boolean,
-	onClick(value: string): void,
 }
 
 export default function ChatChatButton({
 	chatId,
 	title,
 	sub_title,
-	date,
-	active,
-	onClick,
-	...props
+	date
 }: ChatChatButtonProps & React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>) {
 	const chatTitleRef = useRef<HTMLInputElement>(null);
 	const { hovered, ref } = useHover();
+	const refOutside = useClickOutside(() => {
+		if(isPressed) {
+			setPressed(undefined);
+		}
+	});
 	const [editable, editToggle] = useDisclosure(false);
 	const [deleting, { open, close }] = useDisclosure(false);
 	const [chatTitle, setChatTitle] = useState(title);
 	const navigate = useNavigate();
-	const { setMobileTitle } = useContext(MobileTitleContext);
+	const { setMobileTitle, opened, toggle } = useContext(MobileTitleContext);
+
+
+
+	const { active, setActive, pressed, setPressed } = useContext(ChatsContext);
+	const isActive = active == chatId;
+	const isPressed = pressed == chatId;
+	const onLongPress = () => {
+		setPressed(chatId);
+	};
+
+	const onClick = () => {
+		if (IS_MOBILE && !editable && !isPressed || !IS_MOBILE && !editable) {
+			setMobileTitle(title);
+			document.title = title;
+			setActive(chatId);
+			setPressed(undefined);
+			navigate('chat/' + chatId);
+			if (opened) {
+				toggle();
+			}
+		}
+	}
+
+	const defaultOptions = {
+		shouldPreventDefault: false,
+		delay: 300,
+	};
+	const longPressEvent = useLongPress(onLongPress, onClick, defaultOptions);
+
+
 
 	const queryClient = useQueryClient();
 
@@ -66,7 +100,7 @@ export default function ChatChatButton({
 			return { previousChat };
 		},
 		onSuccess: () => {
-			if (active) {
+			if (isActive) {
 				setMobileTitle('Новый чат');
 				navigate('chat');
 			}
@@ -97,7 +131,7 @@ export default function ChatChatButton({
 		onSuccess: () => {
 			if (chatTitleRef.current) {
 				setChatTitle(chatTitleRef.current.value);
-				if (active) {
+				if (isActive) {
 					setMobileTitle(chatTitleRef.current.value);
 				}
 			}
@@ -129,15 +163,8 @@ export default function ChatChatButton({
 					</Button>
 				</Group>
 			</Modal>
-			<div ref={ref} {...props} onClick={(e) => {
-				if (editable) {
-					e.stopPropagation();
-				} else {
-					onClick(e);
-				}
-			}}
-			>
-				<a className={`${IS_MOBILE ? classes.chatLinkMobile : classes.chatLink} ${active ? classes.chatLinkActive : ''}`}>
+			<div ref={refOutside} {...longPressEvent as any} className="unselectable">
+				<div ref={ref} className={`${IS_MOBILE ? classes.chatLinkMobile : classes.chatLink} ${!IS_MOBILE && isActive || IS_MOBILE && isPressed ? classes.chatLinkActive : ''}`}>
 					{editable ? (
 						<>
 							<div style={{ display: 'flex' }}>
@@ -159,6 +186,7 @@ export default function ChatChatButton({
 													id: chatId,
 													title: chatTitleRef.current?.value
 												});
+												setPressed(undefined);
 											}}
 										>
 											<IconCheck className={classes.linkIcon} stroke={1.5} style={{ width: '22px', height: '22px' }} />
@@ -191,7 +219,7 @@ export default function ChatChatButton({
 									{sub_title}
 								</Text>
 
-								{!IS_MOBILE && hovered || editable || active ? (
+								{!IS_MOBILE && hovered || editable || !IS_MOBILE && isActive || IS_MOBILE && isPressed ? (
 									<div className={classes.buttonBox}>
 										<Flex gap={2}>
 											<ActionIcon
@@ -219,7 +247,7 @@ export default function ChatChatButton({
 								) : ''}
 							</div>
 						</>)}
-				</a>
+				</div>
 			</div>
 		</>
 	);

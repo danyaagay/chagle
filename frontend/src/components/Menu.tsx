@@ -35,13 +35,6 @@ export default function MobileHeader() {
 
     return (
         <>
-            <div className='burgerBox'>
-                <button onClick={toggle} className='burgerButton'></button>
-                <div
-                    className='burgerClose'
-                />
-            </div>
-
             {section == 'chat' ?
                 <>
                     <Button

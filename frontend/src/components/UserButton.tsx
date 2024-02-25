@@ -106,6 +106,13 @@ const UserButton = () => {
                 <Menu.Item
                     component={Link}
                     to='transactions'
+                    onClick={() => {
+                        if (opened) {
+                            toggle();
+                        }
+                        setMobileTitle("История использования");
+                        document.title = "История использования";
+                    }}
                     leftSection={<IconList style={{ width: rem(14), height: rem(14) }} />}
                 >
                     История использования
@@ -130,11 +137,11 @@ const UserButton = () => {
                     component={Link}
                     to='settings'
                     onClick={() => {
-                        setMobileTitle('Настройки');
-                        document.title = 'Настройки';
                         if (opened) {
                             toggle();
                         }
+                        setMobileTitle("Настройки");
+                        document.title = "Настройки";
                     }}
                     leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
                 >

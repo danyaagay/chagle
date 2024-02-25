@@ -116,12 +116,21 @@ export default function ChatSettings() {
         <>
             {loaded.current && (
                 <>
-                    <div>
+                    <div style={{textAlign: 'right', padding: "0 8px 0 8px", marginBottom: "5px"}}>
                         {IS_MOBILE ? (
-                            <div className='burgerBox' style={{ margin: '0px 12px 0px 12px' }}>
-                                <button onClick={toggleSettings} className='burgerButton'></button>
-                                <div className='burgerClose' />
-                            </div>
+                            <ActionIcon
+                                variant="transparent"
+                                size="md"
+                                color="#868e96"
+                                aria-label="Settings"
+                                onClick={toggleSettings}
+                                ml="auto"
+                                miw={40}
+                                mih="100%"
+                            >
+                                <IconX style={{ width: 24, height: 24 }} stroke={1.8} />
+                            </ActionIcon>
+
                         ) : (
                             <Flex
                                 mih={45}

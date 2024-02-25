@@ -18,8 +18,7 @@ class User extends Model
         'name',
         'shortname',
         'level',
-        'paid_at',
-        'quick',
+        'balance',
         'model',
         'web',
     ];

@@ -27,8 +27,8 @@ body, html {
 
 .burgerBox {
     position: relative;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2rem;
+    height: 2rem;
     flex: 0 0 auto;
     display: flex;
     align-items: center;
@@ -86,3 +86,13 @@ body, html {
     height: 0.125rem;
     background-color: var(--mantine-color-gray-6);
 }
+
+.unselectable {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none;   /* Chrome/Safari/Opera */
+    -khtml-user-select: none;    /* Konqueror */
+    -moz-user-select: none;      /* Firefox */
+    -ms-user-select: none;       /* Internet Explorer/Edge */
+    user-select: none;           /* Non-prefixed version, currently
+                                    not supported by any browser */
+  }

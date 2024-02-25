@@ -29,7 +29,7 @@ type MobileHeaderProviderProps = {
 function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 	const { setActive } = useContext(ChatsContext);
 	const [mobileTitle, setMobileTitle] = useState<string | false>(false);
-	const [opened, { toggle }] = useDisclosure(false);
+	const [opened, { toggle }] = useDisclosure(window.location.pathname == '/chat' ? true : false);
 	const { id } = useParams();
 	const navigate = useNavigate();
 
@@ -109,9 +109,11 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 				break;
 		}
 
-		setMobileTitle(title);
-		document.title = title;
-	}, [chats, window.location.pathname]);
+		if (title) {
+			setMobileTitle(title);
+			document.title = title;
+		}
+	}, [chats]);
 
 	return (
 		<MobileHeaderContext.Provider value={{ mobileTitle, setMobileTitle, opened, toggle, openedSettings, toggleSettings }}>

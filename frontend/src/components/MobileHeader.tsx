@@ -2,17 +2,20 @@ import { useRef, useEffect } from 'react';
 import { useMobileHeader } from '../contexts/MobileHeaderContext';
 import classes from '../css/MobileHeader.module.css';
 import {
-    ActionIcon,
+    ActionIcon, Center,
 } from '@mantine/core';
 import {
-    IconSettings
+    IconSettings,
+    IconChevronLeft
 } from '@tabler/icons-react';
 import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function MobileHeader() {
     const topbarRef = useRef<HTMLInputElement>(null);
     const { mobileTitle, toggle, toggleSettings } = useMobileHeader();
     const { id } = useParams();
+    const navigate = useNavigate();
 
     useEffect(() => {
         // Disable scroll mobile
@@ -28,31 +31,43 @@ export default function MobileHeader() {
 
     return (
         <div className={classes.headerBox} ref={topbarRef}>
+            <ActionIcon
+                variant="transparent"
+                size="md"
+                color="#868e96"
+                onClick={() => {
+                    toggle();
+                    navigate('/chat');
+                }}
+                mih={57}
+                miw={40}
+            >
+                <IconChevronLeft style={{ width: 30, height: 30 }} stroke={1.7} />
+            </ActionIcon>
             {id ?
                 <>
+                    <span className={classes.text}>{mobileTitle}</span>
                     <ActionIcon
                         variant="transparent"
                         size="md"
-                        radius="md"
                         color="#868e96"
                         aria-label="Settings"
                         onClick={toggleSettings}
-                        mih={40}
+                        mih={57}
                         miw={40}
                     >
                         <IconSettings style={{ width: 28, height: 28 }} stroke={1.7} />
                     </ActionIcon>
-                    <span className={classes.text}>{mobileTitle}</span>
                 </>
                 :
-                <span className={classes.text} style={{ textAlign: 'left', marginLeft: '12px'}}>{mobileTitle}</span>
+                <span style={{
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    textAlign: 'center',
+                    zIndex: '-1'
+                }}>{mobileTitle}</span>
             }
-            <div className='burgerBox'>
-                <button onClick={toggle} className='burgerButton'></button>
-                <div
-                    className='burger'
-                />
-            </div>
         </div>
     );
 }
