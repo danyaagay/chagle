@@ -42,6 +42,7 @@ Table "chats" {
   "system_message" varchar(255) [not null]
   "max_tokens" int [default: 2048]
   "history" tinyint(1) [default: 1]
+  "used_at" timestamp [default: NULL]
   "created_at" timestamp [default: NULL]
   "updated_at" timestamp [default: NULL]
   Note: '''
@@ -59,7 +60,8 @@ Table "chats" {
 `max_tokens` выбор длины ответа  
 `history`  
   1 история чата учитывается  
-  2 история чата не учитывается   
+  2 история чата не учитывается 
+`used_at` дата последнего сообщения  
 `created_at` дата создания  
 `updated_at` дата обновления  
 '''

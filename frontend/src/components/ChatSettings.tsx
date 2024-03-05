@@ -29,6 +29,7 @@ import { Scrollbars } from 'react-custom-scrollbars';
 import { useMobileHeader } from '../contexts/MobileHeaderContext';
 import { IS_MOBILE } from '../environment/userAgent';
 import { useDebouncedValue } from '@mantine/hooks';
+import { produce } from 'immer';
 
 export default function ChatSettings() {
     const { id } = useParams();
@@ -45,7 +46,7 @@ export default function ChatSettings() {
     const [debounced] = useDebouncedValue(form.values, 500);
     const { toggleSettings } = useMobileHeader();
 
-    const { data: chats } = useQuery({
+    const { data: chats }: any = useQuery({
         queryKey: ['chats'],
         staleTime: Infinity,
         gcTime: Infinity,
@@ -53,18 +54,23 @@ export default function ChatSettings() {
     });
 
     useEffect(() => {
-        if (chats && Array.isArray(chats)) {
-            const chat = chats.find(chat => chat.id == id);
+        const allItems: any = chats?.pages?.flatMap((page: any) => page.chats);
+
+        if (allItems && Array.isArray(allItems)) {
+            const chat = allItems.find(chat => chat.id == id);
             //console.log('loading start', chat);
-            const values = {
-                model: chat['model'],
-                system_message: chat['system_message'],
-                max_tokens: `${chat['max_tokens']}`,
-                history: `${chat['history']}`,
-            };
-            form.setValues(values);
-            form.resetDirty(values);
-            loaded.current = true;
+
+            if (chat) {
+                const values = {
+                    model: chat['model'],
+                    system_message: chat['system_message'],
+                    max_tokens: `${chat['max_tokens']}`,
+                    history: `${chat['history']}`,
+                };
+                form.setValues(values);
+                form.resetDirty(values);
+                loaded.current = true;
+            }
         }
 
         isMounted.current = true;
@@ -85,15 +91,25 @@ export default function ChatSettings() {
 
             const previousChat = queryClient.getQueryData(['chats']);
 
-            queryClient.setQueryData(['chats'], (oldChats: any) => {
-                const updatedChats = oldChats.map((chat: any) => {
-                    if (chat.id == id) {
-                        return { ...chat, ...form.values };
+            queryClient.setQueryData(['chats'],
+                (oldData: any) => {
+                    if (oldData) {
+                        return produce(oldData, (draft: any) => {
+                            draft.pages.forEach((page: any) => {
+                                page.chats.forEach((chat: any) => {
+                                    if (chat.id == id) {
+                                        chat.model = form.values.model;
+                                        chat.history = form.values.history;
+                                        chat.max_tokens = form.values.max_tokens;
+                                        chat.system_message = form.values.system_message;
+                                    }
+                                });
+                            });
+                        });
                     }
-                    return chat;
-                });
-                return updatedChats;
-            });
+                    return oldData;
+                }
+            );
 
             return { previousChat };
         },
@@ -116,7 +132,7 @@ export default function ChatSettings() {
         <>
             {loaded.current && (
                 <>
-                    <div style={{textAlign: 'right', padding: "0 8px 0 8px", marginBottom: "5px"}}>
+                    <div style={{ textAlign: 'right', padding: "0 8px 0 8px", marginBottom: "5px" }}>
                         {IS_MOBILE ? (
                             <ActionIcon
                                 variant="transparent"

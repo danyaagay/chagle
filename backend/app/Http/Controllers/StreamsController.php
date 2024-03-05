@@ -18,7 +18,7 @@ class StreamsController extends Controller
 	public static function stream($question, $history, $settings)
 	{
 		//DANGER FOR PRODUCTION
-		$debug = true;
+		$debug = false;
 
 		ignore_user_abort(true);
 

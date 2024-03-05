@@ -10,9 +10,23 @@ class TransactionController extends Controller
     {
         $user = $request->user();
 
-        $transactions = $user->transactions()->orderBy('updated_at', 'desc')->take(20)->get();
+        $transactions = $user->transactions()
+        ->orderBy('updated_at', 'desc')
+        ->skip($request->offset)
+        ->take(20)
+        ->get()
+        ->toArray();
 
-        return response()->json($transactions);
+		if ($user->transactions()->orderBy('updated_at', 'desc')->count() > $request->offset + 20) {
+			$hasMore = true;
+		} else {
+			$hasMore = false;
+		}
+
+		return response()->json([
+			'transactions' => $transactions,
+			'hasMore' => $hasMore
+		]);
     }
 
     public function store()

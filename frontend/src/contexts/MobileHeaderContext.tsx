@@ -49,7 +49,7 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 		setOpenedSettings(!openedSettings);
 	};
 
-	const { data: chats } = useQuery({
+	const { data: chats }: any = useQuery({
 		queryKey: ['chats'],
 		staleTime: Infinity,
 		gcTime: Infinity,
@@ -60,6 +60,8 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 	useEffect(() => {
 		const path = window.location.pathname;
 		let title = '';
+
+		const allItems: any = chats?.pages?.flatMap((page: any) => page.chats);
 
 		switch (path) {
 			case '/settings':
@@ -96,8 +98,8 @@ function MobileHeaderProvider(props: MobileHeaderProviderProps) {
 			//	title = 'Орфография';
 			//	break;
 			default:
-				if (Array.isArray(chats) && id) {
-					const chat = chats.find((chat: any) => chat.id == id);
+				if (Array.isArray(allItems) && id) {
+					const chat = allItems.find((chat: any) => chat.id == id);
 					if (chat) {
 						title = chat.title;
 						setActive(id);

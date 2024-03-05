@@ -21,7 +21,7 @@ import { IS_MOBILE } from '../environment/userAgent';
 import classes from '../css/ProtectedLayout.module.css';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useClickOutside } from '@mantine/hooks';
-
+import { produce } from 'immer';
 import ChatsContext from '../contexts/ChatsContext';
 import useLongPress from '../hooks/useLongPress';
 
@@ -41,7 +41,7 @@ export default function ChatChatButton({
 	const chatTitleRef = useRef<HTMLInputElement>(null);
 	const { hovered, ref } = useHover();
 	const refOutside = useClickOutside(() => {
-		if(isPressed) {
+		if (isPressed) {
 			setPressed(undefined);
 		}
 	});
@@ -56,6 +56,7 @@ export default function ChatChatButton({
 	const { active, setActive, pressed, setPressed } = useContext(ChatsContext);
 	const isActive = active == chatId;
 	const isPressed = pressed == chatId;
+	
 	const onLongPress = () => {
 		setPressed(chatId);
 	};
@@ -90,12 +91,23 @@ export default function ChatChatButton({
 		onMutate: async (data) => {
 			await queryClient.cancelQueries({ queryKey: ['chats'] });
 
-			const previousChat = queryClient.getQueryData(['chats']);
+			const previousChat: any = queryClient.getQueryData(['chats']);
 
-			queryClient.setQueryData(['chats'], (oldChats: any) => {
-				const updatedChats = oldChats.filter((chat: any) => chat.id !== data.id);
-				return updatedChats;
+			const newPagesArray: any = [];
+			previousChat?.pages.forEach((page: any) => {
+				const newData = page.chats.filter(
+					(val: any) => val.id !== data.id
+				);
+				newPagesArray.push({
+					chats: newData,
+					pageParam: page.pageParam,
+				});
 			});
+
+			queryClient.setQueryData(['chats'], (data: any) => ({
+				pages: newPagesArray,
+				pageParams: data.pageParams,
+			}));
 
 			return { previousChat };
 		},
@@ -116,15 +128,20 @@ export default function ChatChatButton({
 
 			const previousChat = queryClient.getQueryData(['chats']);
 
-			queryClient.setQueryData(['chats'], (oldChats: any) => {
-				const updatedChats = oldChats.map((chat: any) => {
-					if (chat.id === data.id) {
-						return { ...chat, title: data.title };
+			queryClient.setQueryData(['chats'],
+				(oldData: any) => {
+					if (oldData) {
+						return produce(oldData, (draft: any) => {
+							draft.pages[0].chats.forEach((chat: any) => {
+								if (chat.id == data.id) {
+									chat.title = data.title;
+								}
+							});
+						});
 					}
-					return chat;
-				});
-				return updatedChats;
-			});
+					return oldData;
+				}
+			);
 
 			return { previousChat };
 		},
@@ -163,7 +180,7 @@ export default function ChatChatButton({
 					</Button>
 				</Group>
 			</Modal>
-			<div ref={refOutside} {...longPressEvent as any} className="unselectable">
+			<div ref={refOutside} {...(IS_MOBILE ? longPressEvent : {onClick: onClick}) as any} className="unselectable">
 				<div ref={ref} className={`${IS_MOBILE ? classes.chatLinkMobile : classes.chatLink} ${!IS_MOBILE && isActive || IS_MOBILE && isPressed ? classes.chatLinkActive : ''}`}>
 					{editable ? (
 						<>
@@ -227,6 +244,7 @@ export default function ChatChatButton({
 												size="sm"
 												onClick={(e) => {
 													e.stopPropagation();
+													e.preventDefault();
 													editToggle.toggle();
 												}}
 											>
@@ -237,6 +255,7 @@ export default function ChatChatButton({
 												size="sm"
 												onClick={(e) => {
 													e.stopPropagation();
+													e.preventDefault();
 													open();
 												}}
 											>

@@ -38,6 +38,8 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 
 	const { user } = useAuth();
 
+	const queryClient = useQueryClient();
+
 	useEffect(() => {
 		const handleResize = () => {
 			const VIEWPORT_VS_CLIENT_HEIGHT_RATIO = 0.75;
@@ -56,17 +58,15 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 			window.visualViewport.addEventListener('resize', handleResize);
 		}
 
-		//если в чате прогружается сообщение и человек переключил, закончить прогрузку и сбросить кеш
+		//если в чате прогружается сообщение и человек переключил, закончить прогрузку
 		if (isLoading) {
 			//delete tempRef.current[idRef.current];
+			console.log('location change', tempIdRef.current, id);
 			handleStop();
 		}
 
 		tempIdRef.current = '';
 	}, [location]);
-
-
-	const queryClient = useQueryClient();
 
 	// Handle send message
 	const handleSend = async () => {
@@ -257,38 +257,66 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 							} else if (chatId) {
 								const now = dayjs();
 
-								queryClient.setQueryData(['chats'], (oldData: any) => [{
-									title: text,
-									sub_title: answer,
-									id: chatId,
-									date: now.format('HH:mm'),
-									updated_at: now.utc(),
-									model: 'gpt-3.5-turbo',
-									system_message: '',
-									max_tokens: '2048',
-									history: '1',
-								}, ...oldData]);
+								queryClient.setQueryData(['chats'],
+									(oldData: any) => {
+										return produce(oldData, (draft: any) => {
+											draft.pages[0].chats.unshift({
+												title: text,
+												sub_title: answer,
+												id: chatId,
+												date: now.format('HH:mm'),
+												used_at: now.utc(),
+												model: 'gpt-3.5-turbo',
+												system_message: '',
+												max_tokens: '2048',
+												history: '1',
+											});
+										});
+									}
+								);
 
 								if (tempIdRef.current) {
 									setActive(chatId);
 									navigate('/chat/' + chatId);
 									setMobileTitle(text);
+								} else {
+									const tempData = queryClient.getQueryData(['messages','temp']);
+									queryClient.setQueryData(['messages', chatId], tempData);
+									queryClient.setQueryData(['messages','temp'], {
+										pages: [
+											{
+												messages: [
+				
+												],
+												hasMore: false
+											}
+										],
+										pageParams: [
+											0
+										]
+									});
 								}
 							}
 						}
 					}
-					queryClient.setQueryData(['chats'], (oldData: any) => {
-						return produce(oldData, (draft: any) => {
-							draft.forEach((chat: any) => {
-								if (chat.id == id) {
-									const now = dayjs();
-									chat.date = now.format('HH:mm');
-									chat.updated_at = now.utc();
-									chat.sub_title = answer;
-								}
-							});
-						});
-					});
+
+					queryClient.setQueryData(['chats'],
+						(oldData: any) => {
+							if (oldData) {
+								return produce(oldData, (draft: any) => {
+									draft.pages[0].chats.forEach((chat: any) => {
+										if (chat.id == id) {
+											const now = dayjs();
+											chat.date = now.format('HH:mm');
+											chat.used_at = now.utc();
+											chat.sub_title = answer;
+										}
+									});
+								});
+							}
+							return oldData;
+						}
+					);
 				} catch (error) {
 					console.error(error);
 				}
@@ -432,18 +460,23 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 							}
 						}
 					}
-					queryClient.setQueryData(['chats'], (oldData: any) => {
-						return produce(oldData, (draft: any) => {
-							draft.forEach((chat: any) => {
-								if (chat.id == id) {
-									const now = dayjs();
-									chat.date = now.format('HH:mm');
-									chat.updated_at = now.utc();
-									chat.sub_title = answer;
-								}
-							});
-						});
-					});
+					queryClient.setQueryData(['chats'],
+						(oldData: any) => {
+							if (oldData) {
+								return produce(oldData, (draft: any) => {
+									draft.pages[0].chats.forEach((chat: any) => {
+										if (chat.id == id) {
+											const now = dayjs();
+											chat.date = now.format('HH:mm');
+											chat.used_at = now.utc();
+											chat.sub_title = answer;
+										}
+									});
+								});
+							}
+							return oldData;
+						}
+					);
 				} catch (error) {
 					console.error(error);
 				}
@@ -521,7 +554,7 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 						/>
 					</div>
 					<div style={{ display: 'flex' }}>
-						
+
 					</div>
 				</Card>
 

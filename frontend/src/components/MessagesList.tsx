@@ -87,7 +87,6 @@ const MessageList = () => {
     );
 
     useLayoutEffect(() => {
-        //console.log('new page');
         return () => {
             firstLoaded.current = true;
             loading.current = true;

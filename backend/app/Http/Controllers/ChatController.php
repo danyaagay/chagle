@@ -14,10 +14,24 @@ class ChatController extends Controller
 	{
 		$user = $request->user();
 
-		$chats = $user->chats()->orderBy('updated_at', 'desc')->take(20)->get();
+		$chats = $user->chats()
+			->orderBy('used_at', 'desc')
+			->skip($request->offset)
+			->take(20)
+			->get()
+			->toArray();
+
+		//$messagesReverse = array_reverse($messages);
+
+		if ($user->chats()->orderBy('used_at', 'desc')->count() > $request->offset + 20) {
+			$hasMore = true;
+		} else {
+			$hasMore = false;
+		}
 
 		return response()->json([
 			'chats' => $chats,
+			'hasMore' => $hasMore
 		]);
 	}
 

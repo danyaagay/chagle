@@ -72,6 +72,7 @@ class MessageController extends Controller
 			} else {
 				$chat = $user->chats()->create([
 					'title' => mb_substr($request->text, 0, 255),
+					'used_at' => now(),
 				]);
 			}
 
@@ -131,7 +132,7 @@ class MessageController extends Controller
 				$user->save();
 			}
 
-			$chat->update(['sub_title' => mb_substr($answer['answer'], 0, 255)]);
+			$chat->update(['sub_title' => mb_substr($answer['answer'], 0, 255), 'used_at' => now()]);
 
 			echo 'data: {"answerId":"' . $chatAnswer->id . '"}' . "\n\n";
 
@@ -229,7 +230,7 @@ class MessageController extends Controller
 
 			echo 'data: {"amount":"' . $newBalance . '"}' . "\n\n";
 
-			$chat->update(['sub_title' => mb_substr($answer['answer'], 0, 255)]);
+			$chat->update(['sub_title' => mb_substr($answer['answer'], 0, 255), 'used_at' => now()]);
 		}, 200, [
 			'Cache-Control' => 'no-cache',
 			'X-Accel-Buffering' => 'no',

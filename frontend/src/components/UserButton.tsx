@@ -5,6 +5,7 @@ import {
     Avatar,
     Text,
     UnstyledButton,
+    Button,
     Flex,
     Menu,
     rem
@@ -60,18 +61,23 @@ const UserButton = () => {
             styles={{ item: { borderRadius: '8px' }, dropdown: { borderRadius: '8px' } }}
         >
             <Menu.Target>
-                <UnstyledButton
+                <Button
                     px={12}
                     py={10}
+                    variant="subtle"
+                    size="md"
+                    color="gray"
+                    styles={{ label: { display: 'block'}, inner: { display: 'block'} }}
                     style={{
                         width: '100%',
                         color: 'var(--mantine-color-text)',
                         borderRadius: 'var(--mantine-radius-md)',
+                        height: 'auto'
                     }}
                 >
                     <Flex gap="xs" align="center">
                         <Avatar radius="xl" />
-                        <div style={{ flex: 1 }}>
+                        <div style={{ flex: 1, textAlign: 'left' }}>
                             <Text size="sm" fw={500}>
                                 {user.name}
                             </Text>
@@ -92,7 +98,7 @@ const UserButton = () => {
                             </Group>
                         </div>
                     </Flex>
-                </UnstyledButton>
+                </Button>
             </Menu.Target>
             <Menu.Dropdown>
                 <Menu.Item
