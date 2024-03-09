@@ -22,7 +22,8 @@ import {
 } from '@tanstack/react-query';
 import axios from '../axios';
 import {
-    IconX
+    IconX,
+    IconChevronDown
 } from '@tabler/icons-react';
 import classes from '../css/ProtectedLayout.module.css';
 import { Scrollbars } from 'react-custom-scrollbars';
@@ -30,8 +31,10 @@ import { useMobileHeader } from '../contexts/MobileHeaderContext';
 import { IS_MOBILE } from '../environment/userAgent';
 import { useDebouncedValue } from '@mantine/hooks';
 import { produce } from 'immer';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function ChatSettings() {
+    const { user } = useAuth();
     const { id } = useParams();
     const isMounted = useRef(false);
     const loaded = useRef<boolean>(false);
@@ -172,10 +175,18 @@ export default function ChatSettings() {
                                     styles={{ input: { height: '45px' }, dropdown: { borderRadius: '8px' }, option: { borderRadius: '8px' } }}
                                     size='sm'
                                     radius="md"
-                                    data={['gpt-3.5-turbo', 'gpt-3.5-turbo-0301', 'gpt-3.5-turbo-1106', 'gpt-3.5-turbo-16k']}
+                                    data={[
+                                        { value: 'gpt-3.5-turbo', label: 'GPT 3.5 Turbo' },
+                                        { value: 'gpt-3.5-turbo-16k', label: 'GPT 3.5 Turbo 16k' },
+                                        { value: 'gpt-4', label: 'GPT 4', disabled: user.level < 2 },
+                                        { value: 'gpt-4-32k', label: 'GPT 4 32k', disabled: user.level < 2 },
+                                        { value: 'gpt-4-turbo-preview', label: 'GPT 4 Turbo', disabled: user.level < 2 },
+                                    ]}
                                     withCheckIcon={false}
+                                    rightSection={<IconChevronDown style={{ width: 16, height: 16 }}  />}
                                     {...form.getInputProps('model')}
                                 />
+                                {user.level < 2 && <Text size="xs" mt={5} c="dimmed">Для использования GPT 4 оплатите аккаунт</Text>}
                             </div>
                             <div>
                                 <Text size='sm' fw={500} mb={8} c='gray.7'>Системное сообщение</Text>

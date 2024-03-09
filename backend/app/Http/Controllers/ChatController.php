@@ -56,6 +56,13 @@ class ChatController extends Controller
 
 	public function settingsUpdate(Request $request, $id)
 	{
+		$validatedData = $request->validate([
+			'system_message' => 'max:255',
+			'history' => 'in:0,1',
+			'max_tokens' => 'in:500,2048,4096',
+			'model' => 'string|in:gpt-3.5-turbo,gpt-3.5-turbo-16k,gpt-4,gpt-4-32k,gpt-4-turbo-preview',
+		]);
+		
 		$user = $request->user();
 
 		$chat = $user->chats()->find($id);
@@ -66,15 +73,13 @@ class ChatController extends Controller
 			], 500);
 		}
 
-		$data = $request->all();
-
 		if (!$request->filled('system_message')) {
-			$data['system_message'] = '';
+			$validatedData['system_message'] = '';
 		}
 
-		$chat->update($data);
+		$chat->update($validatedData);
 
-		return $data;
+		return $validatedData;
 	}
 
 	public function destroy(Request $request, $id)

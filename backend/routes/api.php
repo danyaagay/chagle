@@ -55,7 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/chats/{id}', [ChatController::class, 'destroy']);
         Route::get('/messages/{id}', [MessageController::class, 'index']);
         Route::post('/messages/{id?}', [MessageController::class, 'store'])->middleware('throttle:8,1');
-        Route::post('/messages/regenerate/{id}', [MessageController::class, 'regenerate'])->middleware('throttle:8,1');
+        Route::post('/messages/regenerate/{id}', [MessageController::class, 'store'])->middleware('throttle:8,1');
         Route::post('/messages-cancel', [MessageController::class, 'cancel']);
         Route::post('/settings-update', [SettingController::class, 'update']);
         Route::get('/transactions', [TransactionController::class, 'index']);

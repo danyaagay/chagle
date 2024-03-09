@@ -1,3 +1,9 @@
+.chagle-Select-input:focus,
+.chagle-Textarea-input:focus[data-variant=default]  {
+    --_input-bd: var(--mantine-color-gray-6) !important;
+    outline: none;
+}
+
 body, html {
     height: 100%;
     width: 100%;

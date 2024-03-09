@@ -17,18 +17,14 @@ class StreamsController extends Controller
 	 */
 	public static function stream($question, $history, $settings)
 	{
+		$isOpenRouter = in_array($settings['model'], ['gpt-4', 'gpt-4-32k', 'gpt-4-turbo-preview']);
+
 		//DANGER FOR PRODUCTION
-		$debug = false;
+		$debug = true;
 
 		ignore_user_abort(true);
 
-		//$question = 'Provide your response in a markdown code block ' . $question;
-
-		if (!$history) {
-			$history = [
-				['role' => 'user', 'content' => $question]
-			];
-		}
+		$history = $history ?: [['role' => 'user', 'content' => $question]];
 
 		if ($settings['system_message']) {
 			array_unshift($history, ['role' => 'system', 'content' => $settings['system_message']]);
@@ -47,17 +43,24 @@ class StreamsController extends Controller
 				$error = true;
 				$errorCode = false;
 
-				$token = TokenController::getToken();
-				$proxy = ProxyController::getProxy();
-				if (!$token || !$proxy) {
-					$errorCode = '1';
-					break;
-				}
+				if ($isOpenRouter) {
+					$client = OpenAI::factory()
+						->withBaseUri('https://openrouter.ai/api/v1')
+						->withApiKey('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')
+						->make();
+				} else {
+					$token = TokenController::getToken();
+					$proxy = ProxyController::getProxy();
+					if (!$token || !$proxy) {
+						$errorCode = '1';
+						break;
+					}
 
-				$client = OpenAI::factory()
-					->withApiKey($token->token)
-					->withHttpClient(new \GuzzleHttp\Client(['verify' => false, 'proxy' => "{$proxy->schema}://{$proxy->auth}@{$proxy->ip}"]))
-					->make();
+					$client = OpenAI::factory()
+						->withApiKey($token->token)
+						->withHttpClient(new \GuzzleHttp\Client(['verify' => false, 'proxy' => "{$proxy->schema}://{$proxy->auth}@{$proxy->ip}"]))
+						->make();
+				}
 
 				try {
 					$stream = $client->chat()->createStreamed([
@@ -69,24 +72,25 @@ class StreamsController extends Controller
 					$error = false;
 				} catch (\OpenAI\Exceptions\ErrorException $e) {
 					$errorCode = @$e->getErrorCode() ?: $e->getErrorType();
-					$errorMessage = @$e->getMessage();
+					//$errorMessage = @$e->getMessage();
 					//var_dump('2', $errorMessage, $errorCode);
 				} catch (\OpenAI\Exceptions\TransporterException $e) {
 					$errorCode = @$e->getCode();
-					$errorMessage = @$e->getMessage();
+					//$errorMessage = @$e->getMessage();
 					//var_dump('1', $errorMessage, $errorCode);
 				}
 
-				// Приостанавливаем токен
-				if ($errorCode === 'rate_limit_exceeded') {
+				// Приостанавливаем токен (нужно дописать другие ошибки)
+				//elseif ($errorCode === 'invalid_request_error') {
+					//break;
+				if ($errorCode === 'rate_limit_exceeded' && !$isOpenRouter) {
 					TokenController::setStatus($token, 2);
-				} elseif ($errorCode === 'invalid_request_error') {
-					break;
-				} elseif ($errorCode === 0 ) {
+				} elseif ($errorCode === 0 && !$isOpenRouter) {
 					ProxyController::setStatus($proxy, 2);
 					break;
+				} elseif ($errorCode !== false) {
+					break;
 				}
-				// Нужно дописать другие ошибки
 			} while ($error && $token && $proxy);
 
 			if ($error) {
@@ -131,10 +135,16 @@ class StreamsController extends Controller
 			echo 'data: ' . $json . "\n\n";
 			ob_flush();
 			flush();
+
+			$id = $isOpenRouter ? $response->id : false;
 		}
 
 		ob_end_flush();
 
-		return ['error' => false, 'answer' => $answer];
+		return [
+			'error' => false,
+			'answer' => $answer,
+			'id' => $id
+		];
 	}
 }

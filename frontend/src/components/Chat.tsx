@@ -56,7 +56,7 @@ export default function ChatChatButton({
 	const { active, setActive, pressed, setPressed } = useContext(ChatsContext);
 	const isActive = active == chatId;
 	const isPressed = pressed == chatId;
-	
+
 	const onLongPress = () => {
 		setPressed(chatId);
 	};
@@ -93,21 +93,15 @@ export default function ChatChatButton({
 
 			const previousChat: any = queryClient.getQueryData(['chats']);
 
-			const newPagesArray: any = [];
-			previousChat?.pages.forEach((page: any) => {
-				const newData = page.chats.filter(
-					(val: any) => val.id !== data.id
-				);
-				newPagesArray.push({
-					chats: newData,
-					pageParam: page.pageParam,
-				});
-			});
-
-			queryClient.setQueryData(['chats'], (data: any) => ({
-				pages: newPagesArray,
-				pageParams: data.pageParams,
-			}));
+			queryClient.setQueryData(['chats'],
+				(oldData: any) => {
+					return produce(oldData, (draft: any) => {
+						draft.pages.forEach((page: any) => {
+							page.chats = page.chats.filter((chat: any) => chat.id !== data.id);
+						});
+					});
+				}
+			);
 
 			return { previousChat };
 		},
@@ -130,16 +124,13 @@ export default function ChatChatButton({
 
 			queryClient.setQueryData(['chats'],
 				(oldData: any) => {
-					if (oldData) {
-						return produce(oldData, (draft: any) => {
-							draft.pages[0].chats.forEach((chat: any) => {
-								if (chat.id == data.id) {
-									chat.title = data.title;
-								}
-							});
+					return produce(oldData, (draft: any) => {
+						draft.pages[0].chats.forEach((chat: any) => {
+							if (chat.id == data.id) {
+								chat.title = data.title;
+							}
 						});
-					}
-					return oldData;
+					});
 				}
 			);
 
@@ -180,7 +171,7 @@ export default function ChatChatButton({
 					</Button>
 				</Group>
 			</Modal>
-			<div ref={refOutside} {...(IS_MOBILE ? longPressEvent : {onClick: onClick}) as any} className="unselectable">
+			<div ref={refOutside} {...(IS_MOBILE ? longPressEvent : { onClick: onClick }) as any} className="unselectable">
 				<div ref={ref} className={`${IS_MOBILE ? classes.chatLinkMobile : classes.chatLink} ${!IS_MOBILE && isActive || IS_MOBILE && isPressed ? classes.chatLinkActive : ''}`}>
 					{editable ? (
 						<>

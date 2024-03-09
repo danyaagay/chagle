@@ -64,7 +64,7 @@ export default function Transactions() {
 			{!IS_MOBILE ? (
 				<Scrollbars autoHide>
 					<div style={{ 'maxWidth': '900px', 'margin': 'auto' }}>
-						<Box className={classes.root}>
+						<Box>
 							<ScrollArea>
 								<Table classNames={classes} horizontalSpacing="md" verticalSpacing="xs" miw={700} layout="fixed" striped>
 									<Table.Thead>
@@ -97,8 +97,8 @@ export default function Transactions() {
 				</Scrollbars>
 
 			) : (
-				<Container className={classes.container} px={8}>
-					<Box className={classes.root}>
+				<Container px={8} style={{overflow: 'auto', height: '100%'}}>
+					<Box>
 						<ScrollArea>
 							<Table classNames={classes} horizontalSpacing="md" verticalSpacing="xs" layout="fixed" striped>
 								<Table.Thead>
