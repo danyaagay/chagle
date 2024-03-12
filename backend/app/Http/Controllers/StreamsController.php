@@ -24,8 +24,6 @@ class StreamsController extends Controller
 
 		ignore_user_abort(true);
 
-		$history = $history ?: [['role' => 'user', 'content' => $question]];
-
 		if ($settings['system_message']) {
 			array_unshift($history, ['role' => 'system', 'content' => $settings['system_message']]);
 		}
@@ -104,7 +102,6 @@ class StreamsController extends Controller
 				ob_end_flush();
 
 				return [
-					'error' => true,
 					'error_code' => $errorCode,
 					'answer' => $text
 				];
@@ -142,7 +139,7 @@ class StreamsController extends Controller
 		ob_end_flush();
 
 		return [
-			'error' => false,
+			'error_code' => null,
 			'answer' => $answer,
 			'id' => $id
 		];

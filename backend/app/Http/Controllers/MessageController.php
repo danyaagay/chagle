@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Redis;
 use App\Http\Controllers\StreamsController;
 use Illuminate\Support\Str;
 
+use App\Services\ChatService;
+use App\Services\UserService;
+use App\Services\MessageService;
+use App\Services\StreamService;
+
 class MessageController extends Controller
 {
 	public function index(Request $request, $id)
@@ -49,83 +54,50 @@ class MessageController extends Controller
 		]);
 	}
 
-	public function store(Request $request, $id = false)
+	public function store(Request $request, $id = false, ChatService $chatService, UserService $userService, StreamService $streamService, MessageService $messageService)
 	{
 		$user = $request->user();
 
-		return response()->stream(function () use ($user, $request, $id) {
+		return response()->stream(function () use ($user, $request, $id, $userService, $chatService, $streamService, $messageService) {
 			$isRegenerate = Str::contains(url()->current(), '/regenerate/');
-			$reqText = $request->text;
 
 			if ($user->balance <= 0) {
-				$text = "Пополните баланс";
+				$streamService->sendMessage(['message' => 'Пополните баланс', 'error' => true]);
 
-				$json = json_encode(['message' => $text, 'error' => true]);
-
-				echo 'data: ' . $json . "\n\n";
-				flush();
-				ob_end_flush();
-
-				return false;
+				return response()->json([
+					'error' => 'Low balance',
+				], 500);
 			}
 
-			$chat = $id ? $user->chats()->find($id) : $user->chats()->create([
-				'title' => mb_substr($reqText, 0, 255),
-				'used_at' => now(),
-			]);
-
+			$chat = $chatService->createOrFind($user, $id, $request->text);
 			if (!$chat) {
 				return response()->json([
 					'error' => 'Chat not found',
 				], 500);
 			}
 
-			$isOpenRouter = in_array($chat->model, ['gpt-4', 'gpt-4-32k', 'gpt-4-turbo-preview']);
-			if ($isOpenRouter && $user->level < 2) {
-				$text = "Для использования GPT 4 оплатите аккаунт";
+			if (!$userService->checkLevel($chat, $user)) {
+				$streamService->sendMessage(['message' => 'Для использования GPT 4 оплатите аккаунт', 'error' => true]);
 
-				$json = json_encode(['message' => $text, 'error' => true]);
-
-				echo 'data: ' . $json . "\n\n";
-				flush();
-				ob_end_flush();
-
-				return false;
+				return response()->json([
+					'error' => 'Wrong model as level',
+				], 500);
 			}
 
 			if ($isRegenerate) {
-				$lastMessages = $chat->messages()->orderBy('id', 'desc')->limit(2)->get();
-
-				if ($lastMessages[1]->role != 'user' || $lastMessages[0]->role != 'assistant') {
-					return response()->json([
-						'error' => 'Unknown error 2',
-					]);
-				}
-
-				$reqText = $lastMessages[1]->text;
+				$lastMessages = $messageService->getLasts($chat, $request->text);
+				$message = $lastMessages[1];
 			} else {
-				$message = $chat->messages()->create([
-					'content' => $reqText,
-					'role' => 'user',
-				]);
+				$message = $messageService->create($chat, $request->text, 'user');
 			}
 
-			if ($chat->history) {
-				$messagesQuery = $chat->messages()
-					->where('error_code', NULL)
-					->orderByDesc('id');
-
-				if ($isRegenerate) {
-					$messagesQuery->whereNot('id', $lastMessages[0]->id);
-				}
-
-				$messages = $messagesQuery->get();
-
-				$history = $this->getHistory($messages, $chat->model);
-				$history = array_reverse($history);
-			} else {
-				$history = [];
+			if (!$message) {
+				return response()->json([
+					'error' => 'Message cannot be created or not found',
+				], 500);
 			}
+
+			$history = $messageService->getHistory($chat, $lastMessages[0]->id ?? false, $message->content);
 
 			$settings = [
 				'model' => $chat->model,
@@ -133,55 +105,31 @@ class MessageController extends Controller
 				'max_tokens' => $chat->max_tokens,
 			];
 
-			$answer = StreamsController::stream($reqText, $history, $settings);
+			$answer = StreamsController::stream($message->content, $history, $settings);
 
-			if ($answer['error']) {
-				if ($isRegenerate) {
-					$lastMessages[0]->update([
-						'content' => $answer['answer'],
-						'error_code' => $answer['error_code']
-					]);
-				} else {
-					$chatAnswer = $chat->messages()->create([
-						'content' => $answer['answer'],
-						'role' => 'assistant',
-						'error_code' => $answer['error_code']
-					]);
-				}
+			if ($isRegenerate) {
+				$messageService->update($lastMessages[0], $answer['answer'], $answer['error_code'] ?? NULL);
 			} else {
-				if ($isRegenerate) {
-					$lastMessages[0]->update([
-						'content' => $answer['answer'],
-						'error_code' => NULL
-					]);
-				} else {
-					$chatAnswer = $chat->messages()->create([
-						'content' => $answer['answer'],
-						'role' => 'assistant',
-					]);
+				$chatAnswer = $messageService->create($chat, $answer['answer'], 'assistant', $answer['error_code'] ?? NULL);
+			}
 
-					echo 'data: {"answerId":"' . $chatAnswer->id . '"}' . "\n\n";
+			if (!$answer['error_code']) {
+				if (!$isRegenerate) {
+					$streamService->sendMessage(['answerId' => $chatAnswer->id]);
 
-					echo 'data: {"messageId":"' . $message->id . '"}' . "\n\n";
+					$streamService->sendMessage(['messageId' => $message->id]);
 
 					if (!$id) {
-						echo 'data: {"chatId":"' . $chat->id . '"}' . "\n\n";
+						$streamService->sendMessage(['chatId' => $chat->id]);
 					}
 				}
 
-				$newBalance = $this->calculate($history, $user->balance, $reqText, $answer['answer'], $chat->model, $answer['id'] ?? null);
+				$newBalance = $userService->balanceDown($history, $user, $answer['answer'], $chat->model, $answer['id'] ?? null);
 
-				//Учет в транзакциях
-				$user->transactions()->create([
-					'type' => 'Списание',
-					'amount' => $user->balance - $newBalance,
-				]);
-				$user->update(['balance' => $newBalance]);
-
-				echo 'data: {"amount":"' . $newBalance . '"}' . "\n\n";
+				$streamService->sendMessage(['amount' => number_format($newBalance, 5, '.', '')]);
 			}
 
-			$chat->update(['sub_title' => mb_substr($answer['answer'], 0, 255), 'used_at' => now()]);
+			$chatService->subTitleUpdate($chat, $answer['answer']);
 		}, 200, [
 			'Cache-Control' => 'no-cache',
 			'X-Accel-Buffering' => 'no',
@@ -193,78 +141,5 @@ class MessageController extends Controller
 	{
 		Redis::del($request->id);
 		return true;
-	}
-
-	public static function getHistory($messages, $model)
-	{
-		$array = [];
-		$contextSize = ($model === 'gpt-3.5-turbo-16k') ? 16383 : 4095;
-		$contextLength = 0;
-
-		foreach ($messages as $message) {
-			$roleLength = mb_strlen($message->role);
-			$contentLength = mb_strlen($message->content);
-
-			// Проверяем, поместится ли роль и содержимое в контекст
-			if (($contextLength + $roleLength + $contentLength) <= $contextSize) {
-				$array[] = ['role' => $message->role, 'content' => $message->content];
-
-				// Увеличиваем длину контекста на длину роли и содержимого, а также учитываем пробелы между ними
-				$contextLength += $roleLength + $contentLength + 2;
-			} else {
-				// Если контекст уже достиг максимального размера, прекращаем добавление сообщений
-				break;
-			}
-		}
-
-		return $array;
-	}
-
-	public static function calculate($history, $balance, $question, $answer, $model, $id)
-	{
-		$history = $history ?: [['role' => 'user', 'content' => $question]];
-
-		// Считаем количество токенов
-		if ($id) {
-			$curl = curl_init('https://openrouter.ai/api/v1/generation?id=' . $id);
-			curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-				'Authorization: Bearer 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'
-			));
-			$response = curl_exec($curl);
-			$data = json_decode($response, true);
-
-			$tokenCount = $data['data']['tokens_prompt'] + $data['data']['tokens_completion'];
-		} else {
-			$text = '';
-			foreach ($history as $history) {
-				$text .= $history['content'];
-			}
-			$text .= $answer;
-			$text = str_replace(" ", "", $text);
-
-			$tokenCount = ceil(mb_strlen($text) / 2);
-		}
-
-		// Рассчитываем стоимость
-		if ($model === 'gpt-3.5-turbo') {
-			$pricePerTokens = 0.2;
-		} elseif ($model === 'gpt-3.5-turbo-16k') {
-			$pricePerTokens = 0.4;
-		} elseif ($model === 'gpt-4') {
-			$pricePerTokens = 6;
-		} elseif ($model === 'gpt-4-32k') {
-			$pricePerTokens = 12;
-		} elseif ($model === 'gpt-4-turbo-preview') {
-			$pricePerTokens = 3;
-		}
-		$pricePerToken = $pricePerTokens / 1000;
-		$cost = $tokenCount * $pricePerToken;
-
-
-		// Вычитаем стоимость из баланса
-		$balance -= $cost;
-
-		return $balance;
 	}
 }
