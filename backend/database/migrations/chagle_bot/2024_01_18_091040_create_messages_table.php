@@ -19,6 +19,7 @@ return new class extends Migration
                 ->onDelete('cascade');
             $table->string('role');
             $table->text('content');
+            $table->string('model', 255)->nullable();
             $table->string('error_code')->nullable();
             $table->timestamps();
         });

@@ -9,7 +9,8 @@ class MessageService
         $message = $chat->messages()->create([
             'content' => $text,
             'role' => $role,
-            'error_code' => $errorCode ?? NULL
+            'error_code' => $errorCode ?? NULL,
+            'model' => $chat->model
         ]);
 
         return $message;
