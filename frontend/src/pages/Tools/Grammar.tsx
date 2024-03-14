@@ -1,9 +1,8 @@
 import {
-	Flex, TextInput, Button, Group, Box, Textarea, Input, Paper, ActionIcon
+	Flex, Button, Group,Textarea, Input, Paper
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useEffect, useState } from 'react';
-import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
+import { useState } from 'react';
 
 export default function Grammar() {
 	const [result, setResult] = useState('');

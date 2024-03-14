@@ -1,5 +1,5 @@
 import {
-	Flex, TextInput, Button, Group, Box, Textarea
+	Flex, Button, Textarea
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 
