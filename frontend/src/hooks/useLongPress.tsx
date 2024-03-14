@@ -56,16 +56,16 @@ const useLongPress = (
     };
 };
 
-const isTouchEvent = (event: Event): event is TouchEvent => {
-    return "touches" in event;
-};
-
-const preventDefault = (event: TouchEvent) => {
-    if (!isTouchEvent(event)) return;
-
-    if (event.touches.length < 2 && event.preventDefault) {
-        event.preventDefault();
-    }
-};
+//const isTouchEvent = (event: Event): event is TouchEvent => {
+//    return "touches" in event;
+//};
+//
+//const preventDefault = (event: TouchEvent) => {
+//    if (!isTouchEvent(event)) return;
+//
+//    if (event.touches.length < 2 && event.preventDefault) {
+//        event.preventDefault();
+//    }
+//};
 
 export default useLongPress;

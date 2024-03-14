@@ -2,7 +2,7 @@ import { useRef, useEffect } from 'react';
 import { useMobileHeader } from '../contexts/MobileHeaderContext';
 import classes from '../css/MobileHeader.module.css';
 import {
-    ActionIcon, Center,
+    ActionIcon
 } from '@mantine/core';
 import {
     IconSettings,

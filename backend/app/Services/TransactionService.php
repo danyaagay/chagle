@@ -4,10 +4,10 @@ namespace App\Services;
 
 class TransactionService
 {
-    public function down($user, $newBalance) {
+    public function down($user, $cost) {
         $user->transactions()->create([
             'type' => 'Списание',
-            'amount' => $user->balance - $newBalance,
+            'amount' => $cost,
         ]);
     }
 }

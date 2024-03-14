@@ -1,12 +1,12 @@
 import classes from '../css/ProtectedLayout.module.css';
 import { Scrollbars } from 'react-custom-scrollbars';
 import { Text } from '@mantine/core';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { IS_MOBILE } from '../environment/userAgent';
 
 const ToolList = () => {
-    const [active, setActive] = useState('');
+    const [active, setActive]: any = useState('');
 
     useEffect(() => {
         const pathSegments = window.location.pathname.split('/tool/');

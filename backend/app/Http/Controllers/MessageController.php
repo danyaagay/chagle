@@ -54,7 +54,7 @@ class MessageController extends Controller
 		]);
 	}
 
-	public function store(Request $request, $id = false, ChatService $chatService, UserService $userService, StreamService $streamService, MessageService $messageService)
+	public function store(Request $request, MessageService $messageService, ChatService $chatService, UserService $userService, StreamService $streamService, $id = false)
 	{
 		$user = $request->user();
 

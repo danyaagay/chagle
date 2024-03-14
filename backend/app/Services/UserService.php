@@ -57,7 +57,7 @@ class UserService
 
         $user->update(['balance' => $balance]);
 
-        $this->transactionService->down($user, $balance);
+        $this->transactionService->down($user, $cost);
 
 		return $balance;
     }
