@@ -4,13 +4,14 @@ namespace App\Services;
 
 class MessageService
 {
-    public function create($chat, $text, $role, $errorCode = NULL)
+    // user for support bot telegram (without chats)
+    public function create($chatOrUser, $text, $role, $errorCode = NULL)
     {
-        $message = $chat->messages()->create([
+        $message = $chatOrUser->messages()->create([
             'content' => $text,
             'role' => $role,
             'error_code' => $errorCode ?? NULL,
-            'model' => $chat->model
+            'model' => $chatOrUser->model
         ]);
 
         return $message;
@@ -35,10 +36,10 @@ class MessageService
         ]);
     }
 
-    public function getHistory($chat, $lastMessageId = false, $text)
+    public function getHistory($chatOrUser, $lastMessageId = false, $text)
     {
-        if ($chat->history) {
-            $messagesQuery = $chat->messages()
+        if ($chatOrUser->history || !isset($chatOrUser->history)) {
+            $messagesQuery = $chatOrUser->messages()
                 ->where('error_code', NULL)
                 ->orderByDesc('id');
 
@@ -49,15 +50,15 @@ class MessageService
             $messages = $messagesQuery->get();
 
             $array = [];
-            if ($chat->model === 'gpt-3.5-turbo') {
+            if ($chatOrUser->model === 'gpt-3.5-turbo') {
                 $contextSize = 4095;
-            } elseif ($chat->model === 'gpt-3.5-turbo-16k') {
+            } elseif ($chatOrUser->model === 'gpt-3.5-turbo-16k') {
                 $contextSize = 16383;
-            } elseif ($chat->model === 'gpt-4') {
+            } elseif ($chatOrUser->model === 'gpt-4') {
                 $contextSize = 8191;
-            } elseif ($chat->model === 'gpt-4-32k') {
+            } elseif ($chatOrUser->model === 'gpt-4-32k') {
                 $contextSize = 32767;
-            } elseif ($chat->model === 'gpt-4-turbo-preview') {
+            } elseif ($chatOrUser->model === 'gpt-4-turbo-preview') {
                 $contextSize = 128000;
             }
             $contextLength = 0;

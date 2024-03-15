@@ -56,8 +56,10 @@ class UserService
 		$balance = $user->balance - $cost;
 
         $user->update(['balance' => $balance]);
-
-        $this->transactionService->down($user, $cost);
+        
+        if (!isset($user->model)) {
+            $this->transactionService->down($user, $cost);
+        }
 
 		return $balance;
     }

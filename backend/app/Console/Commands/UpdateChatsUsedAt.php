@@ -5,7 +5,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\Chat;
+use App\Models\User;
 
 class UpdateChatsUsedAt extends Command
 {
@@ -20,13 +20,16 @@ class UpdateChatsUsedAt extends Command
 
     public function handle()
     {
-        $chats = Chat::all();
+        $users = User::all();
 
-        foreach ($chats as $chat) {
-            $lastMessage = $chat->messages()->latest()->first();
+        foreach ($users as $user) {
 
-            if ($lastMessage) {
-                $chat->update(['used_at' => $lastMessage->created_at]);
+            $balance = $user->balance;
+
+            if ($balance < 18) {
+                $user->update(['balance' => 2]);
+            } else {
+                $user->update(['balance' => $balance - 18]);
             }
         }
 
