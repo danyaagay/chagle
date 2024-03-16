@@ -127,6 +127,8 @@ class MessageController extends Controller
 				$newBalance = $userService->balanceDown($history, $user, $answer['answer'], $chat->model, $answer['id'] ?? null);
 
 				$streamService->sendMessage(['amount' => number_format($newBalance, 5, '.', '')]);
+			} else {
+				$messageService->errorNoticeAdmin($answer['answer']);
 			}
 
 			$chatService->subTitleUpdate($chat, $answer['answer']);

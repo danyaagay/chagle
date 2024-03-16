@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Telegram\Bot\Laravel\Facades\Telegram;
+
 class MessageService
 {
     // user for support bot telegram (without chats)
@@ -85,6 +87,16 @@ class MessageService
         }
 
         return $history;
+    }
+
+    public function errorNoticeAdmin($text)
+    {
+		$bot = Telegram::bot();
+        $bot->sendMessage([
+			'chat_id' => 629799294,
+			'text' => "Произошла ошибка
+$text"
+		]);
     }
 }
 

@@ -8,12 +8,16 @@ import {
 	Textarea,
 	ActionIcon,
 	Card,
+	Tooltip,
 } from '@mantine/core';
 import { AxiosError } from 'axios';
 import ChatsContext from '../contexts/ChatsContext';
 import { IS_MOBILE } from '../environment/userAgent';
 import classes from '../css/MessageInput.module.css';
-import { useQueryClient } from '@tanstack/react-query';
+import {
+	useQuery,
+	useQueryClient
+} from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { produce } from 'immer';
 import { useAuth } from '../contexts/AuthContext';
@@ -280,13 +284,13 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 									navigate('/chat/' + chatId);
 									setMobileTitle(text);
 								} else {
-									const tempData = queryClient.getQueryData(['messages','temp']);
+									const tempData = queryClient.getQueryData(['messages', 'temp']);
 									queryClient.setQueryData(['messages', chatId], tempData);
-									queryClient.setQueryData(['messages','temp'], {
+									queryClient.setQueryData(['messages', 'temp'], {
 										pages: [
 											{
 												messages: [
-				
+
 												],
 												hasMore: false
 											}
@@ -517,18 +521,62 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 	//	}
 	//);
 
+
+
+	//ВРЕМЕННО Начало (баг OpenRouter)
+	const [isOpenRouter, setIsOpenRouter] = useState(false);
+
+	const { data: chats }: any = useQuery({
+		queryKey: ['chats'],
+		staleTime: Infinity,
+		gcTime: Infinity,
+		refetchOnWindowFocus: false,
+	});
+
+	useEffect(() => {
+		const allItems: any = chats?.pages?.flatMap((page: any) => page.chats);
+
+		if (id && allItems && Array.isArray(allItems)) {
+			const chat = allItems.find(chat => chat.id == id);
+			console.log(chat)
+
+			if (chat['model'] == 'gpt-4' ||
+				chat['model'] == 'gpt-4-32k' ||
+				chat['model'] == 'gpt-4-turbo-preview') {
+				setIsOpenRouter(true);
+			}
+		}
+	}, [id, chats]);
+	//ВРЕМЕННО Конец (баг OpenRouter)
+
 	return (
 		<div className='chatInput'>
 			<div className='chatInputContainer'>
 				{isLoading ? (
-					<ActionIcon
-						variant="transparent"
-						size="lg"
-						className={classes.send}
-						onClick={handleStop}
-					>
-						<IconPlayerStop stroke={1.5} className={classes.linkIcon} />
-					</ActionIcon>
+					isOpenRouter ?
+						(<Tooltip
+							multiline
+							w={220}
+							transitionProps={{ duration: 200 }}
+							label="Отмена генерации на всех моделях кроме GPT 3.5 временно недоступна"
+						>
+							<ActionIcon
+								variant="transparent"
+								size="lg"
+								className={classes.send}
+							>
+								<IconPlayerStop stroke={1.5} className={classes.linkIcon} />
+							</ActionIcon>
+						</Tooltip>)
+						:
+						(<ActionIcon
+							variant="transparent"
+							size="lg"
+							className={classes.send}
+							onClick={handleStop}
+						>
+							<IconPlayerStop stroke={1.5} className={classes.linkIcon} />
+						</ActionIcon>)
 				) : id && (
 					<ActionIcon
 						variant="transparent"

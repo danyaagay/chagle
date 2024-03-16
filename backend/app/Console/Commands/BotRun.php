@@ -8,6 +8,8 @@ use App\Models\Bot\User;
 use OpenAI;
 use App\Http\Controllers\TokenController;
 use App\Http\Controllers\ProxyController;
+use App\Http\Controllers\MessageController;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Crypt;
 
 use App\Services\UserService;
@@ -399,6 +401,8 @@ ChatGPT 4, Claude 2
 
 		if ($error || !$result->choices[0]->message->content) {
 			$text = "В данный момент невозможно обработать запрос. Ошибка: {$errorCode}";
+
+			$messageService->errorNoticeAdmin($text);
 		} else {
 			$text = $result->choices[0]->message->content;
 

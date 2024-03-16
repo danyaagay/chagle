@@ -20,7 +20,7 @@ class StreamsController extends Controller
 		$isOpenRouter = in_array($settings['model'], ['gpt-4', 'gpt-4-32k', 'gpt-4-turbo-preview']);
 
 		//DANGER FOR PRODUCTION
-		$debug = true;
+		$debug = false;
 
 		ignore_user_abort(true);
 
@@ -121,7 +121,7 @@ class StreamsController extends Controller
 				$text = $response->choices[0]->delta->content;
 			}
 
-			if (connection_aborted() || !Redis::get($tempId)) {
+			if (connection_aborted() && !$isOpenRouter || !Redis::get($tempId) && !$isOpenRouter) { //ВРЕМЕННО стоит !$isOpenRouter (баг OpenRouter)
 				break;
 			}
 
