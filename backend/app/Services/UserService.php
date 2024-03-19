@@ -7,18 +7,20 @@ use App\Services\TransactionService;
 
 class UserService
 {
-    public $tokenizer, $transactionService;
-
-    public function __construct(Tokenizer $tokenizer, TransactionService $transactionService) {
-        $this->tokenizer = $tokenizer;
-        $this->transactionService = $transactionService;
+    public function __construct(private Tokenizer $tokenizer, private TransactionService $transactionService) {
     }
 
     public function checkLevel($chat, $user)
     {
-        $isOpenRouter = in_array($chat->model, ['gpt-4', 'gpt-4-32k', 'gpt-4-turbo-preview']);
+        $oneLevel = [
+            'gpt-3.5-turbo',
+            'gpt-3.5-turbo-16k',
+            'anthropic/claude-instant-1',
+            'anthropic/claude-3-haiku',
+            'google/gemini-pro'
+        ];
 
-        if ($isOpenRouter && $user->level < 2) {
+        if ($user->level < 2 && !in_array($chat->model, $oneLevel)) {
             return false;
         }
 
@@ -42,13 +44,21 @@ class UserService
 			$pricePerTokens = 0.2;
 		} elseif ($model === 'gpt-3.5-turbo-16k') {
 			$pricePerTokens = 0.4;
-		} elseif ($model === 'gpt-4') {
+		} elseif ($model === 'openai/gpt-4') {
 			$pricePerTokens = 6;
-		} elseif ($model === 'gpt-4-32k') {
+		} elseif ($model === 'openai/gpt-4-32k') {
 			$pricePerTokens = 12;
-		} elseif ($model === 'gpt-4-turbo-preview') {
+		} elseif ($model === 'openai/gpt-4-turbo-preview') {
 			$pricePerTokens = 3;
-		}
+		} elseif ($model === 'anthropic/claude-instant-1') {
+			$pricePerTokens = 0.48;
+		} elseif ($model === 'anthropic/claude-3-opus') {
+            $pricePerTokens = 12;
+        } elseif ($model === 'anthropic/claude-3-haiku') {
+            $pricePerTokens = 0.225;
+        } elseif ($model === 'google/gemini-pro') {
+            $pricePerTokens = 0.159;
+        }
 		$pricePerToken = $pricePerTokens / 1000;
 		$cost = $tokenCount * $pricePerToken;
 

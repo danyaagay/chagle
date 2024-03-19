@@ -56,87 +56,18 @@ class MessageController extends Controller
 
 	public function store(Request $request, MessageService $messageService, ChatService $chatService, UserService $userService, StreamService $streamService, $id = false)
 	{
+		$isRegenerate = Str::contains(url()->current(), '/regenerate/');
+
 		$user = $request->user();
 
-		return response()->stream(function () use ($user, $request, $id, $userService, $chatService, $streamService, $messageService) {
-			$isRegenerate = Str::contains(url()->current(), '/regenerate/');
+		$chat = $chatService->createOrFind($user, $id, $request->text);
+		if (!$chat) {
+			return response()->json([
+				'error' => 'Chat not found',
+			], 500);
+		}
 
-			if ($user->balance <= 0) {
-				$streamService->sendMessage(['message' => 'Пополните баланс', 'error' => true]);
-
-				return response()->json([
-					'error' => 'Low balance',
-				], 500);
-			}
-
-			$chat = $chatService->createOrFind($user, $id, $request->text);
-			if (!$chat) {
-				return response()->json([
-					'error' => 'Chat not found',
-				], 500);
-			}
-
-			if (!$userService->checkLevel($chat, $user)) {
-				$streamService->sendMessage(['message' => 'Для использования GPT 4 оплатите аккаунт', 'error' => true]);
-
-				return response()->json([
-					'error' => 'Wrong model as level',
-				], 500);
-			}
-
-			if ($isRegenerate) {
-				$lastMessages = $messageService->getLasts($chat, $request->text);
-				$message = $lastMessages[1];
-			} else {
-				$message = $messageService->create($chat, $request->text, 'user');
-			}
-
-			if (!$message) {
-				return response()->json([
-					'error' => 'Message cannot be created or not found',
-				], 500);
-			}
-
-			$history = $messageService->getHistory($chat, $lastMessages[0]->id ?? false, $message->content);
-
-			$settings = [
-				'model' => $chat->model,
-				'system_message' => $chat->system_message,
-				'max_tokens' => $chat->max_tokens,
-			];
-
-			$answer = StreamsController::stream($message->content, $history, $settings);
-
-			if ($isRegenerate) {
-				$messageService->update($lastMessages[0], $answer['answer'], $answer['error_code'] ?? NULL);
-			} else {
-				$chatAnswer = $messageService->create($chat, $answer['answer'], 'assistant', $answer['error_code'] ?? NULL);
-			}
-
-			if (!$answer['error_code']) {
-				if (!$isRegenerate) {
-					$streamService->sendMessage(['answerId' => $chatAnswer->id]);
-
-					$streamService->sendMessage(['messageId' => $message->id]);
-
-					if (!$id) {
-						$streamService->sendMessage(['chatId' => $chat->id]);
-					}
-				}
-
-				$newBalance = $userService->balanceDown($history, $user, $answer['answer'], $chat->model, $answer['id'] ?? null);
-
-				$streamService->sendMessage(['amount' => number_format($newBalance, 5, '.', '')]);
-			} else {
-				$messageService->errorNoticeAdmin($answer['answer']);
-			}
-
-			$chatService->subTitleUpdate($chat, $answer['answer']);
-		}, 200, [
-			'Cache-Control' => 'no-cache',
-			'X-Accel-Buffering' => 'no',
-			'Content-Type' => 'text',
-		]);
+		return $streamService->stream($user, $chat, $request, $isRegenerate, $id, $messageService, $chatService, $userService, $streamService);
 	}
 
 	public function cancel(Request $request)

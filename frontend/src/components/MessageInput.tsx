@@ -540,9 +540,9 @@ export default function MessageInput({ textareaRef }: { textareaRef: React.RefOb
 			const chat = allItems.find(chat => chat.id == id);
 			console.log(chat)
 
-			if (chat['model'] == 'gpt-4' ||
-				chat['model'] == 'gpt-4-32k' ||
-				chat['model'] == 'gpt-4-turbo-preview') {
+			if (chat['model'] == 'openai/gpt-4' ||
+				chat['model'] == 'openai/gpt-4-32k' ||
+				chat['model'] == 'openai/gpt-4-turbo-preview') {
 				setIsOpenRouter(true);
 			}
 		}

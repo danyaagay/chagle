@@ -60,7 +60,7 @@ class ChatController extends Controller
 			'system_message' => 'max:255',
 			'history' => 'in:0,1',
 			'max_tokens' => 'in:500,2048,4096',
-			'model' => 'string|in:gpt-3.5-turbo,gpt-3.5-turbo-16k,gpt-4,gpt-4-32k,gpt-4-turbo-preview',
+			'model' => 'string|in:gpt-3.5-turbo,gpt-3.5-turbo-16k,openai/gpt-4,openai/gpt-4-32k,openai/gpt-4-turbo-preview,anthropic/claude-instant-1,anthropic/claude-3-opus,anthropic/claude-3-haiku,google/gemini-pro',
 		]);
 		
 		$user = $request->user();

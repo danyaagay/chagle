@@ -8,8 +8,6 @@ use App\Models\Bot\User;
 use OpenAI;
 use App\Http\Controllers\TokenController;
 use App\Http\Controllers\ProxyController;
-use App\Http\Controllers\MessageController;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Crypt;
 
 use App\Services\UserService;

@@ -66,7 +66,7 @@ const UserButton = () => {
                     variant="subtle"
                     size="md"
                     color="gray"
-                    styles={{ label: { display: 'block'}, inner: { display: 'block'} }}
+                    styles={{ label: { display: 'block' }, inner: { display: 'block' } }}
                     style={{
                         width: '100%',
                         color: 'var(--mantine-color-text)',
@@ -75,27 +75,27 @@ const UserButton = () => {
                     }}
                 >
                     <Flex gap="xs" align="center">
-                        <Avatar radius="xl" />
-                        <div style={{ flex: 1, textAlign: 'left' }}>
-                            <Text size="sm" fw={500}>
-                                {user.name}
-                            </Text>
-                            <Text c="dimmed" size="xs">
-                                {user.email}
-                            </Text>
-                        </div>
-                        <div style={{ flex: 1 }}>
-                            <Group gap={5}>
-                                <Text size="sm" style={{
-                                    marginLeft: "auto",
-                                }}>
-                                    {numberBalance(user.balance)}
+                        <Flex gap="xs" align="center" style={{ flex: 1, width: '100%', overflow: 'hidden' }}>
+                            <Avatar radius="xl" />
+                            <div style={{ textAlign: 'left', overflow: 'hidden' }}>
+                                <Text size="sm" fw={500} style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                                    {user.name}
                                 </Text>
-                                <IconSparkles size={20} style={{
-                                    color: "rgb(34, 139, 230)",
-                                }} stroke={2} />
-                            </Group>
-                        </div>
+                                <Text c="dimmed" size="xs" style={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                                    {user.email}
+                                </Text>
+                            </div>
+                        </Flex>
+                        <Flex gap={5}>
+                            <Text size="sm" style={{
+                                marginLeft: "auto",
+                            }}>
+                                {numberBalance(user.balance)}
+                            </Text>
+                            <IconSparkles size={20} style={{
+                                color: "rgb(34, 139, 230)",
+                            }} stroke={2} />
+                        </Flex>
                     </Flex>
                 </Button>
             </Menu.Target>

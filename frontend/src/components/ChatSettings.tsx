@@ -178,15 +178,19 @@ export default function ChatSettings() {
                                     data={[
                                         { value: 'gpt-3.5-turbo', label: 'GPT 3.5 Turbo' },
                                         { value: 'gpt-3.5-turbo-16k', label: 'GPT 3.5 Turbo 16k' },
-                                        { value: 'gpt-4', label: 'GPT 4', disabled: user.level < 2 },
-                                        { value: 'gpt-4-32k', label: 'GPT 4 32k', disabled: user.level < 2 },
-                                        { value: 'gpt-4-turbo-preview', label: 'GPT 4 Turbo', disabled: user.level < 2 },
+                                        { value: 'openai/gpt-4', label: 'GPT 4', disabled: user.level < 2 },
+                                        { value: 'openai/gpt-4-32k', label: 'GPT 4 32k', disabled: user.level < 2 },
+                                        { value: 'openai/gpt-4-turbo-preview', label: 'GPT 4 Turbo', disabled: user.level < 2 },
+                                        { value: 'anthropic/claude-instant-1', label: 'Claude Instant' },
+                                        { value: 'anthropic/claude-3-opus', label: 'Claude 3 Opus', disabled: user.level < 2 },
+                                        { value: 'anthropic/claude-3-haiku', label: 'Claude 3 Haiku', disabled: user.level < 2 },
+                                        { value: 'google/gemini-pro', label: 'Gemini Pro' },
                                     ]}
                                     withCheckIcon={false}
                                     rightSection={<IconChevronDown style={{ width: 16, height: 16 }}  />}
                                     {...form.getInputProps('model')}
                                 />
-                                {user.level < 2 && <Text size="xs" mt={5} c="dimmed">Для использования GPT 4 оплатите аккаунт</Text>}
+                                {user.level < 2 && <Text size="xs" mt={5} c="dimmed">Для использования недоступных моделей оплатите аккаунт</Text>}
                             </div>
                             <div>
                                 <Text size='sm' fw={500} mb={8} c='gray.7'>Системное сообщение</Text>
