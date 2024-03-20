@@ -71,7 +71,9 @@ class UserController extends Controller
 
 	public function addBalance(Request $request, $id)
 	{
-		if ($request->telegram) {
+		$isTelegram = $request->telegram;
+
+		if ($isTelegram) {
 			$currentUser = \App\Models\Bot\User::find($id);
 		} else {
 			$currentUser = User::find($id);
@@ -85,11 +87,13 @@ class UserController extends Controller
 		$currentUser->level = 2;
 		$currentUser->save();
 
-		//Учет в транзакциях
-		$currentUser->transactions()->create([
-            'type' => 'Пополнение',
-            'amount' => $request->balance,
-        ]);
+		if (!$isTelegram) {
+			//Учет в транзакциях
+			$currentUser->transactions()->create([
+				'type' => 'Пополнение',
+				'amount' => $request->balance,
+			]);
+		}
 
 		return response()->json(['message' => 'Balance updated successfully']);
 	}

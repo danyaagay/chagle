@@ -144,7 +144,7 @@ class StreamService
 				], 500);
 			}
 
-			if (!$userService->checkLevel($chat, $user)) {
+			if (!$userService->checkLevel($user, $chat)) {
 				$streamService->sendMessage(['message' => 'Для использования этой модели оплатите аккаунт', 'error' => true]);
 
 				return response()->json([

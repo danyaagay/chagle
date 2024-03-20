@@ -3,16 +3,12 @@
 namespace App\Services;
 
 use App\Models\Bot\User;
-use OpenAI;
-use App\Http\Controllers\TokenController;
-use App\Http\Controllers\ProxyController;
 use Illuminate\Support\Facades\Crypt;
-
 use Telegram\Bot\Laravel\Facades\Telegram;
-
 use App\Services\UserService;
 use App\Services\MessageService;
 use App\Services\StreamService;
+use Illuminate\Support\Facades\Redis;
 
 class BotService
 {
@@ -27,7 +23,18 @@ class BotService
         'billing' => ['пополнить баланс'],
         'new' => ['новый чат'],
         'connect' => ['привязать аккаунт chagle'],
-        'change' => ['изменить модель', 'gpt-3.5-turbo', 'gpt-3.5-turbo-16k'],
+        'change' => [
+            'изменить модель',
+            'gpt-3.5-turbo',
+            'gpt-3.5-turbo-16k',
+            'openai/gpt-4',
+            'openai/gpt-4-32k',
+            'openai/gpt-4-turbo-preview',
+            'anthropic/claude-instant-1',
+            'anthropic/claude-3-opus',
+            'anthropic/claude-3-haiku',
+            'google/gemini-pro'
+        ],
         'start' => ['/start', 'тест']
     ];
 
@@ -167,23 +174,25 @@ class BotService
 
         $text = mb_strtolower(@$this->update->text);
 
-        if ($text === 'gpt-3.5-turbo') {
-            $this->user->model = 'gpt-3.5-turbo';
-            $this->user->save();
+        $models = [
+            'gpt-3.5-turbo',
+            'gpt-3.5-turbo-16k',
+            'openai/gpt-4',
+            'openai/gpt-4-32k',
+            'openai/gpt-4-turbo-preview',
+            'anthropic/claude-instant-1',
+            'anthropic/claude-3-opus',
+            'anthropic/claude-3-haiku',
+            'google/gemini-pro'
+        ];
 
+        if (in_array($text, $models)) {
+            $this->user->model = $text;
+            $this->user->save();
 
             $this->bot->sendMessage([
                 'chat_id' => $chatId,
-                'text' => 'Модель успешно изменена на gpt-3.5-turbo',
-                'reply_markup' => $this->markup
-            ]);
-        } elseif ($text === 'gpt-3.5-turbo-16k') {
-            $this->user->model = 'gpt-3.5-turbo-16k';
-            $this->user->save();
-
-            $this->bot->sendMessage([
-                'chat_id' => $chatId,
-                'text' => 'Модель успешно изменена на gpt-3.5-turbo-16k',
+                'text' => 'Модель успешно изменена на ' . $text,
                 'reply_markup' => $this->markup
             ]);
         } else {
@@ -191,6 +200,13 @@ class BotService
                 'keyboard' => [
                     ['gpt-3.5-turbo'],
                     ['gpt-3.5-turbo-16k'],
+                    ['openai/gpt-4'],
+                    ['openai/gpt-4-32k'],
+                    ['openai/gpt-4-turbo-preview'],
+                    ['anthropic/claude-instant-1'],
+                    ['anthropic/claude-3-opus'],
+                    ['anthropic/claude-3-haiku'],
+                    ['google/gemini-pro']
                 ],
                 'resize_keyboard' => true,
                 'one_time_keyboard' => true
@@ -225,11 +241,11 @@ ChatGPT 3.5, Claude Instant, Gemini Pro
 			
 Базовый 199 ₽ (200 ✨)
 ChatGPT 3.5, Claude Instant, Gemini Pro
-ChatGPT 4, Claude 2
+ChatGPT 4, Claude 3
 			
 Премиум 299 ₽ (300 ✨)
 ChatGPT 3.5, Claude Instant, Gemini Pro
-ChatGPT 4, Claude 2
+ChatGPT 4, Claude 3
 			
 ✨ это виртуальная валюта Chagle, 1₽ = 1✨
 Оплата происходит за использование, без абонентской платы и сгорания токенов.
@@ -270,13 +286,24 @@ ChatGPT 4, Claude 2
     {
         $chatId = @$this->update->chat->id;
 
+        // Проверка спама
+      // $cache = Redis::get($chatId);
+      // $time = time();
+      // if (($time - $cache) <= 60) { // Ограничение не работает для longpoll (следует смотреть время в update)
+      //     return;
+      // } else {
+      //     Redis::set($chatId, $time);
+      // }
+
+        // Блокировка аккаунта
         if ($this->webUser && $this->webUser->level < 1 || $this->user->level < 1) {
             $this->bot->sendMessage([
                 'chat_id' => $chatId,
                 'text' => 'В данный момент невозможно обработать запрос. Ошибка: 1',
                 'reply_markup' => $this->markup
             ]);
-            
+
+            Redis::del($chatId);
             return;
         }
 
@@ -288,23 +315,30 @@ ChatGPT 4, Claude 2
                 'reply_markup' => $this->markup
             ]);
 
+            Redis::del($chatId);
             return;
         }
 
-        // Проверяем спам
-        $latestMessage = $this->user->messages()
-            ->orderByDesc('id')
-            ->first();
-        if ($latestMessage) {
-            if ($latestMessage->content == $text || $latestMessage->role == 'user') {
-                return;
-            }
-        }
+        if ($this->webUser && !$this->userService->checkLevel($this->webUser) || !$this->userService->checkLevel($this->user)) {
+            $this->bot->sendMessage([
+                'chat_id' => $chatId,
+                'text' => 'Для использования этой модели оплатите аккаунт',
+                'reply_markup' => $this->markup
+            ]);
 
+            Redis::del($chatId);
+            return;
+        }
         $this->messageService->create($this->user, $text, 'user');
 
         $history = $this->messageService->getHistory($this->user, false, $text);
 
+        /*
+            Если возникает ошибка Undefined array key "index"
+            Это происходит поскольку поставщик OpenRouter не передает index для моделей, каждый choices должен содержать index
+            Для исправления изменить vendor/openai-php/client/src/Responses/Chat/CreateResponseChoice.php на $attributes['index'] ?? 0
+            В идеале создать свою или клон openai-php чтобы влиять на эти и другие моменты
+        */
         $result = $this->streamService->execute('create', $this->user->model, $history, 2048);
 
         if ($result['error'] || !$result['result']->choices[0]->message->content) {
@@ -319,12 +353,14 @@ ChatGPT 4, Claude 2
             // Пересчитываем баланс
             $user = $this->webUser ?? $this->user;
 
-            $this->userService->balanceDown($history, $user, $text, $user->model, false);
+            $this->userService->balanceDown($history, $user, $text, $user->model, $result['result']->id ?? false);
         }
 
         $this->bot->sendMessage([
             'chat_id' => $chatId,
             'text' => $text
         ]);
+
+        Redis::del($chatId);
     }
 }

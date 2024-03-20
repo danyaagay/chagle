@@ -10,7 +10,7 @@ class UserService
     public function __construct(private Tokenizer $tokenizer, private TransactionService $transactionService) {
     }
 
-    public function checkLevel($chat, $user)
+    public function checkLevel($user, $chat = false)
     {
         $oneLevel = [
             'gpt-3.5-turbo',
@@ -20,7 +20,7 @@ class UserService
             'google/gemini-pro'
         ];
 
-        if ($user->level < 2 && !in_array($chat->model, $oneLevel)) {
+        if ($user->level < 2 && !in_array((is_object($chat)) ? $chat->model : $user->model, $oneLevel)) {
             return false;
         }
 
