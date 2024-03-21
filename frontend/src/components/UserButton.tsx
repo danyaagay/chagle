@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import axios from '../axios';
 import {
-    Group,
     Avatar,
     Text,
     Button,
