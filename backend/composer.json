@@ -6,13 +6,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
+        "danyaagay/openai-php-laravel": "^0.8.1",
         "guzzlehttp/guzzle": "^7.8",
         "irazasyed/telegram-bot-sdk": "^3.13",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.2",
         "laravel/socialite": "^5.11",
         "laravel/tinker": "^2.8",
-        "openai-php/laravel": "^0.8.1",
         "spatie/laravel-permission": "^5.11",
         "yethee/tiktoken": "^0.3.0"
     },
@@ -66,6 +66,16 @@
             "php-http/discovery": true
         }
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/danyaagay/openai-php-laravel"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/danyaagay/openai-php-client"
+        }
+    ],
     "minimum-stability": "stable",
     "prefer-stable": true
 }

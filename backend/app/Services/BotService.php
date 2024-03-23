@@ -337,7 +337,9 @@ ChatGPT 4, Claude 3
             Если возникает ошибка Undefined array key "index"
             Это происходит поскольку поставщик OpenRouter не передает index для моделей, каждый choices должен содержать index
             Для исправления изменить vendor/openai-php/client/src/Responses/Chat/CreateResponseChoice.php на $attributes['index'] ?? 0
-            В идеале создать свою или клон openai-php чтобы влиять на эти и другие моменты
+            
+            Создали форк, его необходимо обновлять.
+            В идеале создать свою.
         */
         $result = $this->streamService->execute('create', $this->user->model, $history, 2048);
 

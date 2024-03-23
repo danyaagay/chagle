@@ -4,10 +4,11 @@ namespace App\Services;
 
 use App\Services\Tokenizer;
 use App\Services\TransactionService;
+use App\Services\StreamService;
 
 class UserService
 {
-    public function __construct(private Tokenizer $tokenizer, private TransactionService $transactionService) {
+    public function __construct(private Tokenizer $tokenizer, private TransactionService $transactionService, private StreamService $streamService) {
     }
 
     public function checkLevel($user, $chat = false)
@@ -29,12 +30,14 @@ class UserService
 
     public function balanceDown($history, $user, $answer, $model, $id)
     {
+        $isOpenRouter = $this->streamService->isOpenRouter($model);
+
 		// Считаем количество токенов
-		if ($id) {
+		if ($isOpenRouter) {
             $tokenCount = $this->tokenizer->openRouter($id);
-            if (!$tokenCount) {
-                $tokenCount = $this->tokenizer->openAi($history, $answer, $model);
-            }
+            //if (!$tokenCount) {
+            //    $tokenCount = $this->tokenizer->openAi($history, $answer, $model);
+            //}
 		} else {
             $tokenCount = $this->tokenizer->openAi($history, $answer, $model);
 		}
