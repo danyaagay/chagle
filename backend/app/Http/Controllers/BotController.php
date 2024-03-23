@@ -19,7 +19,7 @@ class BotController extends Controller
 
 		if (@$update->from->is_bot) return 'ok';
 
-		$botService->update = $update;
+		$botService->update = $update->message;
 
 		$botService->getUser();
 
