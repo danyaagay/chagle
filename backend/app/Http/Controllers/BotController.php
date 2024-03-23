@@ -17,7 +17,7 @@ class BotController extends Controller
 
 		$update = Telegram::getWebhookUpdate();
 
-		if (@$update->from->is_bot) return 'ok';
+		if (@$update->message->from->is_bot) return 'ok';
 
 		$botService->update = $update->message;
 
@@ -27,7 +27,7 @@ class BotController extends Controller
 		//$botService->eventForBot();
 
 		// Проверяем команды
-		$text = mb_strtolower(@$update->text);
+		$text = mb_strtolower(@$update->message->text);
 		$isCommand = $botService->commandRun($text);
 
 		if ($text && !$isCommand) {
