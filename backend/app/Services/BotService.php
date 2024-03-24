@@ -146,7 +146,7 @@ class BotService
 
         $this->bot->sendMessage([
             'chat_id' => $chatId,
-            'text' => 'Для оплаты напишите нам @chaglemanager',
+            'text' => 'Для оплаты напишите нам @chaglemanagerbot',
             'reply_markup' => $this->markup
         ]);
     }

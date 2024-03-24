@@ -101,7 +101,7 @@ const UserButton = () => {
             <Menu.Dropdown>
                 <Menu.Item
                     component={Link}
-                    to='https://t.me/chaglemanager'
+                    to='https://t.me/chaglemanagerbot'
                     target="_blank"
                     leftSection={<IconCurrencyRubel style={{ width: rem(14), height: rem(14) }} />}
                 >

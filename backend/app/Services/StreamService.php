@@ -72,6 +72,7 @@ class StreamService
 	{
 		$isOpenRouter = $this->isOpenRouter($model);
 		$noHasSettings = $this->noHasSettings($model);
+		$proxyRetry = [];
 
 		do {
 			$error = true;
@@ -112,7 +113,11 @@ class StreamService
 				if ($errorCode === 'rate_limit_exceeded') {
 					TokenController::setStatus($token, 2);
 				} elseif ($errorCode === 0) {
-					ProxyController::setStatus($proxy, 2);
+					if ($proxyRetry[$proxy->ip] >= 3) {
+						ProxyController::setStatus($proxy, 2);
+					} else {
+						$proxyRetry[$proxy->ip]++;
+					}
 				}
 			}
 		} while ($error && $token && $proxy);
