@@ -131,7 +131,7 @@ const UserButton = () => {
                 </Menu.Item>
                 <Menu.Item
                     component={Link}
-                    to='https://t.me/chaglemanager'
+                    to='https://t.me/chaglemanagerbot'
                     target="_blank"
                     leftSection={<IconMail style={{ width: rem(14), height: rem(14) }} />}
                 >
