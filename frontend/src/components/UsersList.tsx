@@ -99,8 +99,8 @@ export function UsersList() {
 									<ActionIcon variant="default" size="lg" w={36} h={36} onClick={() => mutationAdd({ sum: 199, id: row.id, telegram: row.email ? false : true })} radius={'md'}>
 										199
 									</ActionIcon>
-									<ActionIcon variant="default" size="lg" w={36} h={36} onClick={() => mutationAdd({ sum: 299, id: row.id, telegram: row.email ? false : true })} radius={'md'}>
-										299
+									<ActionIcon variant="default" size="lg" w={36} h={36} onClick={() => mutationAdd({ sum: 599, id: row.id, telegram: row.email ? false : true })} radius={'md'}>
+										599
 									</ActionIcon>
 								</Flex>
 							</Table.Td>

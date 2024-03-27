@@ -15,9 +15,10 @@ class Tokenizer
         $response = curl_exec($curl);
         $data = json_decode($response, true);
 
-        $tokenCount = $data['data']['tokens_prompt'] + $data['data']['tokens_completion'];
-
-        return $tokenCount;
+        return [
+            'prompt' => $data['data']['tokens_prompt'],
+            'completion' => $data['data']['tokens_completion']
+        ];
     }
 
     public function openAi($history, $answer, $model)
@@ -34,23 +35,10 @@ class Tokenizer
 
         $tokensCompletion = count($encoder->encode($answer));
 
-        $tokenCount = $tokensPrompt + $tokensCompletion;
-
-        return $tokenCount;
-    }
-
-    public function our($history, $answer)
-    {
-        $text = '';
-        foreach ($history as $history) {
-            $text .= $history['content'];
-        }
-        $text .= $answer;
-        $text = str_replace(" ", "", $text);
-
-        $tokenCount = ceil(mb_strlen($text) / 2); // Каждые 2 символа (это не правильно)
-
-        return $tokenCount;
+        return [
+            'prompt' => $tokensPrompt,
+            'completion' => $tokensCompletion
+        ];
     }
 }
 
